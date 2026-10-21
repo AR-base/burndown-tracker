@@ -129,6 +129,19 @@ td.r,th.r{text-align:right}
 .edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 .edit-row input[type=color]{padding:2px;height:32px}
 @media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+/* budget */
+.bud-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.bud-kpis .kpi.total{background:var(--accent-soft)}
+.bud-kpis .kpi.total .v{color:var(--accent)}
+.rate-in{width:90px;border:1px solid var(--line);background:var(--sunk);border-radius:4px;padding:4px 6px;text-align:right;font:500 13px var(--f-mono)}
+.pc-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(0,2fr) auto;gap:10px;align-items:center;padding:6px 0;font-size:13px}
+.pc-bar{height:10px;background:var(--grid);border-radius:5px;overflow:hidden}.pc-bar i{display:block;height:100%}
+.extra-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 130px auto;gap:8px;align-items:center}
+.extra-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
+@media (max-width:640px){.extra-row{grid-template-columns:1fr 1fr}}
+.bud-form{margin-top:12px;max-width:260px}
+tr.total-row td{font-weight:600;border-top:2px solid var(--line)}
+
 /* doc language note */
 .doc-lang{margin:0 0 12px;padding:8px 12px;border-radius:var(--r);background:var(--accent-soft);color:var(--ink);font-size:13px}
 
@@ -337,6 +350,33 @@ td.r,th.r{text-align:right}
     </div>
   </section>
 
+  <section class="panel" id="tab-budget" role="tabpanel" hidden>
+    <div class="stack">
+      <div class="bud-kpis" id="budKpis"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><h2 data-i="teamT"></h2><span class="hint" data-i="teamHint"></span></div>
+          <div class="tbl-wrap"><table id="teamTable"></table></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h2 data-i="costPhase"></h2></div>
+          <div class="card-b" id="phaseCost"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="fixedT"></h2><button class="btn sm" type="button" id="addExtra" data-i="addExtra"></button></div>
+        <div class="card-b">
+          <div class="edit-rows" id="extraRows"></div>
+          <div class="form bud-form">
+            <div class="f"><label for="bud-cont" data-i="contingencyL"></label><input id="bud-cont" type="number" min="0" max="100" step="1"></div>
+          </div>
+          <div class="actions"><button class="btn pri" type="button" id="saveBudget" data-i="saveBudget"></button><span id="budMsg" role="status"></span></div>
+          <p class="hint" data-i="budNote"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="panel" id="tab-project" role="tabpanel" hidden>
     <div class="stack">
       <div class="card">
@@ -401,6 +441,7 @@ td.r,th.r{text-align:right}
 <script>/*CORE*/</script>
 <script>/*IO*/</script>
 <script>/*DOCGEN*/</script>
+<script>/*BUDGET*/</script>
 <script>/*KB*/</script>
 <script>/*GEN*/</script>
 <script>/*SAMPLE*/</script>

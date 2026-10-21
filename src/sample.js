@@ -1,6 +1,11 @@
 const SAMPLE = {
   name: 'ESAIP AI Assistant', code: 'EAA-2026',
   start: '2026-09-28', end: '2026-12-18', statusDate: '', workingDays: true,
+  budget: { contingency: 0.15, extras: [
+    { fr: 'Consommation de l’API d’IA (12 mois, estimation)', en: 'AI API usage (12 months, estimate)', amount: 1200 },
+    { fr: 'Base de données hébergée (12 mois)', en: 'Hosted database (12 months)', amount: 300 },
+    { fr: 'Nom de domaine (1 an)', en: 'Domain name (1 year)', amount: 30 }
+  ] },
   docs: {
     fr: {
       author: 'Pinninti Sai Anish — MSc Cybersécurité et Data Science, ESAIP',

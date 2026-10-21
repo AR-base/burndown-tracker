@@ -48,4 +48,11 @@ ok('French download uses the French texts, English download the English texts', 
   assert.ok(/fr-FR/.test(frXml) && /en-GB/.test(enXml));
   assert.ok(fr.name.includes('Cahier') && en.name.includes('Requirements'));
 });
+ok('every document has a budget and resources section with a total', () => {
+  ['needs', 'technical', 'report'].forEach(k => ['fr', 'en'].forEach(lang => {
+    const bl = DG.assemble(k, P, lang, today, {}).blocks;
+    assert.ok(bl.some(b => b.k === 'h1' && /Budget/.test(b.t)), `${k}/${lang} budget heading`);
+    assert.ok(bl.some(b => b.k === 'table' && b.rows.some(r => /Budget total|total budget/i.test(r[0]))), `${k}/${lang} total row`);
+  }));
+});
 console.log(`\n${n} tests passed`);

@@ -51,6 +51,9 @@ const Core = (() => {
       if (raw.docs.fr || raw.docs.en) p.docs = { fr: pick(raw.docs.fr), en: pick(raw.docs.en) };
       else { const flat = pick(raw.docs); p.docs = { fr: { ...flat }, en: { ...flat } }; }
     } else p.docs = { fr: {}, en: {} };
+    // Team day rates and budget settings (validated by budget.js, loaded lazily to avoid a require cycle)
+    const B = typeof Budget !== 'undefined' ? Budget : (typeof require === 'function' ? require('./budget.js') : null);
+    if (B) { const tb = B.clean(raw.team, raw.budget); p.team = tb.team; p.budget = tb.budget; }
     const ps = parseDate(p.start), pe = parseDate(p.end);
     if (ps === null) errors.push('start');
     if (pe === null) errors.push('end');

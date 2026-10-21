@@ -2,6 +2,7 @@
    Pure JS, no dependencies, no DOM. Images are passed in as PNG bytes. */
 const DocGen = (() => {
   const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
+  const BG = () => (typeof Budget !== 'undefined') ? Budget : require('./budget.js');
   const enc = s => new TextEncoder().encode(s);
   const x = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
 
@@ -151,7 +152,12 @@ const DocGen = (() => {
       kpiEarned: 'Avancement acquis / prévu', kpiSpi: 'SPI (valeur acquise ÷ planifiée)', kpiVel: 'Vélocité / requise', kpiFc: 'Fin prévue', perWk: 'pts/sem', bd: 'Burndown', snap: 'Historique hebdomadaire',
       ideal: 'Idéal (reste)', actual: 'Réel (reste)', gap: 'Écart', watch: 'À surveiller', late: 'En retard', inprog: 'En cours', none: 'Aucune', todo: 'À compléter dans Projet → Contenu des documents.',
       statusW: { on: 'dans les temps', risk: 'à risque', late: 'en retard' }, sDone: 'Terminée', sLate: 'En retard', sIn: 'En cours', sTodo: 'À faire', generated: 'Généré le', asOf: 'Date d’état', days: 'jours',
-      conclusion: 'Conclusion et prochaines étapes', noVel: 'pas encore de vélocité', fig: 'Figure' },
+      conclusion: 'Conclusion et prochaines étapes', noVel: 'pas encore de vélocité', fig: 'Figure',
+      budgetT: 'Budget et ressources', teamT: 'Équipe nécessaire', role: 'Rôle', people: 'Personnes', pdays: 'Jours-homme', period: 'Période', load: 'Charge', rate: 'Taux / jour', cost: 'Coût',
+      costPhase: 'Coût par phase', fixed: 'Coûts fixes (première année)', item: 'Poste', amount: 'Montant', labour: 'Main-d’œuvre', fixedT: 'Coûts fixes', contingencyL: 'Marge pour imprévus',
+      totalB: 'Budget total estimé', summaryB: 'Synthèse du budget', evL: 'Valeur acquise à date', pvL: 'Valeur planifiée à date', share: 'Part',
+      budgetNote: 'Taux journaliers indicatifs (marché français), modifiables dans l’onglet Budget. Chaque tâche compte une personne à temps plein sur ses jours ouvrés ; le nombre de personnes répartit ces jours sur la période d’activité du rôle.',
+      budgetLine: (tot, pd, pp) => `Budget estimé : **${tot}** pour ${pd} jours-homme, avec une équipe de ${pp} personnes.` },
     en: { card: 'Project card', field: 'Field', value: 'Value', name: 'Project', code: 'Code', period: 'Period', effort: 'Effort', tasks: 'tasks', pts: 'points', phases: 'phases', ms: 'milestones',
       author: 'Author / project manager', sponsor: 'Sponsor / client', schedule: 'Schedule', phaseT: 'Phases', phase: 'Phase', start: 'Start', end: 'End', progress: 'Progress', msT: 'Milestones and deliverables', id: 'ID',
       milestone: 'Milestone', date: 'Date', task: 'Task', owner: 'Owner', deps: 'Depends on', st: 'Status', summaryG: 'Summary Gantt', masterG: 'Master Gantt', wbs: 'Work breakdown structure (WBS)',
@@ -159,7 +165,12 @@ const DocGen = (() => {
       kpiEarned: 'Earned / planned progress', kpiSpi: 'SPI (earned ÷ planned value)', kpiVel: 'Velocity / required', kpiFc: 'Forecast finish', perWk: 'pts/wk', bd: 'Burndown', snap: 'Weekly history',
       ideal: 'Ideal (remaining)', actual: 'Actual (remaining)', gap: 'Gap', watch: 'Watch list', late: 'Late', inprog: 'In progress', none: 'None', todo: 'To be completed in Project → Document content.',
       statusW: { on: 'on track', risk: 'at risk', late: 'late' }, sDone: 'Done', sLate: 'Late', sIn: 'In progress', sTodo: 'To do', generated: 'Generated on', asOf: 'Status date', days: 'days',
-      conclusion: 'Conclusion and next steps', noVel: 'no velocity yet', fig: 'Figure' }
+      conclusion: 'Conclusion and next steps', noVel: 'no velocity yet', fig: 'Figure',
+      budgetT: 'Budget and resources', teamT: 'Required team', role: 'Role', people: 'People', pdays: 'Person-days', period: 'Period', load: 'Load', rate: 'Day rate', cost: 'Cost',
+      costPhase: 'Cost by phase', fixed: 'Fixed costs (first year)', item: 'Item', amount: 'Amount', labour: 'Labour', fixedT: 'Fixed costs', contingencyL: 'Contingency',
+      totalB: 'Estimated total budget', summaryB: 'Budget summary', evL: 'Earned value to date', pvL: 'Planned value to date', share: 'Share',
+      budgetNote: 'Indicative day rates (French market), editable in the Budget tab. Each task counts one full-time person on its working days; headcount spreads those days over the role’s active period.',
+      budgetLine: (tot, pd, pp) => `Estimated budget: **${tot}** for ${pd} person-days, with a team of ${pp} people.` }
   };
   const dfmt = (t, lang) => new Date(t).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
   const num = (v, lang, d = 1) => v.toFixed(d).replace('.', lang === 'fr' ? ',' : '.');
@@ -184,6 +195,7 @@ const DocGen = (() => {
       else out.push({ k: 'p', t: lang === 'fr'
         ? `Au ${dfmt(now, lang)}, ${b.done} points sur ${b.total} sont terminés (${pct} %) ; SPI ${num(h.spi, lang, 2)} : le projet est **${T.statusW[h.status]}**. ${b.forecast !== null ? `La fin prévue au rythme actuel est le ${dfmt(b.forecast, lang)} (${slip > 0 ? '+' : ''}${slip} jours par rapport au ${dfmt(C.parseDate(P.end), lang)}).` : 'Aucune vélocité mesurée pour l’instant.'} Vélocité : ${num(b.velocityWeek, lang)} pts/sem, requise : ${num(b.requiredWeek, lang)} pts/sem.`
         : `As of ${dfmt(now, lang)}, ${b.done} of ${b.total} points are done (${pct}%); SPI ${num(h.spi, lang, 2)}: the project is **${T.statusW[h.status]}**. ${b.forecast !== null ? `At the current pace it finishes on ${dfmt(b.forecast, lang)} (${slip > 0 ? '+' : ''}${slip} days vs ${dfmt(C.parseDate(P.end), lang)}).` : 'No velocity measured yet.'} Velocity: ${num(b.velocityWeek, lang)} pts/wk, required: ${num(b.requiredWeek, lang)} pts/wk.` });
+      { const bx = BG().compute(P, todayT), eu = v => new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v); out.push({ k: 'p', t: T.budgetLine(eu(bx.total), bx.personDays, bx.people) }); }
       if (docs.context) out.push(...textBlocks(docs.context).slice(0, 1));
     }
     H1(T.card);
@@ -193,6 +205,23 @@ const DocGen = (() => {
     const textSection = key => { H1(fieldName(key)); const bl = textBlocks(docs[key]); if (bl.length) out.push(...bl); else out.push({ k: 'note', t: T.todo }); };
     const before = spec.fields.filter(k => k !== 'risks');
     before.forEach(textSection);
+    // budget and resources (computed from the schedule and the day rates)
+    const BB = BG().compute(P, todayT), eur = v => new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+    H1(T.budgetT);
+    out.push({ k: 'p', t: T.budgetLine(eur(BB.total), BB.personDays, BB.people) });
+    out.push({ k: 'h2', t: T.teamT });
+    out.push({ k: 'table', rows: kind === 'needs'
+      ? [[T.role, T.people, T.pdays], ...BB.staff.map(r => [nm(r), String(r.people), String(r.personDays)])]
+      : [[T.role, T.people, T.pdays, T.period, T.load, T.rate, T.cost], ...BB.staff.map(r => [nm(r), String(r.people), String(r.personDays), `${dfmt(C.parseDate(r.start), lang).slice(0, 5)} → ${dfmt(C.parseDate(r.end), lang).slice(0, 5)}`, Math.round(r.load * 100) + ' %', eur(r.rate), eur(r.cost)])] });
+    if (kind !== 'needs') {
+      out.push({ k: 'h2', t: T.costPhase });
+      out.push({ k: 'table', rows: [[T.phase, T.cost, T.share], ...BB.byPhase.map(x => [`${x.id} · ${nm(x)}`, eur(x.cost), BB.labour ? Math.round(x.cost / BB.labour * 100) + ' %' : '—'])] });
+    }
+    if (BB.extras.length) { out.push({ k: 'h2', t: T.fixed }); out.push({ k: 'table', rows: [[T.item, T.amount], ...BB.extras.map(x => [nm(x), eur(x.amount)])] }); }
+    out.push({ k: 'h2', t: T.summaryB });
+    out.push({ k: 'table', rows: [[T.item, T.amount], [T.labour, eur(BB.labour)], [T.fixedT, eur(BB.extrasTotal)], [`${T.contingencyL} (${Math.round(BB.contingencyRate * 100)} %)`, eur(BB.contingency)], [`**${T.totalB}**`, `**${eur(BB.total)}**`],
+      ...(spec.status ? [[T.pvL, eur(BB.plannedValue)], [T.evL, eur(BB.earnedValue)]] : [])] });
+    out.push({ k: 'note', t: T.budgetNote });
     // schedule
     H1(T.schedule);
     const spans = C.phaseSpans(P).filter(s => s.start);

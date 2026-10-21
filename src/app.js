@@ -33,7 +33,11 @@ const I18N = {
     eId: 'ID : lettres, chiffres, _ ou -, 16 caractères max.', eIdTaken: 'Cet ID existe déjà.', eName: 'Le nom (FR) est obligatoire.',
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
-    tabAssistant: 'Assistant', newProject: 'Nouveau projet',
+    tabAssistant: 'Assistant', newProject: 'Nouveau projet', tabBudget: 'Budget et équipe',
+    kBudget: 'Budget estimé', kTeam: 'équipe', bTotal: 'Budget total', bLabour: 'Main-d’œuvre', bFixed: 'Coûts fixes', bCont: 'Marge pour imprévus', bTeam: 'Équipe', bPd: 'jours-homme', persons: 'personnes',
+    bEV: 'Valeur acquise', bPV: 'Valeur planifiée', teamT: 'Équipe nécessaire', teamHint: 'Modifiez un taux journalier, puis enregistrez.', role: 'Rôle', people: 'Pers.', pdays: 'Jours-homme', period: 'Période', load: 'Charge', rate: 'Taux / jour', cost: 'Coût', total: 'Total',
+    costPhase: 'Coût par phase', fixedT: 'Coûts fixes et marge', addExtra: 'Ajouter un coût', contingencyL: 'Marge pour imprévus (%)', saveBudget: 'Enregistrer le budget', amountL: 'Montant (€)', labelFr: 'Libellé (FR)', labelEn: 'Libellé (EN)',
+    budNote: 'Calcul : chaque tâche compte une personne de son rôle à temps plein sur ses jours ouvrés. Taux indicatifs du marché français, à ajuster.',
     docLangFr: 'Vous modifiez la version française. Les documents téléchargés en français utilisent ces textes ; passez en EN pour modifier la version anglaise.',
     burnMode: 'Le burndown compte', bmProgress: 'L’avancement % de chaque tâche (recommandé)', bmDone: 'Seulement les tâches terminées',
     bdHintP: 'La courbe réelle suit l’avancement % des tâches : chaque modification enregistrée apparaît aussitôt, jour après jour.',
@@ -84,7 +88,11 @@ const I18N = {
     eId: 'ID: letters, digits, _ or -, 16 characters max.', eIdTaken: 'That ID already exists.', eName: 'Name (FR) is required.',
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
-    tabAssistant: 'Assistant', newProject: 'New project',
+    tabAssistant: 'Assistant', newProject: 'New project', tabBudget: 'Budget & team',
+    kBudget: 'Estimated budget', kTeam: 'team', bTotal: 'Total budget', bLabour: 'Labour', bFixed: 'Fixed costs', bCont: 'Contingency', bTeam: 'Team', bPd: 'person-days', persons: 'people',
+    bEV: 'Earned value', bPV: 'Planned value', teamT: 'Required team', teamHint: 'Change a day rate, then save.', role: 'Role', people: 'People', pdays: 'Person-days', period: 'Period', load: 'Load', rate: 'Day rate', cost: 'Cost', total: 'Total',
+    costPhase: 'Cost by phase', fixedT: 'Fixed costs and contingency', addExtra: 'Add a cost', contingencyL: 'Contingency (%)', saveBudget: 'Save budget', amountL: 'Amount (€)', labelFr: 'Label (FR)', labelEn: 'Label (EN)',
+    budNote: 'Method: each task counts one person of its role full time on its working days. Indicative French-market rates, adjust as needed.',
     docLangEn: 'You are editing the English version. Documents downloaded in English use these texts; switch to FR to edit the French version.',
     burnMode: 'Burndown counts', bmProgress: 'Each task’s progress % (recommended)', bmDone: 'Completed tasks only',
     bdHintP: 'The actual line follows each task’s progress %: every saved change shows at once, day after day.',
@@ -139,7 +147,7 @@ function renderChrome() {
   $('pName').textContent = P.name;
   $('pMeta').textContent = `${dLabel(C.parseDate(P.start), true)} → ${dLabel(C.parseDate(P.end), true)} · ${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
   ['fr', 'en'].forEach(l => $('lang-' + l).setAttribute('aria-pressed', UI.lang === l));
-  const tabs = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['project', 'tabProject']];
+  const tabs = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['budget', 'tabBudget'], ['project', 'tabProject']];
   $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
   tabs.forEach(([id]) => { $('tab-' + id).hidden = UI.tab !== id; });
   $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
@@ -149,6 +157,7 @@ function renderChrome() {
 }
 
 function renderKpis() {
+  const BG = Budget.compute(P, todayT());
   const b = C.burndown(P, todayT()), h = C.health(P, todayT()), cp = C.criticalPath(P);
   const end = C.parseDate(P.end);
   const st = $('pStatus'); st.className = 'pill st-' + h.status; st.textContent = t(h.status);
@@ -165,9 +174,43 @@ function renderKpis() {
     <div class="kpi"><div class="k">${esc(t('kSpi'))}</div><div class="v" style="color:var(--${h.status === 'on' ? 'good' : h.status === 'risk' ? 'warn' : 'bad'})">${h.spi.toFixed(2)}</div><div class="s">${esc(t('kSpiS'))}</div></div>
     <div class="kpi"><div class="k">${esc(t('kForecast'))}</div><div class="v" style="font-size:19px;${fcLate ? 'color:var(--bad)' : ''}">${b.forecast !== null ? esc(dLabel(b.forecast, true)) : esc(t('none'))}</div>
       <div class="s">${b.forecast !== null ? `${slip > 0 ? '+' : ''}${slip} ${esc(t('d'))} · ` : esc(t('noVelocity')) + ' · '}${esc(t('kPlannedEnd'))} ${esc(dLabel(end))}</div></div>
+    <div class="kpi"><div class="k">${esc(t('kBudget'))}</div><div class="v" style="font-size:19px">${esc(eurF(BG.total))}</div><div class="s">${BG.people} ${esc(t('persons'))} · ${BG.personDays} ${esc(t('bPd'))}</div></div>
     <div class="kpi"><div class="k">${esc(t('kCritical'))}</div><div class="v">${cp.critical.size} <small>${esc(t('kTasks'))}</small></div>
       <div class="s mono">${esc([...cp.critical].filter(id => !P.tasks.find(k => k.id === id).done).slice(0, 6).join(' → ') || t('none'))}</div></div>`;
 }
+
+const eurF = v => new Intl.NumberFormat(UI.lang === 'fr' ? 'fr-FR' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+
+/* ---------- budget and team ---------- */
+function renderBudget() {
+  const B = Budget.compute(P, todayT());
+  const tile = (k, v, s, cls = '') => `<div class="kpi ${cls}"><div class="k">${esc(t(k))}</div><div class="v" style="font-size:20px">${esc(v)}</div>${s ? `<div class="s">${esc(s)}</div>` : ''}</div>`;
+  $('budKpis').innerHTML = tile('bTotal', eurF(B.total), `${B.personDays} ${t('bPd')}`, 'total') + tile('bLabour', eurF(B.labour)) + tile('bFixed', eurF(B.extrasTotal)) +
+    tile('bCont', eurF(B.contingency), Math.round(B.contingencyRate * 100) + ' %') + tile('bTeam', `${B.people} ${t('persons')}`, `${B.staff.length} ${t('role').toLowerCase()}s`) +
+    tile('bEV', eurF(B.earnedValue), `${t('bPV')} : ${eurF(B.plannedValue)}`);
+  $('teamTable').innerHTML = `<thead><tr><th>${esc(t('role'))}</th><th class="r">${esc(t('people'))}</th><th class="r">${esc(t('pdays'))}</th><th>${esc(t('period'))}</th><th class="r">${esc(t('load'))}</th><th class="r">${esc(t('rate'))}</th><th class="r">${esc(t('cost'))}</th></tr></thead><tbody>` +
+    B.staff.map(r => `<tr><td>${esc(nm(r))} <span class="tid">${esc(r.id)}</span></td><td class="r num">${r.people}</td><td class="r num">${r.personDays}</td>
+      <td class="num">${esc(dLabel(C.parseDate(r.start)))} → ${esc(dLabel(C.parseDate(r.end)))}</td><td class="r num">${Math.round(r.load * 100)} %</td>
+      <td class="r"><input class="rate-in" type="number" min="0" max="10000" step="10" id="rate-${esc(r.id)}" data-role="${esc(r.id)}" value="${r.rate}" aria-label="${esc(t('rate'))} ${esc(nm(r))}"></td>
+      <td class="r num">${esc(eurF(r.cost))}</td></tr>`).join('') +
+    `<tr class="total-row"><td>${esc(t('total'))}</td><td class="r num">${B.people}</td><td class="r num">${B.personDays}</td><td></td><td></td><td></td><td class="r num">${esc(eurF(B.labour))}</td></tr></tbody>`;
+  const max = Math.max(1, ...B.byPhase.map(x => x.cost));
+  $('phaseCost').innerHTML = B.byPhase.map(x => `<div class="pc-row"><span>${esc(x.id + ' · ' + nm(x))}</span><span class="pc-bar"><i style="width:${x.cost / max * 100}%;background:${esc(x.color)}"></i></span><span class="num">${esc(eurF(x.cost))}</span></div>`).join('');
+  $('extraRows').innerHTML = (P.budget.extras || []).map(extraRow).join('');
+  $('bud-cont').value = Math.round((P.budget.contingency ?? 0.15) * 100);
+}
+const extraRow = x => `<div class="extra-row"><input class="ex-fr" maxlength="120" value="${esc(x.fr)}" placeholder="${esc(t('labelFr'))}" aria-label="${esc(t('labelFr'))}"><input class="ex-en" maxlength="120" value="${esc(x.en)}" placeholder="${esc(t('labelEn'))}" aria-label="${esc(t('labelEn'))}"><input class="ex-amt" type="number" min="0" step="10" value="${x.amount}" aria-label="${esc(t('amountL'))}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
+$('extraRows').addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) ev.target.closest('.extra-row').remove(); });
+$('addExtra').addEventListener('click', () => $('extraRows').insertAdjacentHTML('beforeend', extraRow({ fr: '', en: '', amount: 0 })));
+$('saveBudget').addEventListener('click', () => {
+  const rates = new Map([...document.querySelectorAll('#teamTable .rate-in')].map(i => [i.dataset.role, Number(i.value)]));
+  const known = new Set(P.team.map(r => r.id));
+  const team = [...P.team.map(r => rates.has(r.id) ? { ...r, rate: rates.get(r.id) } : r),
+    ...Budget.staffing(P).filter(r => !known.has(r.id)).map(r => ({ id: r.id, fr: r.fr, en: r.en, rate: rates.has(r.id) ? rates.get(r.id) : r.rate }))];
+  const extras = [...document.querySelectorAll('#extraRows .extra-row')].map(r => ({ fr: r.querySelector('.ex-fr').value, en: r.querySelector('.ex-en').value, amount: Number(r.querySelector('.ex-amt').value) }));
+  P = C.validateProject({ ...P, team, budget: { contingency: Number($('bud-cont').value) / 100, extras } }).project; commit();
+  $('budMsg').textContent = t('saved'); $('budMsg').className = 'ok';
+});
 
 /* ---------- burndown chart ---------- */
 function renderBurndown() {
@@ -633,7 +676,8 @@ function renderResult() {
   const st = (k, v) => `<div><dt>${esc(t(k))}</dt><dd>${esc(v)}</dd></div>`;
   $('wzStats').innerHTML = st('wzStType', UI.lang === 'fr' ? lastGen.fr : lastGen.en) + st('wzStDur', `${weeks} ${t('weeksU')}`) +
     st('wzStDates', `${dLabel(C.parseDate(p.start))} → ${dLabel(C.parseDate(p.end), true)}`) + st('wzStTasks', String(p.tasks.length)) +
-    st('wzStPts', String(C.totalPoints(p))) + st('wzStMs', String(p.milestones.length));
+    st('wzStPts', String(C.totalPoints(p))) + st('wzStMs', String(p.milestones.length)) +
+    (B => st('kBudget', eurF(B.total)) + st('bTeam', `${B.people} ${t('persons')} · ${B.personDays} ${t('bPd')}`))(Budget.compute(p, todayT()));
   $('wzUndo').hidden = !prevProject;
 }
 $('wz-desc').addEventListener('input', showDetect);
@@ -671,14 +715,14 @@ $('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); ren
 $('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); });
 
 /* ---------- wiring ---------- */
-function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); if (!editing) fillFormSilent(); }
+function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() { P.history = C.recordHistory(P, nowT()); persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
 $('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); });
 $('tabs').addEventListener('keydown', ev => {
   if (!['ArrowRight', 'ArrowLeft'].includes(ev.key)) return;
-  const ids = ['assistant', 'burndown', 'gantt', 'tasks', 'project'], i = ids.indexOf(UI.tab);
+  const ids = ['assistant', 'burndown', 'gantt', 'tasks', 'budget', 'project'], i = ids.indexOf(UI.tab);
   UI.tab = ids[(i + (ev.key === 'ArrowRight' ? 1 : ids.length - 1)) % ids.length]; persist(); renderChrome(); $('tb-' + UI.tab).focus();
 });
 $('gMode').addEventListener('click', ev => { const b = ev.target.closest('[data-mode]'); if (!b) return; UI.gMode = b.dataset.mode; persist(); renderChrome(); renderGantt(); });
@@ -686,6 +730,6 @@ $('gZoom').addEventListener('click', ev => { const b = ev.target.closest('[data-
 $('optDeps').addEventListener('change', ev => { UI.deps = ev.target.checked; persist(); renderGantt(); });
 $('optCrit').addEventListener('change', ev => { UI.crit = ev.target.checked; persist(); renderGantt(); });
 const hash = (location.hash || '').slice(1);
-if (['assistant', 'burndown', 'gantt', 'tasks', 'project'].includes(hash)) UI.tab = hash;
+if (['assistant', 'burndown', 'gantt', 'tasks', 'budget', 'project'].includes(hash)) UI.tab = hash;
 renderAll(); fillForm(null);
 })();

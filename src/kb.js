@@ -5,6 +5,7 @@
 const KB = [
   {
     id: 'ecommerce', fr: 'Site e-commerce', en: 'E-commerce website', code: 'ECOM',
+    costs: [['Hébergement boutique et base de données (12 mois)', 'Shop and database hosting (12 months)', 600], ['Nom de domaine et e-mails professionnels (1 an)', 'Domain name and business e-mail (1 year)', 90], ['Moteur de recherche hébergé (12 mois)', 'Hosted search engine (12 months)', 360], ['Thème graphique et photos libres de droits', 'Design theme and stock photos', 300]],
     kw: ['e-commerce', 'ecommerce', 'e commerce', 'boutique en ligne', 'online store', 'online shop', 'shop', 'boutique', 'vente en ligne', 'vendre', 'vente', 'sell', 'selling', 'acheter', 'buy', 'panier', 'cart', 'checkout', 'paiement', 'payment', 'produits', 'products', 'catalogue', 'commande', 'orders', 'magasin', 'marketplace', 'dropshipping', 'shopify', 'woocommerce', 'vetements', 'clothes', 'bijoux', 'jewelry'],
     users: ['Acheteurs en ligne', 'Online shoppers'], owner: ['Marchand', 'Merchant'],
     features: [
@@ -29,6 +30,7 @@ const KB = [
   },
   {
     id: 'website', fr: 'Site web vitrine', en: 'Showcase website', code: 'WEB',
+    costs: [['Nom de domaine et hébergement (1 an)', 'Domain name and hosting (1 year)', 120], ['Photos et icônes libres de droits', 'Stock photos and icons', 200], ['Formulaires et anti-spam (1 an)', 'Forms and anti-spam (1 year)', 100]],
     kw: ['site vitrine', 'site web', 'site internet', 'website', 'web site', 'landing', 'landing page', 'portfolio', 'blog', 'wordpress', 'page web', 'presentation', 'présenter', 'presenter', 'association', 'restaurant', 'entreprise', 'company website', 'cv en ligne', 'agence'],
     users: ['Visiteurs et prospects', 'Visitors and prospects'], owner: ['Entreprise cliente', 'Client company'],
     features: [
@@ -51,6 +53,7 @@ const KB = [
   },
   {
     id: 'mobile', fr: 'Application mobile', en: 'Mobile app', code: 'APP',
+    costs: [['Comptes développeur Apple et Google', 'Apple and Google developer accounts', 125], ['Hébergement API et base (12 mois)', 'API and database hosting (12 months)', 600], ['Téléphones de test (Android + iPhone)', 'Test phones (Android + iPhone)', 900]],
     kw: ['application mobile', 'app mobile', 'mobile app', 'appli', 'android', 'ios', 'iphone', 'smartphone', 'flutter', 'react native', 'play store', 'app store', 'application telephone', 'phone app', 'notifications push'],
     users: ['Utilisateurs sur smartphone', 'Smartphone users'], owner: ['Porteur du projet', 'Product owner'],
     features: [
@@ -73,6 +76,7 @@ const KB = [
   },
   {
     id: 'chatbot', fr: 'Assistant IA / chatbot', en: 'AI assistant / chatbot', code: 'BOT',
+    costs: [['Consommation de l’API d’IA (12 mois, estimation)', 'AI API usage (12 months, estimate)', 1200], ['Hébergement API et base vectorielle (12 mois)', 'API and vector database hosting (12 months)', 600]],
     kw: ['chatbot', 'chat bot', 'assistant ia', 'assistant ai', 'ai assistant', 'agent ia', 'ai agent', 'intelligence artificielle', 'artificial intelligence', 'llm', 'gpt', 'chatgpt', 'rag', 'claude', 'repond aux questions', 'answer questions', 'faq', 'support client', 'customer support', 'conversationnel'],
     users: ['Utilisateurs qui posent des questions', 'People asking questions'], owner: ['Service client / organisation', 'Support team / organisation'],
     features: [
@@ -96,6 +100,7 @@ const KB = [
   },
   {
     id: 'dashboard', fr: 'Tableau de bord / BI', en: 'Dashboard / BI', code: 'BI',
+    costs: [['Licences outil de visualisation (10 utilisateurs, 12 mois)', 'Visualisation tool licences (10 users, 12 months)', 1700], ['Serveur entrepôt de données (12 mois)', 'Data warehouse server (12 months)', 600]],
     kw: ['dashboard', 'tableau de bord', 'reporting', 'rapport automatique', 'bi', 'business intelligence', 'power bi', 'tableau', 'kpi', 'indicateurs', 'statistiques', 'visualisation', 'visualization', 'data viz', 'analyse des ventes', 'sales analysis', 'graphiques', 'charts', 'excel'],
     users: ['Direction et managers', 'Management and managers'], owner: ['Direction', 'Management'],
     features: [
@@ -118,6 +123,7 @@ const KB = [
   },
   {
     id: 'ml', fr: 'Modèle d’IA / Machine learning', en: 'Machine learning model', code: 'ML',
+    costs: [['Calcul GPU dans le cloud pour l’entraînement', 'Cloud GPU compute for training', 800], ['Hébergement de l’API de prédiction (12 mois)', 'Prediction API hosting (12 months)', 600], ['Annotation de données', 'Data labelling', 500]],
     kw: ['machine learning', 'apprentissage automatique', 'deep learning', 'prediction', 'prédiction', 'predict', 'prevoir', 'forecast', 'prevision', 'classification', 'detection', 'détection', 'reconnaissance', 'recognition', 'computer vision', 'vision par ordinateur', 'modele ia', 'ai model', 'neural', 'reseau de neurones', 'scoring', 'anomalie', 'anomaly', 'recommandation', 'recommendation'],
     users: ['Équipes métier qui utilisent les prédictions', 'Business teams using predictions'], owner: ['Direction métier', 'Business owner'],
     features: [
@@ -141,6 +147,7 @@ const KB = [
   },
   {
     id: 'booking', fr: 'Plateforme de réservation', en: 'Booking platform', code: 'RSV',
+    costs: [['Hébergement application et base (12 mois)', 'App and database hosting (12 months)', 600], ['Rappels SMS (environ 3 000 SMS)', 'SMS reminders (about 3,000 SMS)', 300], ['Nom de domaine (1 an)', 'Domain name (1 year)', 30]],
     kw: ['reservation', 'réservation', 'booking', 'book', 'reserver', 'rendez-vous', 'rdv', 'appointment', 'agenda', 'calendrier', 'calendar', 'creneau', 'slot', 'location', 'rental', 'salle', 'room', 'hotel', 'table', 'planning', 'prise de rendez-vous', 'doctolib'],
     users: ['Clients qui réservent', 'Customers booking'], owner: ['Prestataire', 'Service provider'],
     features: [
@@ -163,6 +170,7 @@ const KB = [
   },
   {
     id: 'business', fr: 'Application de gestion (CRM / ERP / SaaS)', en: 'Business application (CRM / ERP / SaaS)', code: 'APPW',
+    costs: [['Hébergement cloud européen (12 mois)', 'European cloud hosting (12 months)', 1200], ['Sauvegardes externalisées (12 mois)', 'Off-site backups (12 months)', 240], ['Outil de connexion unique (SSO)', 'Single sign-on tool (SSO)', 0]],
     kw: ['crm', 'erp', 'saas', 'gestion', 'management', 'logiciel de gestion', 'plateforme', 'platform', 'intranet', 'portail', 'portal', 'clients', 'stock', 'inventaire', 'inventory', 'facturation', 'invoicing', 'ressources humaines', 'hr', 'rh', 'tickets', 'suivi', 'tracking', 'workflow', 'back office', 'administration'],
     users: ['Employés de l’entreprise', 'Company staff'], owner: ['Direction de l’entreprise', 'Company management'],
     features: [
@@ -185,6 +193,7 @@ const KB = [
   },
   {
     id: 'elearning', fr: 'Plateforme e-learning', en: 'E-learning platform', code: 'LMS',
+    costs: [['Hébergement des vidéos (12 mois)', 'Video hosting (12 months)', 600], ['Hébergement de la plateforme (12 mois)', 'Platform hosting (12 months)', 600]],
     kw: ['e-learning', 'elearning', 'lms', 'formation en ligne', 'online course', 'cours en ligne', 'courses', 'cours', 'training platform', 'apprendre', 'learning', 'quiz', 'eleves', 'students', 'etudiants', 'ecole', 'school', 'moodle', 'mooc', 'education'],
     users: ['Apprenants', 'Learners'], owner: ['Organisme de formation', 'Training organisation'],
     features: [
@@ -206,6 +215,7 @@ const KB = [
   },
   {
     id: 'security', fr: 'Audit et sécurisation (cybersécurité)', en: 'Security audit and hardening', code: 'SEC',
+    costs: [['Licence scanner de vulnérabilités (1 an)', 'Vulnerability scanner licence (1 year)', 3600], ['Serveur de supervision SIEM (12 mois)', 'SIEM monitoring server (12 months)', 1200], ['Plateforme de simulation d’hameçonnage', 'Phishing simulation platform', 500]],
     kw: ['cybersecurite', 'cybersécurité', 'cybersecurity', 'securite', 'sécurité', 'security', 'audit', 'pentest', 'test d intrusion', 'penetration', 'soc', 'siem', 'iso 27001', 'nis2', 'conformite', 'compliance', 'vulnerabilite', 'vulnerability', 'piratage', 'hack', 'ransomware', 'phishing', 'firewall', 'pare-feu'],
     users: ['Utilisateurs et équipes IT', 'Users and IT teams'], owner: ['Direction / RSSI', 'Management / CISO'],
     features: [
@@ -230,6 +240,7 @@ const KB = [
   },
   {
     id: 'iot', fr: 'Objets connectés (IoT)', en: 'Connected devices (IoT)', code: 'IOT',
+    costs: [['Matériel de prototypage (10 capteurs)', 'Prototype hardware (10 sensors)', 1500], ['Plateforme IoT et hébergement (12 mois)', 'IoT platform and hosting (12 months)', 600], ['Abonnements réseau (LoRa / SIM)', 'Network subscriptions (LoRa / SIM)', 300]],
     kw: ['iot', 'objets connectes', 'objet connecte', 'connected device', 'capteur', 'capteurs', 'sensor', 'sensors', 'arduino', 'raspberry', 'esp32', 'domotique', 'smart home', 'maison connectee', 'temperature', 'mesure', 'telemetrie', 'telemetry', 'industrie 4.0', 'machine', 'robot'],
     users: ['Opérateurs et techniciens', 'Operators and technicians'], owner: ['Exploitant', 'Operator'],
     features: [
@@ -251,6 +262,7 @@ const KB = [
   },
   {
     id: 'software', fr: 'Application web sur mesure', en: 'Custom web application', code: 'PRJ',
+    costs: [['Hébergement application et base (12 mois)', 'App and database hosting (12 months)', 600], ['Nom de domaine et e-mails (1 an)', 'Domain name and e-mail (1 year)', 60]],
     kw: [],
     users: ['Utilisateurs finaux', 'End users'], owner: ['Client', 'Client'],
     features: [

@@ -97,6 +97,7 @@ const Generator = (() => {
     const project = {
       name, code: `${tp.code}-${new Date(s0).getUTCFullYear()}`, start: C.fmt(s0), end: endOf([close]), statusDate: '', workingDays: true,
       phases: PHASES.map(([id, fr, en, color]) => ({ id, fr, en, color })), milestones, tasks,
+      budget: { contingency: 0.15, extras: (tp.costs || []).map(([fr, en, amount]) => ({ fr, en, amount })) },
       docs: { fr: docs({ description, client, author, lang: 'fr', tp, feats, tasks, milestones, name, size }),
               en: docs({ description, client, author, lang: 'en', tp, feats, tasks, milestones, name, size }) }
     };
@@ -143,7 +144,7 @@ const Generator = (() => {
       `- ${L(`Durée estimée : ${weeks} semaines, ${tasks.length} tâches, ${tasks.reduce((a, t) => a + t.points, 0)} points d’effort`, `Estimated duration: ${weeks} weeks, ${tasks.length} tasks, ${tasks.reduce((a, t) => a + t.points, 0)} effort points`)}`,
       `- ${L('Le client valide chaque jalon sous 5 jours ouvrés', 'The client approves each milestone within 5 working days')}`,
       `- ${L('Contenus (textes, images, données) fournis par le client avant la fin de la conception', 'Content (texts, images, data) supplied by the client before the end of design')}`,
-      `- ${L('Budget : à chiffrer à partir des points d’effort et du taux journalier retenu', 'Budget: to be priced from effort points and the agreed day rate')}`
+      `- ${L('Budget : calculé à partir de l’équipe nécessaire et des taux journaliers (voir « Budget et ressources »), marge pour imprévus de 15 %', 'Budget: computed from the required team and day rates (see “Budget and resources”), 15 % contingency')}`
     ].join('\n');
     o.architecture = [L(`La solution est découpée en briques indépendantes, chacune remplaçable sans tout refaire :`, `The solution is split into independent building blocks, each replaceable without redoing everything:`),
       row([L('Brique', 'Component'), L('Rôle', 'Role')]), ...tp.comps.map(c => row([c[0], fr ? c[1] : c[2]]))].join('\n');
