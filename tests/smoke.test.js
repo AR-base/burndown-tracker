@@ -141,4 +141,15 @@ $('bud-mode').value = 'manual'; $('bud-mode').dispatchEvent(new w.Event('change'
 check('switching to a fixed margin enables the rate field', !$('bud-cont').disabled);
 check('no runtime errors after live budget edits', errors.length === 0);
 if (errors.length) console.log(errors);
+// command bar
+d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+check('Ctrl+K opens the command bar', !$('cmdk').hidden);
+$('cmdkIn').value = 'budget'; $('cmdkIn').dispatchEvent(new w.Event('input'));
+check('command bar filters actions', d.querySelectorAll('#cmdkList [data-i2]').length >= 1 && d.querySelectorAll('#cmdkList [data-i2]').length < 8);
+$('cmdkIn').dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+check('Enter runs the action and closes', $('cmdk').hidden && !$('tab-budget').hidden);
+click($('cmdBtn')); d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+check('Escape closes the command bar', $('cmdk').hidden);
+check('no runtime errors with the command bar', errors.length === 0);
+if (errors.length) console.log(errors);
 })();

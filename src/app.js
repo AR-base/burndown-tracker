@@ -34,6 +34,7 @@ const I18N = {
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
     tabAssistant: 'Assistant', newProject: 'Nouveau projet', tabBudget: 'Budget et équipe',
+    cmdOpen: 'Ouvrir la barre de commandes', cmdPh: 'Rechercher une action, un onglet, un document…', cmdEmpty: 'Aucune action ne correspond.', cmdGo: 'Aller à', cmdLang: 'Passer en anglais',
     per_once: 'Une fois', per_month: 'Par mois', per_person: 'Par personne', per_personMonth: 'Par personne et par mois', basisL: 'Calcul', monthsU: 'mois',
     contAuto: 'Automatique, selon le risque du planning', contManual: 'Taux fixe choisi', contModeL: 'Marge pour imprévus', contWhy: 'Calcul :',
     budLive: 'Chaque modification s’applique aussitôt : budget, indicateurs et documents suivent.',
@@ -92,6 +93,7 @@ const I18N = {
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
     tabAssistant: 'Assistant', newProject: 'New project', tabBudget: 'Budget & team',
+    cmdOpen: 'Open the command bar', cmdPh: 'Search an action, a tab, a document…', cmdEmpty: 'No matching action.', cmdGo: 'Go to', cmdLang: 'Switch to French',
     per_once: 'One-off', per_month: 'Per month', per_person: 'Per person', per_personMonth: 'Per person per month', basisL: 'Basis', monthsU: 'months',
     contAuto: 'Automatic, from schedule risk', contManual: 'Fixed rate', contModeL: 'Contingency', contWhy: 'How:',
     budLive: 'Every change applies at once: budget, indicators and documents follow.',
@@ -156,6 +158,7 @@ function renderChrome() {
   const tabs = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['budget', 'tabBudget'], ['project', 'tabProject']];
   $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
   tabs.forEach(([id]) => { $('tab-' + id).hidden = UI.tab !== id; });
+  $('kpis').hidden = UI.tab === 'assistant';
   $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
   $('g-summary').setAttribute('aria-pressed', UI.gMode === 'summary'); $('g-master').setAttribute('aria-pressed', UI.gMode === 'master');
   document.querySelectorAll('#gZoom button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.z === UI.zoom));
@@ -163,6 +166,7 @@ function renderChrome() {
 }
 
 function renderKpis() {
+  setTimeout(() => countUp($('kpis')), 0);
   const BG = Budget.compute(P, todayT());
   const b = C.burndown(P, todayT()), h = C.health(P, todayT()), cp = C.criticalPath(P);
   const end = C.parseDate(P.end);
@@ -170,11 +174,14 @@ function renderKpis() {
   const fcLate = b.forecast !== null && b.forecast > end;
   const slip = b.forecast !== null ? C.diffDays(end, b.forecast) : null;
   const pct = x => Math.round(x * 100) + '%';
+  const ring = (v, plan) => { const R = 19, L = 2 * Math.PI * R; return `<svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="${R}" fill="none" stroke="var(--grid)" stroke-width="5"/>
+    <circle cx="24" cy="24" r="${R}" fill="none" stroke="var(--ideal)" stroke-opacity=".5" stroke-width="5" stroke-dasharray="${(L * Math.min(1, plan)).toFixed(1)} ${L.toFixed(1)}" transform="rotate(-90 24 24)"/>
+    <circle class="ring-v" cx="24" cy="24" r="${R}" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(L * Math.min(1, v)).toFixed(1)} ${L.toFixed(1)}" transform="rotate(-90 24 24)"/></svg>`; };
   $('kpis').innerHTML = `
-    <div class="kpi"><div class="k">${esc(t('kRemaining'))}</div><div class="v">${Math.round(b.remaining)} <small>${esc(t('pts'))}</small></div>
+    <div class="kpi"><div class="k">${esc(t('kRemaining'))}</div><div class="v"><span data-to="${Math.round(b.remaining)}">${Math.round(b.remaining)}</span> <small>${esc(t('pts'))}</small></div>
       <div class="s">${b.done} ${esc(t('kDone'))} ${b.total}</div><div class="meter"><i style="width:${b.total ? b.done / b.total * 100 : 0}%"></i></div></div>
-    <div class="kpi"><div class="k">${esc(t('kEarned'))}</div><div class="v">${pct(h.pctEarned)}</div>
-      <div class="s">${pct(h.pctPlanned)} ${esc(t('kPlanned'))}</div><div class="meter"><i style="width:${h.pctEarned * 100}%"></i></div></div>
+    <div class="kpi"><div class="k">${esc(t('kEarned'))}</div><div class="ring">${ring(h.pctEarned, h.pctPlanned)}<div><div class="v"><span data-to="${Math.round(h.pctEarned * 100)}" data-suffix="%">${pct(h.pctEarned)}</span></div>
+      <div class="s">${pct(h.pctPlanned)} ${esc(t('kPlanned'))}</div></div></div></div>
     <div class="kpi"><div class="k">${esc(t('kVelocity'))}</div><div class="v">${b.velocityWeek.toFixed(1)} <small>${esc(t('perWeek'))}</small></div>
       <div class="s" style="color:${b.velocityWeek + 0.05 < b.requiredWeek ? 'var(--warn)' : 'var(--muted)'}">${b.requiredWeek.toFixed(1)} ${esc(t('perWeek'))} ${esc(t('kRequired'))}</div></div>
     <div class="kpi"><div class="k">${esc(t('kSpi'))}</div><div class="v" style="color:var(--${h.status === 'on' ? 'good' : h.status === 'risk' ? 'warn' : 'bad'})">${h.spi.toFixed(2)}</div><div class="s">${esc(t('kSpiS'))}</div></div>
@@ -234,6 +241,19 @@ $('tab-budget').addEventListener('input', ev => { if (!ev.target.matches('input,
 $('tab-budget').addEventListener('change', ev => { if (ev.target.matches('select')) { clearTimeout(budTimer); applyBudget(false); } });
 
 /* ---------- burndown chart ---------- */
+const reduceMotion = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; } })();
+const shown = new Map();
+function countUp(root) {
+  root.querySelectorAll('[data-to]').forEach(el => {
+    const to = Number(el.dataset.to), key = el.closest('.kpi')?.querySelector('.k')?.textContent || '', from = shown.has(key) ? shown.get(key) : 0;
+    shown.set(key, to);
+    if (reduceMotion || from === to || !Number.isFinite(to)) return;
+    const suf = el.dataset.suffix || '', t0 = performance.now(), dur = 700;
+    const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(from + (to - from) * e) + suf; if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+let animateBd = true;
 function renderBurndown() {
   const box = $('bdBox'), tip = $('bdTip');
   box.querySelectorAll('svg').forEach(s => s.remove());
@@ -266,7 +286,7 @@ function renderBurndown() {
     let d = `M${X(b.actual[0].t)} ${Y(b.actual[0].v)}`;
     b.actual.forEach((p, i) => { if (i) d += `H${X(p.t).toFixed(1)}V${Y(p.v).toFixed(1)}`; });
     const last = b.actual.at(-1);
-    g += `<path d="${d}V${H - m.b}H${X(b.actual[0].t)}Z" fill="var(--accent-soft)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round"/>`;
+    g += `<path d="${d}V${H - m.b}H${X(b.actual[0].t)}Z" fill="var(--accent-soft)"/><path class="bd-line" d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" filter="url(#bdGlow)"/>`;
     if (b.forecast !== null && b.remaining > 0) {
       const fx = Math.min(b.forecast, xEnd), fv = b.remaining * (1 - (fx - last.t) / (b.forecast - last.t || 1));
       g += `<line x1="${X(last.t)}" y1="${Y(last.v)}" x2="${X(fx)}" y2="${Y(fv)}" stroke="var(--${b.forecast > e ? 'bad' : 'good'})" stroke-width="1.8" stroke-dasharray="2 4" stroke-linecap="round"/>`;
@@ -279,10 +299,13 @@ function renderBurndown() {
   if (nt >= s && nt <= xEnd) g += `<line x1="${X(nt)}" x2="${X(nt)}" y1="${m.t - 8}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".55"/><text x="${X(nt)}" y="${m.t - 12}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(t('today').toUpperCase())}</text>`;
   g += `<rect id="bdHit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
   g += `<line id="bdCursor" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" visibility="hidden"/>`;
-  lastBurndown = { svg: g, W, H };
+  lastBurndown = { svg: g.replace(' filter="url(#bdGlow)"', ''), W, H };
+  g = `<defs><filter id="bdGlow" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>` + g;
   box.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('bdTitle'))}">${g}</svg>`);
   $('bdLegend').innerHTML = `<span><i class="sw" style="border-color:var(--accent);border-top-width:3px"></i>${esc(t('actual'))}</span><span><i class="sw" style="border-color:var(--ideal);border-top-style:dashed"></i>${esc(t('ideal'))}</span><span><i class="sw" style="border-color:var(--${b.forecast !== null && b.forecast > e ? 'bad' : 'good'});border-top-style:dotted"></i>${esc(t('forecastL'))}</span><span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
   $('bdHint').textContent = t(P.burnMode === 'done' ? 'bdHintD' : 'bdHintP');
+  const line = box.querySelector('.bd-line');
+  if (line && animateBd && UI.tab === 'burndown' && !reduceMotion) { try { const len = line.getTotalLength(); line.style.setProperty('--len', len); line.classList.add('draw'); animateBd = false; } catch { /* no layout */ } }
   const svg = box.querySelector('svg'), hit = svg.querySelector('#bdHit'), cur = svg.querySelector('#bdCursor');
   const move = ev => {
     const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W;
@@ -379,7 +402,7 @@ function buildGantt(mode, dw, showDeps, showCrit) {
     rowY.set(k.id, { cy, x1, x2 });
     L += `<text x="12" y="${cy + 4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(k.id)}</text><text x="52" y="${cy + 4}" font-size="12.5" fill="var(--ink)">${esc(nm(k).length > 38 ? nm(k).slice(0, 37) + '…' : nm(k))}<title>${esc(nm(k))}</title></text>`;
     R += `<g><title>${esc(`${k.id} · ${nm(k)}\n${dLabel(C.parseDate(k.start), true)} → ${dLabel(C.parseDate(k.end), true)}\n${k.owner} · ${k.points} ${t('pts')} · ${k.progress}% · ${t(statusKey[st])}`)}</title>
-      <rect x="${x1}" y="${cy - 8}" width="${x2 - x1}" height="16" rx="3" fill="${esc(ph.color)}" fill-opacity=".22" stroke="${crit ? 'var(--bad)' : esc(ph.color)}" stroke-width="${crit ? 2 : 1}"/>
+      <rect x="${x1}" y="${cy - 8}" width="${x2 - x1}" height="16" rx="3" fill="${esc(ph.color)}" fill-opacity=".22" stroke="${crit ? 'var(--ink)' : esc(ph.color)}" stroke-width="${crit ? 1.8 : 1}"/>
       <rect x="${x1}" y="${cy - 8}" width="${(x2 - x1) * k.progress / 100}" height="16" rx="3" fill="${esc(ph.color)}"/></g>
       <text x="${x2 + 6}" y="${cy + 4}" font-size="10.5" fill="${st === 'late' ? 'var(--bad)' : 'var(--muted)'}" font-family="var(--f-mono)">${esc(k.owner)}${k.owner ? ' · ' : ''}${k.points}${st === 'late' ? ' · !' : ''}</text>`;
   });
@@ -389,11 +412,11 @@ function buildGantt(mode, dw, showDeps, showCrit) {
       const a = rowY.get(d), b2 = rowY.get(k.id); if (!a || !b2) return;
       const crit = showCrit && cp.critical.has(k.id) && cp.critical.has(d);
       const midX = Math.max(a.x2 + 4, Math.min(b2.x1 - 6, a.x2 + 10));
-      dp += `<path d="M${a.x2} ${a.cy}H${midX}V${b2.cy}H${b2.x1 - 1}" fill="none" stroke="${crit ? 'var(--bad)' : 'var(--muted)'}" stroke-opacity="${crit ? .9 : .5}" stroke-width="1.1" marker-end="url(#arr${crit ? 'C' : ''})"/>`;
+      dp += `<path d="M${a.x2} ${a.cy}H${midX}V${b2.cy}H${b2.x1 - 1}" fill="none" stroke="${crit ? 'var(--ink)' : 'var(--muted)'}" stroke-opacity="${crit ? .85 : .45}" stroke-width="1.1" marker-end="url(#arr${crit ? 'C' : ''})"/>`;
     }));
-    R = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker><marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--bad)"/></marker></defs>` + R + dp;
+    R = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker><marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker></defs>` + R + dp;
   }
-  if (now >= s && now <= e) R += `<line x1="${X(now) + dw / 2}" x2="${X(now) + dw / 2}" y1="${HEAD - 6}" y2="${H}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${X(now) + dw / 2 - 42}" y="${HEAD - 14}" width="84" height="14" rx="3" fill="var(--accent)"/><text x="${X(now) + dw / 2}" y="${HEAD - 4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="var(--f-display)" letter-spacing=".06em">${esc(t('today').toUpperCase())}</text>`;
+  if (now >= s && now <= e) R += `<line x1="${X(now) + dw / 2}" x2="${X(now) + dw / 2}" y1="19" y2="${H}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${X(now) + dw / 2 - 42}" y="4" width="84" height="15" rx="7.5" fill="var(--accent)"/><text x="${X(now) + dw / 2}" y="15" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="var(--f-display)" letter-spacing=".06em">${esc(t('today').toUpperCase())}</text>`;
   return { L, R, W, H };
 }
 function renderGantt() {
@@ -401,7 +424,7 @@ function renderGantt() {
   $('gLeft').innerHTML = `<svg width="400" height="${H}" viewBox="0 0 400 ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${L}</svg>`;
   $('gRight').innerHTML = `<svg width="${W + 140}" height="${H}" viewBox="0 0 ${W + 140} ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${R}</svg>`;
   $('gLegend').innerHTML = P.phases.map(p => `<span><svg width="12" height="12" viewBox="0 0 12 12"><rect width="12" height="12" rx="2" fill="${esc(p.color)}"/></svg>${esc(p.id + ' ' + nm(p))}</span>`).join('') +
-    (UI.crit ? `<span><svg width="18" height="12" viewBox="0 0 18 12"><rect x="1" y="1" width="16" height="10" rx="2" fill="none" stroke="var(--bad)" stroke-width="2"/></svg>${esc(t('showCrit'))}</span>` : '') +
+    (UI.crit ? `<span><svg width="18" height="12" viewBox="0 0 18 12"><rect x="1" y="1" width="16" height="10" rx="2" fill="none" stroke="var(--ink)" stroke-width="2"/></svg>${esc(t('showCrit'))}</span>` : '') +
     `<span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
 }
 
@@ -557,7 +580,7 @@ function importText(txt) {
   const r = C.validateProject(raw);
   if (!r.project || (fmt === 'json' && !r.ok)) return msg(t('eInvalid') + r.errors.slice(0, 8).join(', '), false);
   if (!r.project.tasks.length) return msg(t('eNoTasks'), false);
-  P = r.project; editing = null; UI.tab = 'gantt'; commit();
+  P = r.project; editing = null; UI.tab = 'gantt'; commit(); toast(t('imported'));
   const skipped = (raw.tasks || []).length - P.tasks.length;
   msg(`${t('importedN')}${t({ json: 'fmtJson', csv: 'fmtCsv', mermaid: 'fmtMermaid' }[fmt])} · ${P.tasks.length} ${t('kTasks')}${skipped > 0 ? ` (−${skipped})` : ''}${r.errors.includes('cycle') ? ' · ' + t('eCycle') : ''}`, true);
 }
@@ -626,7 +649,7 @@ const slug = s => String(s).replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').sl
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 async function download(kind, st = $('dlStatus')) {
   st = st || $('dlStatus'); st.textContent = t('generating'); st.className = 'dl-status';
-  const report = (r, name) => { st.textContent = r === 'saved' ? t('downloaded') + name : r === 'declined' ? t('dlDeclined') : t('dlBusy'); st.className = 'dl-status' + (r === 'saved' ? '' : ' err'); };
+  const report = (r, name) => { const m = r === 'saved' ? t('downloaded') + name : r === 'declined' ? t('dlDeclined') : t('dlBusy'); st.textContent = m; st.className = 'dl-status' + (r === 'saved' ? '' : ' err'); toast(m, r !== 'saved'); };
   try {
     const base = slug(P.code || P.name);
     if (['needs', 'technical', 'report'].includes(kind)) {
@@ -674,6 +697,7 @@ let prevProject = null, lastGen = null;
 const sampleCap = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('sample').catch(() => null) : Promise.resolve(null);
 sampleCap.then(s => { $('wzAiWrap').hidden = !s; });
 function renderAssistant() {
+  { const [h1, h2] = t('wzTitle').split(/,\s*/); $('wzTitleEl').innerHTML = h2 ? `${esc(h1)}, <em>${esc(h2)}</em>` : esc(h1); }
   $('wz-desc').placeholder = t('wzPh'); $('wzGo').textContent = t('wzGo');
   $('wzChips').innerHTML = t('wzChips').map(c => `<button type="button" data-chip="${esc(c)}">${esc(c)}</button>`).join('');
   const sel = $('wz-type'), cur = sel.value || 'auto';
@@ -724,7 +748,7 @@ $('wzGo').addEventListener('click', async () => {
     const r = C.validateProject(out.project);
     if (!r.ok) throw new Error(r.errors.join(','));
     prevProject = P; lastGen = out.type; P = r.project; editing = null;
-    commit(); renderResult();
+    commit(); renderResult(); toast(t('wzDone') + P.name);
     $('wzResult').scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   } catch (e) { console.warn('generation failed', e); msgEl.textContent = t('dlError'); msgEl.className = 'err'; }
   finally { $('wzGo').disabled = false; }
@@ -734,6 +758,69 @@ $('wzResult').addEventListener('click', ev => { const b = ev.target.closest('[da
 $('wzSeeGantt').addEventListener('click', () => { UI.tab = 'gantt'; UI.gMode = 'master'; persist(); renderChrome(); renderGantt(); });
 $('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); renderChrome(); $('doc-context')?.focus(); });
 $('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); });
+
+/* ---------- toasts ---------- */
+function toast(msg, err) {
+  const el = document.createElement('div'); el.className = 'toast' + (err ? ' err' : ''); el.setAttribute('role', 'status'); el.textContent = msg;
+  $('toasts').appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, 3200);
+}
+
+/* ---------- command bar (⌘K / Ctrl K) ---------- */
+const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+let cmdItems = [], cmdSel = 0, cmdReturn = null;
+function cmdActions() {
+  const go = (id, k, ic) => ({ label: `${t('cmdGo')} ${t(k)}`, ic, run: () => { UI.tab = id; if (id === 'burndown') animateBd = true; persist(); renderChrome(); if (id === 'burndown') renderBurndown(); } });
+  return [
+    { label: t('newProject'), ic: '+', hint: '', run: () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); } },
+    go('assistant', 'tabAssistant', 'A'), go('burndown', 'tabBurndown', 'B'), go('gantt', 'tabGantt', 'G'), go('tasks', 'tabTasks', 'T'), go('budget', 'tabBudget', '€'), go('project', 'tabProject', 'P'),
+    ...[['needs', 'dlNeeds', '.docx'], ['technical', 'dlTech', '.docx'], ['report', 'dlReport', '.docx'], ['gs', 'dlGs', '.png'], ['gm', 'dlGm', '.png'], ['bd', 'dlBd', '.png'], ['csv', 'dlCsv', '.csv'], ['json', 'dlJson', '.json']]
+      .map(([kind, k, ext]) => ({ label: `${t('download')} · ${t(k)}`, ic: '↓', hint: ext, run: () => download(kind) })),
+    { label: t('cmdLang'), ic: UI.lang === 'fr' ? 'EN' : 'FR', run: () => { UI.lang = UI.lang === 'fr' ? 'en' : 'fr'; commit(); } },
+    { label: `${t('tabGantt')} · ${t('summary')}`, ic: 'G', run: () => { UI.tab = 'gantt'; UI.gMode = 'summary'; persist(); renderChrome(); renderGantt(); } },
+    { label: `${t('tabGantt')} · ${t('master')}`, ic: 'G', run: () => { UI.tab = 'gantt'; UI.gMode = 'master'; persist(); renderChrome(); renderGantt(); } },
+    { label: t('addTask'), ic: '+', run: () => { UI.tab = 'tasks'; persist(); renderChrome(); fillForm(null); $('tf-fr').focus(); } }
+  ];
+}
+const fold = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function renderCmd() {
+  const q = fold($('cmdkIn').value.trim());
+  cmdItems = cmdActions().filter(a => !q || q.split(/\s+/).every(w => fold(a.label).includes(w)));
+  cmdSel = Math.min(cmdSel, Math.max(0, cmdItems.length - 1));
+  $('cmdkList').innerHTML = cmdItems.length ? cmdItems.map((a, i) => `<li role="option" id="cmd-${i}" data-i2="${i}" aria-selected="${i === cmdSel}"><span class="ci">${esc(a.ic)}</span>${esc(a.label)}${a.hint ? `<small>${esc(a.hint)}</small>` : ''}</li>`).join('')
+    : `<li class="cmdk-empty" role="option" aria-disabled="true">${esc(t('cmdEmpty'))}</li>`;
+  $('cmdkIn').setAttribute('aria-activedescendant', cmdItems.length ? 'cmd-' + cmdSel : '');
+  $('cmd-' + cmdSel)?.scrollIntoView?.({ block: 'nearest' });
+}
+function openCmd() { cmdReturn = document.activeElement; $('cmdk').hidden = false; $('cmdkIn').value = ''; $('cmdkIn').placeholder = t('cmdPh'); cmdSel = 0; renderCmd(); $('cmdkIn').focus(); }
+function closeCmd() { $('cmdk').hidden = true; cmdReturn?.focus?.(); }
+function runCmd(i) { const a = cmdItems[i]; if (!a) return; closeCmd(); a.run(); }
+$('cmdKey').textContent = isMac ? '⌘K' : 'Ctrl K';
+$('cmdBtn').addEventListener('click', openCmd);
+$('cmdkIn').addEventListener('input', () => { cmdSel = 0; renderCmd(); });
+$('cmdkIn').addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowDown') { ev.preventDefault(); cmdSel = (cmdSel + 1) % Math.max(1, cmdItems.length); renderCmd(); }
+  else if (ev.key === 'ArrowUp') { ev.preventDefault(); cmdSel = (cmdSel - 1 + cmdItems.length) % Math.max(1, cmdItems.length); renderCmd(); }
+  else if (ev.key === 'Enter') { ev.preventDefault(); runCmd(cmdSel); }
+  else if (ev.key === 'Tab') ev.preventDefault();
+});
+$('cmdkList').addEventListener('click', ev => { const li = ev.target.closest('[data-i2]'); if (li) runCmd(Number(li.dataset.i2)); });
+$('cmdk').addEventListener('click', ev => { if (ev.target.closest('[data-close]')) closeCmd(); });
+document.addEventListener('keydown', ev => {
+  if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'k') { ev.preventDefault(); $('cmdk').hidden ? openCmd() : closeCmd(); }
+  else if (ev.key === 'Escape' && !$('cmdk').hidden) closeCmd();
+});
+
+/* ---------- cursor spotlight on glass cards ---------- */
+let spotRaf = 0;
+document.addEventListener('pointermove', ev => {
+  if (reduceMotion || spotRaf) return;
+  spotRaf = requestAnimationFrame(() => {
+    spotRaf = 0;
+    const el = ev.target.closest && ev.target.closest('.card, .kpi, .wiz-main'); if (!el) return;
+    const r = el.getBoundingClientRect(); el.style.setProperty('--mx', (ev.clientX - r.left) + 'px'); el.style.setProperty('--my', (ev.clientY - r.top) + 'px');
+  });
+}, { passive: true });
 
 /* ---------- wiring ---------- */
 function renderAll() {
@@ -745,7 +832,7 @@ function renderAllInner() { renderChrome(); renderKpis(); renderBurndown(); rend
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() { P.history = C.recordHistory(P, nowT()); persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
-$('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); });
+$('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); if (UI.tab === 'burndown') { animateBd = true; renderBurndown(); } });
 $('tabs').addEventListener('keydown', ev => {
   if (!['ArrowRight', 'ArrowLeft'].includes(ev.key)) return;
   const ids = ['assistant', 'burndown', 'gantt', 'tasks', 'budget', 'project'], i = ids.indexOf(UI.tab);

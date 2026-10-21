@@ -2,7 +2,7 @@
    Every parser returns a RAW project object that still goes through Core.validateProject. */
 const GanttIO = (() => {
   const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
-  const PALETTE = ['#4f6bed', '#0f9d8a', '#d9811e', '#c2417a', '#7a5af5', '#5f7182', '#2f8fd6', '#a15c2b'];
+  const PALETTE = ['#D66853', '#E9A27F', '#C98896', '#8FA6D1', '#B7A3D9', '#9AA7BD', '#7FC4B8', '#E3C17A'];
   const MAX = 2e6;
 
   /* ---- dates: 2026-10-05 | 05/10/2026 | 5/10/26 | 05.10.2026 (day first, French/European) ---- */

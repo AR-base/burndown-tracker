@@ -4,8 +4,8 @@ const Generator = (() => {
   const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
   const K = (typeof KB !== 'undefined') ? KB : require('./kb.js');
   const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/[^a-z0-9+\- ]/g, ' ').replace(/\s+/g, ' ').trim();
-  const PHASES = [['P1', 'Cadrage', 'Initiation', '#4f6bed'], ['P2', 'Conception', 'Design', '#0f9d8a'], ['P3', 'Réalisation', 'Build', '#d9811e'],
-    ['P4', 'Tests et recette', 'Testing and acceptance', '#c2417a'], ['P5', 'Mise en service', 'Go-live', '#7a5af5'], ['P6', 'Clôture', 'Closure', '#5f7182']];
+  const PHASES = [['P1', 'Cadrage', 'Initiation', '#D66853'], ['P2', 'Conception', 'Design', '#E9A27F'], ['P3', 'Réalisation', 'Build', '#C98896'],
+    ['P4', 'Tests et recette', 'Testing and acceptance', '#8FA6D1'], ['P5', 'Mise en service', 'Go-live', '#B7A3D9'], ['P6', 'Clôture', 'Closure', '#9AA7BD']];
   const SIZES = { small: { f: 0.7, prios: ['M'], lanes: 2 }, medium: { f: 1, prios: ['M', 'S'], lanes: 2 }, large: { f: 1.35, prios: ['M', 'S', 'C'], lanes: 2 } };
 
   /* ---- detection: weighted keyword match on the normalised text ---- */
