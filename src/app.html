@@ -129,6 +129,10 @@ td.r,th.r{text-align:right}
 .edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 .edit-row input[type=color]{padding:2px;height:32px}
 @media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+/* burndown hint */
+.bd-hint{margin:0;padding:0 14px 12px}
+.f select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:7px 9px;min-width:0;width:100%}
+
 /* assistant */
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .wiz{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;align-items:start}
@@ -266,6 +270,7 @@ td.r,th.r{text-align:right}
       <div class="card">
         <div class="card-h"><h2 data-i="bdTitle"></h2><div class="legend" id="bdLegend"></div></div>
         <div class="card-b chart-box" id="bdBox"><div class="tip" id="bdTip" hidden></div></div>
+        <p class="hint bd-hint" id="bdHint"></p>
       </div>
       <div class="card">
         <div class="card-h"><h2 data-i="focus"></h2></div>
@@ -340,6 +345,7 @@ td.r,th.r{text-align:right}
             <div class="f"><label for="pf-start" data-i="start"></label><input id="pf-start" type="date"></div>
             <div class="f"><label for="pf-end" data-i="end"></label><input id="pf-end" type="date"></div>
             <div class="f"><label for="pf-status" data-i="statusDate"></label><input id="pf-status" type="date"></div>
+            <div class="f wide"><label for="pf-mode" data-i="burnMode"></label><select id="pf-mode"></select></div>
             <div class="f wide"><label><input type="checkbox" id="pf-wd"> <span data-i="workingDays"></span></label></div>
           </div>
           <div class="actions"><button class="btn pri" type="submit" data-i="save"></button><span class="err" id="pfErr" role="alert"></span></div>

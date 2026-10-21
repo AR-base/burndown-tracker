@@ -138,6 +138,10 @@ td.r,th.r{text-align:right}
 .edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 .edit-row input[type=color]{padding:2px;height:32px}
 @media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+/* burndown hint */
+.bd-hint{margin:0;padding:0 14px 12px}
+.f select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:7px 9px;min-width:0;width:100%}
+
 /* assistant */
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .wiz{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;align-items:start}
@@ -275,6 +279,7 @@ td.r,th.r{text-align:right}
       <div class="card">
         <div class="card-h"><h2 data-i="bdTitle"></h2><div class="legend" id="bdLegend"></div></div>
         <div class="card-b chart-box" id="bdBox"><div class="tip" id="bdTip" hidden></div></div>
+        <p class="hint bd-hint" id="bdHint"></p>
       </div>
       <div class="card">
         <div class="card-h"><h2 data-i="focus"></h2></div>
@@ -349,6 +354,7 @@ td.r,th.r{text-align:right}
             <div class="f"><label for="pf-start" data-i="start"></label><input id="pf-start" type="date"></div>
             <div class="f"><label for="pf-end" data-i="end"></label><input id="pf-end" type="date"></div>
             <div class="f"><label for="pf-status" data-i="statusDate"></label><input id="pf-status" type="date"></div>
+            <div class="f wide"><label for="pf-mode" data-i="burnMode"></label><select id="pf-mode"></select></div>
             <div class="f wide"><label><input type="checkbox" id="pf-wd"> <span data-i="workingDays"></span></label></div>
           </div>
           <div class="actions"><button class="btn pri" type="submit" data-i="save"></button><span class="err" id="pfErr" role="alert"></span></div>
@@ -435,8 +441,13 @@ const Core = (() => {
       start: str(raw.start, 10), end: str(raw.end, 10),
       statusDate: str(raw.statusDate, 10),
       workingDays: raw.workingDays !== false,
-      phases: [], milestones: [], tasks: [], docs: {}
+      phases: [], milestones: [], tasks: [], docs: {},
+      burnMode: raw.burnMode === 'done' ? 'done' : 'progress', history: {}
     };
+    if (raw.history && typeof raw.history === 'object' && !Array.isArray(raw.history))
+      Object.keys(raw.history).filter(k => parseDate(k) !== null).sort().slice(-1000).forEach(k => {
+        const v = Number(raw.history[k]); if (Number.isFinite(v) && v >= 0 && v <= 1e6) p.history[k] = Math.round(v * 10) / 10;
+      });
     const DOC_KEYS = ['author', 'sponsor', 'context', 'objectives', 'scope', 'stakeholders', 'functional', 'nonfunctional', 'constraints',
       'architecture', 'stack', 'security', 'testing', 'deployment', 'risks', 'conclusion'];
     if (raw.docs && typeof raw.docs === 'object' && !Array.isArray(raw.docs))
@@ -526,30 +537,54 @@ const Core = (() => {
   }
 
   /* Burndown: ideal series over the whole project, actual series up to the status date, and a forecast. */
+  /* Remaining work at day t.
+     'progress' mode (default): partial progress counts. Each save records a dated snapshot (p.history),
+     so the line moves as soon as a task's % changes and keeps that history; days without a snapshot
+     carry the last one forward, never above what completed tasks alone give.
+     'done' mode: classic agile burndown, only completed tasks count. */
   function burndown(p, todayT) {
     const s = parseDate(p.start), e = parseDate(p.end), total = totalPoints(p);
-    const now = Math.min(Math.max(statusTime(p, todayT), s), Math.max(e, statusTime(p, todayT)));
+    const now = Math.max(statusTime(p, todayT), s);
+    const prog = p.burnMode !== 'done';
+    const hist = Object.entries(p.history || {}).map(([d, v]) => [parseDate(d), v]).filter(([t]) => t !== null).sort((a, b) => a[0] - b[0]);
+    const remainingNowProg = total - earned(p);
+    const at = t => {
+      const doneR = total - donePointsAt(p, t);
+      if (!prog) return doneR;
+      if (t === now) return Math.min(doneR, remainingNowProg);
+      let last = null;
+      for (const [ht, v] of hist) { if (ht <= t) last = v; else break; }
+      return last === null ? doneR : Math.min(doneR, last);
+    };
     const ideal = [], actual = [];
     for (let t = s; t <= e; t = addDays(t, 1)) ideal.push({ t, v: idealAt(p, t) });
-    const lastActual = Math.min(now, Math.max(e, now));
-    for (let t = s; t <= lastActual; t = addDays(t, 1)) actual.push({ t, v: total - donePointsAt(p, t) });
+    for (let t = s; t <= now; t = addDays(t, 1)) actual.push({ t, v: Math.round(at(t) * 10) / 10 });
     const done = donePointsAt(p, now);
-    const remaining = total - done;
+    const remaining = Math.max(0, at(now));
+    const burned = total - remaining;
     const elapsed = Math.max(1, diffDays(s, now));
-    const velocityDay = done / elapsed;
+    const velocityDay = burned / elapsed;
     let forecast = null;
-    if (remaining === 0) {
+    if (remaining <= 0.0001) {
       const dates = p.tasks.filter(k => k.done).map(k => parseDate(k.done));
       forecast = dates.length ? Math.max(...dates) : now;
     } else if (velocityDay > 0) forecast = addDays(now, Math.ceil(remaining / velocityDay));
     const daysLeft = Math.max(1, diffDays(now, e));
     return {
-      total, done, remaining, now, ideal, actual,
+      total, done, remaining, now, ideal, actual, mode: prog ? 'progress' : 'done',
       idealNow: idealAt(p, now),
       velocityWeek: velocityDay * 7,
       requiredWeek: remaining / daysLeft * 7,
       forecast
     };
+  }
+
+  /* Snapshot of today's remaining work, kept for the burndown history (max 1000 days). */
+  function recordHistory(p, t) {
+    const h = { ...(p.history || {}) };
+    h[fmt(t)] = Math.round((totalPoints(p) - earned(p)) * 10) / 10;
+    const keys = Object.keys(h).sort();
+    return Object.fromEntries(keys.slice(-1000).map(k => [k, h[k]]));
   }
 
   function health(p, todayT) {
@@ -618,7 +653,7 @@ const Core = (() => {
   }
 
   return { DAY, parseDate, fmt, addDays, diffDays, isWeekend, workDays, validateProject, topoOrder, totalPoints,
-    statusTime, donePointsAt, earned, plannedAt, idealAt, burndown, health, criticalPath, phaseSpans, createsCycle, depViolations };
+    statusTime, donePointsAt, earned, plannedAt, idealAt, burndown, recordHistory, health, criticalPath, phaseSpans, createsCycle, depViolations };
 })();
 if (typeof module !== 'undefined') module.exports = Core;
 </script>
@@ -1035,7 +1070,7 @@ const DocGen = (() => {
       for (; f <= now; f = C.addDays(f, 7)) snaps.push(f);
       if (snaps.at(-1) !== now) snaps.push(now);
       out.push({ k: 'h2', t: T.snap });
-      out.push({ k: 'table', rows: [[T.date, T.ideal, T.actual, T.gap], ...snaps.reverse().slice(0, 10).map(s => { const i = C.idealAt(P, s), a = b.total - C.donePointsAt(P, s); return [dfmt(s, lang), num(i, lang), String(a), (a - i >= 0 ? '+' : '') + num(a - i, lang)]; })] });
+      out.push({ k: 'table', rows: [[T.date, T.ideal, T.actual, T.gap], ...snaps.reverse().slice(0, 10).map(s => { const i = C.idealAt(P, s), hit = b.actual.find(x => x.t === s), a = hit ? hit.v : b.total - C.donePointsAt(P, s); return [dfmt(s, lang), num(i, lang), num(a, lang), (a - i >= 0 ? '+' : '') + num(a - i, lang)]; })] });
       out.push({ k: 'h2', t: T.watch });
       const late = P.tasks.filter(k => !k.done && C.parseDate(k.end) < now), prog = P.tasks.filter(k => !k.done && C.parseDate(k.start) <= now && C.parseDate(k.end) >= now);
       out.push({ k: 'p', t: `**${T.late} :** ${late.map(k => `${k.id} ${nm(k)}`).join(' · ') || T.none}` });
@@ -1696,6 +1731,9 @@ const I18N = {
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
     tabAssistant: 'Assistant', newProject: 'Nouveau projet',
+    burnMode: 'Le burndown compte', bmProgress: 'L’avancement % de chaque tâche (recommandé)', bmDone: 'Seulement les tâches terminées',
+    bdHintP: 'La courbe réelle suit l’avancement % des tâches : chaque modification enregistrée apparaît aussitôt, jour après jour.',
+    bdHintD: 'La courbe réelle ne baisse que lorsqu’une tâche est terminée (bouton « Terminer » ou date de fin réelle).',
     wzEyebrow: 'Assistant de projet', wzTitle: 'Décrivez votre projet, on prépare tout le reste',
     wzLead: 'Une phrase suffit, sans termes techniques. Vous obtenez le planning (Gantt), le suivi burndown, le cahier des charges, le dossier technique et le rapport, prêts à télécharger.',
     wzPh: 'Ex. : je veux vendre mes vêtements en ligne', wzClient: 'Client (facultatif)', wzType: 'Type de projet', wzAuto: 'Détection automatique', wzSize: 'Ampleur',
@@ -1743,6 +1781,9 @@ const I18N = {
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
     tabAssistant: 'Assistant', newProject: 'New project',
+    burnMode: 'Burndown counts', bmProgress: 'Each task’s progress % (recommended)', bmDone: 'Completed tasks only',
+    bdHintP: 'The actual line follows each task’s progress %: every saved change shows at once, day after day.',
+    bdHintD: 'The actual line only drops when a task is completed (“Complete” button or completion date).',
     wzEyebrow: 'Project assistant', wzTitle: 'Describe your project, we prepare everything else',
     wzLead: 'One sentence is enough, no technical terms needed. You get the schedule (Gantt), burndown tracking, requirements spec, technical document and report, ready to download.',
     wzPh: 'E.g. I want to sell my clothes online', wzClient: 'Client (optional)', wzType: 'Project type', wzAuto: 'Automatic detection', wzSize: 'Scope',
@@ -1872,6 +1913,7 @@ function renderBurndown() {
   lastBurndown = { svg: g, W, H };
   box.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('bdTitle'))}">${g}</svg>`);
   $('bdLegend').innerHTML = `<span><i class="sw" style="border-color:var(--accent);border-top-width:3px"></i>${esc(t('actual'))}</span><span><i class="sw" style="border-color:var(--ideal);border-top-style:dashed"></i>${esc(t('ideal'))}</span><span><i class="sw" style="border-color:var(--${b.forecast !== null && b.forecast > e ? 'bad' : 'good'});border-top-style:dotted"></i>${esc(t('forecastL'))}</span><span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
+  $('bdHint').textContent = t(P.burnMode === 'done' ? 'bdHintD' : 'bdHintP');
   const svg = box.querySelector('svg'), hit = svg.querySelector('#bdHit'), cur = svg.querySelector('#bdCursor');
   const move = ev => {
     const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W;
@@ -2087,8 +2129,9 @@ $('taskTable').addEventListener('click', ev => {
 
 /* ---------- project settings ---------- */
 function renderProject() {
+  $('pf-mode').innerHTML = `<option value="progress">${esc(t('bmProgress'))}</option><option value="done">${esc(t('bmDone'))}</option>`;
   $('pf-name').value = P.name; $('pf-code').value = P.code; $('pf-start').value = P.start; $('pf-end').value = P.end;
-  $('pf-status').value = P.statusDate; $('pf-wd').checked = P.workingDays;
+  $('pf-status').value = P.statusDate; $('pf-wd').checked = P.workingDays; $('pf-mode').value = P.burnMode;
   $('phaseRows').innerHTML = P.phases.map((p, i) => phaseRow(p, i)).join('');
   $('msRows').innerHTML = P.milestones.map((m, i) => msRow(m, i)).join('');
 }
@@ -2111,7 +2154,7 @@ $('saveMs').addEventListener('click', () => {
 });
 $('projForm').addEventListener('submit', ev => {
   ev.preventDefault();
-  const r = C.validateProject({ ...P, name: $('pf-name').value, code: $('pf-code').value, start: $('pf-start').value, end: $('pf-end').value, statusDate: $('pf-status').value, workingDays: $('pf-wd').checked });
+  const r = C.validateProject({ ...P, name: $('pf-name').value, code: $('pf-code').value, start: $('pf-start').value, end: $('pf-end').value, statusDate: $('pf-status').value, workingDays: $('pf-wd').checked, burnMode: $('pf-mode').value });
   const bad = r.errors.filter(x => ['start', 'end', 'range', 'statusDate'].includes(x));
   if (bad.length) { $('pfErr').textContent = bad.includes('range') ? t('eRange') : t('eDates'); $('pfErr').className = 'err'; return; }
   P = r.project; commit(); $('pfErr').textContent = t('saved'); $('pfErr').className = 'ok';
@@ -2322,7 +2365,7 @@ $('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); r
 /* ---------- wiring ---------- */
 function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
-function commit() { persist(); renderAll(); }
+function commit() { P.history = C.recordHistory(P, nowT()); persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
 $('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); });
 $('tabs').addEventListener('keydown', ev => {

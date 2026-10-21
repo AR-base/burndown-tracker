@@ -19,15 +19,35 @@ ok('sample validates cleanly', () => {
 ok('no finish-to-start violations in sample', () => {
   assert.deepStrictEqual(C.depViolations(C.validateProject(S).project), []);
 });
-ok('burndown at 21 Oct', () => {
-  const b = C.burndown(C.validateProject(S).project, today);
+ok('burndown at 21 Oct (done mode = completed tasks only)', () => {
+  const b = C.burndown({ ...C.validateProject(S).project, burnMode: 'done' }, today);
   assert.strictEqual(b.done, 26);
   assert.strictEqual(b.remaining, 83);
   assert.strictEqual(b.ideal[0].v, 109);
   assert.strictEqual(b.ideal.at(-1).v, 0);
   assert.strictEqual(C.fmt(b.actual.at(-1).t), '2026-10-21');
   assert.ok(b.forecast > C.parseDate('2026-12-18'), 'velocity forecast later than end');
-  console.log('   idealNow', b.idealNow.toFixed(1), 'vel/wk', b.velocityWeek.toFixed(1), 'req/wk', b.requiredWeek.toFixed(1), 'forecast', C.fmt(b.forecast));
+});
+ok('burndown counts partial progress by default (progress mode)', () => {
+  const p = C.validateProject(S).project;
+  const b = C.burndown(p, today);
+  assert.strictEqual(b.mode, 'progress');
+  assert.strictEqual(b.done, 26);
+  assert.strictEqual(Math.round(b.remaining * 10) / 10, 77.9);
+  // raising one task's progress moves today's point immediately
+  const p2 = { ...p, tasks: p.tasks.map(k => k.id === 'T8' ? { ...k, progress: 50 } : k) };
+  assert.ok(C.burndown(p2, today).actual.at(-1).v < b.actual.at(-1).v);
+  console.log('   remaining', b.remaining.toFixed(1), 'vel/wk', b.velocityWeek.toFixed(1), 'forecast', C.fmt(b.forecast));
+});
+ok('history snapshots are kept and carried forward', () => {
+  const p = C.validateProject(S).project;
+  const h = C.recordHistory({ ...p, tasks: p.tasks.map(k => k.id === 'T6' ? { ...k, progress: 0 } : k) }, C.parseDate('2026-10-14'));
+  const b = C.burndown({ ...p, history: h }, today);
+  const v14 = b.actual.find(x => C.fmt(x.t) === '2026-10-14').v, v15 = b.actual.find(x => C.fmt(x.t) === '2026-10-15').v;
+  assert.ok(v14 < 109 - 18 + 1, 'snapshot used on its day');
+  assert.strictEqual(v15, v14, 'carried forward');
+  const back = C.validateProject({ ...S, history: { ...h, 'bad-date': 3, '2026-10-01': -5 } }).project.history;
+  assert.deepStrictEqual(Object.keys(back), ['2026-10-14']);
 });
 ok('health / SPI', () => {
   const h = C.health(C.validateProject(S).project, today);

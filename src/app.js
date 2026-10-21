@@ -34,6 +34,9 @@ const I18N = {
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
     tabAssistant: 'Assistant', newProject: 'Nouveau projet',
+    burnMode: 'Le burndown compte', bmProgress: 'L’avancement % de chaque tâche (recommandé)', bmDone: 'Seulement les tâches terminées',
+    bdHintP: 'La courbe réelle suit l’avancement % des tâches : chaque modification enregistrée apparaît aussitôt, jour après jour.',
+    bdHintD: 'La courbe réelle ne baisse que lorsqu’une tâche est terminée (bouton « Terminer » ou date de fin réelle).',
     wzEyebrow: 'Assistant de projet', wzTitle: 'Décrivez votre projet, on prépare tout le reste',
     wzLead: 'Une phrase suffit, sans termes techniques. Vous obtenez le planning (Gantt), le suivi burndown, le cahier des charges, le dossier technique et le rapport, prêts à télécharger.',
     wzPh: 'Ex. : je veux vendre mes vêtements en ligne', wzClient: 'Client (facultatif)', wzType: 'Type de projet', wzAuto: 'Détection automatique', wzSize: 'Ampleur',
@@ -81,6 +84,9 @@ const I18N = {
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
     tabAssistant: 'Assistant', newProject: 'New project',
+    burnMode: 'Burndown counts', bmProgress: 'Each task’s progress % (recommended)', bmDone: 'Completed tasks only',
+    bdHintP: 'The actual line follows each task’s progress %: every saved change shows at once, day after day.',
+    bdHintD: 'The actual line only drops when a task is completed (“Complete” button or completion date).',
     wzEyebrow: 'Project assistant', wzTitle: 'Describe your project, we prepare everything else',
     wzLead: 'One sentence is enough, no technical terms needed. You get the schedule (Gantt), burndown tracking, requirements spec, technical document and report, ready to download.',
     wzPh: 'E.g. I want to sell my clothes online', wzClient: 'Client (optional)', wzType: 'Project type', wzAuto: 'Automatic detection', wzSize: 'Scope',
@@ -210,6 +216,7 @@ function renderBurndown() {
   lastBurndown = { svg: g, W, H };
   box.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('bdTitle'))}">${g}</svg>`);
   $('bdLegend').innerHTML = `<span><i class="sw" style="border-color:var(--accent);border-top-width:3px"></i>${esc(t('actual'))}</span><span><i class="sw" style="border-color:var(--ideal);border-top-style:dashed"></i>${esc(t('ideal'))}</span><span><i class="sw" style="border-color:var(--${b.forecast !== null && b.forecast > e ? 'bad' : 'good'});border-top-style:dotted"></i>${esc(t('forecastL'))}</span><span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
+  $('bdHint').textContent = t(P.burnMode === 'done' ? 'bdHintD' : 'bdHintP');
   const svg = box.querySelector('svg'), hit = svg.querySelector('#bdHit'), cur = svg.querySelector('#bdCursor');
   const move = ev => {
     const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W;
@@ -425,8 +432,9 @@ $('taskTable').addEventListener('click', ev => {
 
 /* ---------- project settings ---------- */
 function renderProject() {
+  $('pf-mode').innerHTML = `<option value="progress">${esc(t('bmProgress'))}</option><option value="done">${esc(t('bmDone'))}</option>`;
   $('pf-name').value = P.name; $('pf-code').value = P.code; $('pf-start').value = P.start; $('pf-end').value = P.end;
-  $('pf-status').value = P.statusDate; $('pf-wd').checked = P.workingDays;
+  $('pf-status').value = P.statusDate; $('pf-wd').checked = P.workingDays; $('pf-mode').value = P.burnMode;
   $('phaseRows').innerHTML = P.phases.map((p, i) => phaseRow(p, i)).join('');
   $('msRows').innerHTML = P.milestones.map((m, i) => msRow(m, i)).join('');
 }
@@ -449,7 +457,7 @@ $('saveMs').addEventListener('click', () => {
 });
 $('projForm').addEventListener('submit', ev => {
   ev.preventDefault();
-  const r = C.validateProject({ ...P, name: $('pf-name').value, code: $('pf-code').value, start: $('pf-start').value, end: $('pf-end').value, statusDate: $('pf-status').value, workingDays: $('pf-wd').checked });
+  const r = C.validateProject({ ...P, name: $('pf-name').value, code: $('pf-code').value, start: $('pf-start').value, end: $('pf-end').value, statusDate: $('pf-status').value, workingDays: $('pf-wd').checked, burnMode: $('pf-mode').value });
   const bad = r.errors.filter(x => ['start', 'end', 'range', 'statusDate'].includes(x));
   if (bad.length) { $('pfErr').textContent = bad.includes('range') ? t('eRange') : t('eDates'); $('pfErr').className = 'err'; return; }
   P = r.project; commit(); $('pfErr').textContent = t('saved'); $('pfErr').className = 'ok';
@@ -660,7 +668,7 @@ $('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); r
 /* ---------- wiring ---------- */
 function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
-function commit() { persist(); renderAll(); }
+function commit() { P.history = C.recordHistory(P, nowT()); persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
 $('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); });
 $('tabs').addEventListener('keydown', ev => {

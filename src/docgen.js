@@ -221,7 +221,7 @@ const DocGen = (() => {
       for (; f <= now; f = C.addDays(f, 7)) snaps.push(f);
       if (snaps.at(-1) !== now) snaps.push(now);
       out.push({ k: 'h2', t: T.snap });
-      out.push({ k: 'table', rows: [[T.date, T.ideal, T.actual, T.gap], ...snaps.reverse().slice(0, 10).map(s => { const i = C.idealAt(P, s), a = b.total - C.donePointsAt(P, s); return [dfmt(s, lang), num(i, lang), String(a), (a - i >= 0 ? '+' : '') + num(a - i, lang)]; })] });
+      out.push({ k: 'table', rows: [[T.date, T.ideal, T.actual, T.gap], ...snaps.reverse().slice(0, 10).map(s => { const i = C.idealAt(P, s), hit = b.actual.find(x => x.t === s), a = hit ? hit.v : b.total - C.donePointsAt(P, s); return [dfmt(s, lang), num(i, lang), num(a, lang), (a - i >= 0 ? '+' : '') + num(a - i, lang)]; })] });
       out.push({ k: 'h2', t: T.watch });
       const late = P.tasks.filter(k => !k.done && C.parseDate(k.end) < now), prog = P.tasks.filter(k => !k.done && C.parseDate(k.start) <= now && C.parseDate(k.end) >= now);
       out.push({ k: 'p', t: `**${T.late} :** ${late.map(k => `${k.id} ${nm(k)}`).join(' · ') || T.none}` });

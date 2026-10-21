@@ -35,8 +35,13 @@ const Core = (() => {
       start: str(raw.start, 10), end: str(raw.end, 10),
       statusDate: str(raw.statusDate, 10),
       workingDays: raw.workingDays !== false,
-      phases: [], milestones: [], tasks: [], docs: {}
+      phases: [], milestones: [], tasks: [], docs: {},
+      burnMode: raw.burnMode === 'done' ? 'done' : 'progress', history: {}
     };
+    if (raw.history && typeof raw.history === 'object' && !Array.isArray(raw.history))
+      Object.keys(raw.history).filter(k => parseDate(k) !== null).sort().slice(-1000).forEach(k => {
+        const v = Number(raw.history[k]); if (Number.isFinite(v) && v >= 0 && v <= 1e6) p.history[k] = Math.round(v * 10) / 10;
+      });
     const DOC_KEYS = ['author', 'sponsor', 'context', 'objectives', 'scope', 'stakeholders', 'functional', 'nonfunctional', 'constraints',
       'architecture', 'stack', 'security', 'testing', 'deployment', 'risks', 'conclusion'];
     if (raw.docs && typeof raw.docs === 'object' && !Array.isArray(raw.docs))
@@ -126,30 +131,54 @@ const Core = (() => {
   }
 
   /* Burndown: ideal series over the whole project, actual series up to the status date, and a forecast. */
+  /* Remaining work at day t.
+     'progress' mode (default): partial progress counts. Each save records a dated snapshot (p.history),
+     so the line moves as soon as a task's % changes and keeps that history; days without a snapshot
+     carry the last one forward, never above what completed tasks alone give.
+     'done' mode: classic agile burndown, only completed tasks count. */
   function burndown(p, todayT) {
     const s = parseDate(p.start), e = parseDate(p.end), total = totalPoints(p);
-    const now = Math.min(Math.max(statusTime(p, todayT), s), Math.max(e, statusTime(p, todayT)));
+    const now = Math.max(statusTime(p, todayT), s);
+    const prog = p.burnMode !== 'done';
+    const hist = Object.entries(p.history || {}).map(([d, v]) => [parseDate(d), v]).filter(([t]) => t !== null).sort((a, b) => a[0] - b[0]);
+    const remainingNowProg = total - earned(p);
+    const at = t => {
+      const doneR = total - donePointsAt(p, t);
+      if (!prog) return doneR;
+      if (t === now) return Math.min(doneR, remainingNowProg);
+      let last = null;
+      for (const [ht, v] of hist) { if (ht <= t) last = v; else break; }
+      return last === null ? doneR : Math.min(doneR, last);
+    };
     const ideal = [], actual = [];
     for (let t = s; t <= e; t = addDays(t, 1)) ideal.push({ t, v: idealAt(p, t) });
-    const lastActual = Math.min(now, Math.max(e, now));
-    for (let t = s; t <= lastActual; t = addDays(t, 1)) actual.push({ t, v: total - donePointsAt(p, t) });
+    for (let t = s; t <= now; t = addDays(t, 1)) actual.push({ t, v: Math.round(at(t) * 10) / 10 });
     const done = donePointsAt(p, now);
-    const remaining = total - done;
+    const remaining = Math.max(0, at(now));
+    const burned = total - remaining;
     const elapsed = Math.max(1, diffDays(s, now));
-    const velocityDay = done / elapsed;
+    const velocityDay = burned / elapsed;
     let forecast = null;
-    if (remaining === 0) {
+    if (remaining <= 0.0001) {
       const dates = p.tasks.filter(k => k.done).map(k => parseDate(k.done));
       forecast = dates.length ? Math.max(...dates) : now;
     } else if (velocityDay > 0) forecast = addDays(now, Math.ceil(remaining / velocityDay));
     const daysLeft = Math.max(1, diffDays(now, e));
     return {
-      total, done, remaining, now, ideal, actual,
+      total, done, remaining, now, ideal, actual, mode: prog ? 'progress' : 'done',
       idealNow: idealAt(p, now),
       velocityWeek: velocityDay * 7,
       requiredWeek: remaining / daysLeft * 7,
       forecast
     };
+  }
+
+  /* Snapshot of today's remaining work, kept for the burndown history (max 1000 days). */
+  function recordHistory(p, t) {
+    const h = { ...(p.history || {}) };
+    h[fmt(t)] = Math.round((totalPoints(p) - earned(p)) * 10) / 10;
+    const keys = Object.keys(h).sort();
+    return Object.fromEntries(keys.slice(-1000).map(k => [k, h[k]]));
   }
 
   function health(p, todayT) {
@@ -218,6 +247,6 @@ const Core = (() => {
   }
 
   return { DAY, parseDate, fmt, addDays, diffDays, isWeekend, workDays, validateProject, topoOrder, totalPoints,
-    statusTime, donePointsAt, earned, plannedAt, idealAt, burndown, health, criticalPath, phaseSpans, createsCycle, depViolations };
+    statusTime, donePointsAt, earned, plannedAt, idealAt, burndown, recordHistory, health, criticalPath, phaseSpans, createsCycle, depViolations };
 })();
 if (typeof module !== 'undefined') module.exports = Core;
