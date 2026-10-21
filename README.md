@@ -130,7 +130,7 @@ Les fichiers .docx sont générés dans le navigateur (aucun serveur) et s'ouvre
 ```bash
 npm install        # jsdom pour les tests DOM / for DOM tests
 npm run build      # src/ → index.html + hachages CSP dans vercel.json et _headers
-npm test           # 12 logique + 8 import/export + 12 .docx + 19 assistant + 38 interface = 89 tests
+npm test           # 12 logique + 8 import/export + 13 .docx + 19 assistant + 38 interface = 90 tests
 ```
 
 Structure : `src/core.js` (calculs purs), `src/io.js` (CSV/Mermaid), `src/docgen.js` (générateur .docx sans dépendance), `src/kb.js` + `src/generator.js` (assistant de projet), `src/app.js` (interface), `src/app.html` (gabarit + CSS), `src/sample.js` (projet exemple ESAIP AI Assistant).

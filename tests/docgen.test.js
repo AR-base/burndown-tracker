@@ -6,7 +6,7 @@ const P = C.validateProject(S).project;
 // 1x1 white PNG
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4//8/AAX+Av4N70a4AAAAAElFTkSuQmCC', 'base64');
 const img = { bytes: new Uint8Array(PNG), w: 1200, h: 600 };
-ok('docs preserved by validation', () => { assert.ok(P.docs.functional.includes('EF1')); assert.strictEqual(C.validateProject({ ...S, docs: { evil: 'x', context: 5 } }).project.docs.evil, undefined); });
+ok('docs preserved by validation', () => { assert.ok(P.docs.fr.functional.includes('Indispensable') && P.docs.en.functional.includes('Must')); const v = C.validateProject({ ...S, docs: { evil: 'x', context: 'flat' } }).project.docs; assert.strictEqual(v.fr.evil, undefined); assert.strictEqual(v.fr.context, 'flat'); assert.strictEqual(v.en.context, 'flat'); });
 ok('text syntax → bullets, tables, paragraphs', () => {
   const b = DG.textBlocks('Intro\n- a\n- b\nA | B\n1 | 2\n## Sub');
   assert.deepStrictEqual(b.map(x => x.k), ['p', 'bullets', 'table', 'h2']);
@@ -22,7 +22,7 @@ for (const kind of ['needs', 'technical', 'report']) for (const lang of ['fr', '
   });
 }
 ok('xml escaping of hostile project text', () => {
-  const evil = C.validateProject({ ...S, name: 'A <b>&"x"</b>', docs: { context: '<script>alert(1)</script> & co' } }).project;
+  const evil = C.validateProject({ ...S, name: 'A <b>&"x"</b>', docs: { fr: { context: '<script>alert(1)</script> & co' } } }).project;
   const d = DG.assemble('report', evil, 'fr', today, {});
   fs.writeFileSync(`${OUT}/evil.docx`, d.bytes);
 });
@@ -38,4 +38,14 @@ for f in sorted(glob.glob('${OUT}/*.docx')):
     d = docx.Document(f); print(f.split('/')[-1], len(d.paragraphs), 'paras', len(d.tables), 'tables', len(d.inline_shapes), 'images')"`, { stdio: ['ignore', 'pipe', 'pipe'] }).toString(); } catch (e) { if (/No module named/.test(String(e.stderr))) { console.log('   (python-docx not installed: OOXML reader check skipped)'); } else throw e; }
 console.log(py.trim().split('\n').map(l => '   ' + l).join('\n'));
 assert.ok(!/Error/.test(py)); n++; console.log('✓ every .docx opens in python-docx');
+ok('French download uses the French texts, English download the English texts', () => {
+  const fr = DG.assemble('needs', P, 'fr', today, {}), en = DG.assemble('needs', P, 'en', today, {});
+  const txt = b => { const s = Buffer.from(b).toString('latin1'); return s; };
+  const frXml = require('zlib') && txt(fr.bytes), enXml = txt(en.bytes);
+  assert.ok(fr.blocks.some(x => x.k === 'table' && x.rows.some(r => r.includes('Indispensable'))));
+  assert.ok(!fr.blocks.some(x => x.k === 'table' && x.rows.some(r => r.includes('Must'))));
+  assert.ok(en.blocks.some(x => x.k === 'table' && x.rows.some(r => r.includes('Must'))));
+  assert.ok(/fr-FR/.test(frXml) && /en-GB/.test(enXml));
+  assert.ok(fr.name.includes('Cahier') && en.name.includes('Requirements'));
+});
 console.log(`\n${n} tests passed`);

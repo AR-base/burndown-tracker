@@ -35,7 +35,7 @@ const DocGen = (() => {
   /* ---------- docx parts ---------- */
   const NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
   const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:color w:val="142033"/><w:lang w:val="fr-FR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:color w:val="142033"/><w:lang w:val="%LANG%"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
 <w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="44"/><w:color w:val="142033"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="240"/></w:pPr><w:rPr><w:sz w:val="24"/><w:color w:val="596579"/></w:rPr></w:style>
@@ -68,6 +68,7 @@ const DocGen = (() => {
 
   /* Blocks → docx bytes. Block kinds: title, subtitle, h1, h2, p, note, bullets, table, img, caption, pagebreak */
   function build(blocks, meta) {
+    const styles = STYLES.replace('%LANG%', meta.lang === 'en' ? 'en-GB' : 'fr-FR');
     const media = []; let body = '';
     blocks.forEach(b => {
       if (b.k === 'title') body += para(b.t, 'Title');
@@ -92,9 +93,9 @@ const DocGen = (() => {
     const files = [
       { name: '[Content_Types].xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>` },
       { name: '_rels/.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>` },
-      { name: 'docProps/core.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${x(meta.title)}</dc:title><dc:creator>${x(meta.author || '')}</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created></cp:coreProperties>` },
+      { name: 'docProps/core.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${x(meta.title)}</dc:title><dc:creator>${x(meta.author || '')}</dc:creator><dc:language>${meta.lang === 'en' ? 'en-GB' : 'fr-FR'}</dc:language><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created></cp:coreProperties>` },
       { name: 'word/document.xml', data: doc },
-      { name: 'word/styles.xml', data: STYLES },
+      { name: 'word/styles.xml', data: styles },
       { name: 'word/footer1.xml', data: footer },
       { name: 'word/_rels/document.xml.rels', data: rels },
       ...media.map((m, i) => ({ name: `word/media/figure${i + 1}.png`, data: m }))
@@ -166,7 +167,7 @@ const DocGen = (() => {
   /* Assemble one document. imgs = {summary, master, burndown} each {bytes,w,h} or undefined. */
   function assemble(kind, P, lang, todayT, imgs = {}) {
     const T = L[lang], spec = DOCS[kind], nm = o => (lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
-    const docs = P.docs || {}, now = C.statusTime(P, todayT), b = C.burndown(P, todayT), h = C.health(P, todayT), cp = C.criticalPath(P);
+    const other = lang === 'fr' ? 'en' : 'fr', all = P.docs || {}, docs = { ...((all && all[other]) || {}), ...((all && all[lang]) || {}) }, now = C.statusTime(P, todayT), b = C.burndown(P, todayT), h = C.health(P, todayT), cp = C.criticalPath(P);
     const st = k => k.done ? T.sDone : C.parseDate(k.end) < now ? T.sLate : C.parseDate(k.start) <= now ? T.sIn : T.sTodo;
     const out = []; let sec = 0, fig = 0;
     const H1 = t => out.push({ k: 'h1', t: `${++sec}. ${t}` });
@@ -230,7 +231,7 @@ const DocGen = (() => {
       const bl = textBlocks(docs.conclusion); if (bl.length) out.push(...bl); else out.push({ k: 'note', t: T.todo });
     }
     const fname = `${(P.code || P.name).replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'projet'}-${spec[lang].replace(/[^\w\-]+/g, '-')}.docx`;
-    return { bytes: build(out, { title: `${P.name} — ${spec[lang]}`, author: docs.author, footer: `${P.name} — ${spec[lang]}` }), name: fname, blocks: out };
+    return { bytes: build(out, { title: `${P.name} — ${spec[lang]}`, author: docs.author, footer: `${P.name} — ${spec[lang]}`, lang }), name: fname, blocks: out };
   }
   return { zip, crc32, build, textBlocks, assemble, FIELDS, DOCS };
 })();

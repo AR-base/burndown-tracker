@@ -35,7 +35,7 @@ const Core = (() => {
       start: str(raw.start, 10), end: str(raw.end, 10),
       statusDate: str(raw.statusDate, 10),
       workingDays: raw.workingDays !== false,
-      phases: [], milestones: [], tasks: [], docs: {},
+      phases: [], milestones: [], tasks: [], docs: { fr: {}, en: {} },
       burnMode: raw.burnMode === 'done' ? 'done' : 'progress', history: {}
     };
     if (raw.history && typeof raw.history === 'object' && !Array.isArray(raw.history))
@@ -44,8 +44,13 @@ const Core = (() => {
       });
     const DOC_KEYS = ['author', 'sponsor', 'context', 'objectives', 'scope', 'stakeholders', 'functional', 'nonfunctional', 'constraints',
       'architecture', 'stack', 'security', 'testing', 'deployment', 'risks', 'conclusion'];
-    if (raw.docs && typeof raw.docs === 'object' && !Array.isArray(raw.docs))
-      DOC_KEYS.forEach(k => { if (typeof raw.docs[k] === 'string' && raw.docs[k].trim()) p.docs[k] = raw.docs[k].slice(0, 20000); });
+    // Document texts are kept per language: docs = { fr: {...}, en: {...} }.
+    // Older files with one flat set of texts are accepted and used for both languages.
+    const pick = src => { const o = {}; if (src && typeof src === 'object' && !Array.isArray(src)) DOC_KEYS.forEach(k => { if (typeof src[k] === 'string' && src[k].trim()) o[k] = src[k].slice(0, 20000); }); return o; };
+    if (raw.docs && typeof raw.docs === 'object' && !Array.isArray(raw.docs)) {
+      if (raw.docs.fr || raw.docs.en) p.docs = { fr: pick(raw.docs.fr), en: pick(raw.docs.en) };
+      else { const flat = pick(raw.docs); p.docs = { fr: { ...flat }, en: { ...flat } }; }
+    } else p.docs = { fr: {}, en: {} };
     const ps = parseDate(p.start), pe = parseDate(p.end);
     if (ps === null) errors.push('start');
     if (pe === null) errors.push('end');

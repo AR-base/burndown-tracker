@@ -34,6 +34,7 @@ const I18N = {
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
     tabAssistant: 'Assistant', newProject: 'Nouveau projet',
+    docLangFr: 'Vous modifiez la version française. Les documents téléchargés en français utilisent ces textes ; passez en EN pour modifier la version anglaise.',
     burnMode: 'Le burndown compte', bmProgress: 'L’avancement % de chaque tâche (recommandé)', bmDone: 'Seulement les tâches terminées',
     bdHintP: 'La courbe réelle suit l’avancement % des tâches : chaque modification enregistrée apparaît aussitôt, jour après jour.',
     bdHintD: 'La courbe réelle ne baisse que lorsqu’une tâche est terminée (bouton « Terminer » ou date de fin réelle).',
@@ -84,6 +85,7 @@ const I18N = {
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
     tabAssistant: 'Assistant', newProject: 'New project',
+    docLangEn: 'You are editing the English version. Documents downloaded in English use these texts; switch to FR to edit the French version.',
     burnMode: 'Burndown counts', bmProgress: 'Each task’s progress % (recommended)', bmDone: 'Completed tasks only',
     bdHintP: 'The actual line follows each task’s progress %: every saved change shows at once, day after day.',
     bdHintD: 'The actual line only drops when a task is completed (“Complete” button or completion date).',
@@ -587,14 +589,17 @@ document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !menu.hi
 dlCap.then(cap => { let framed = true; try { framed = window.top !== window.self; } catch { /* cross-origin */ } $('dlFrameNote').hidden = !!cap || !framed; });
 
 function renderDocsEditor() {
-  const F = DocGen.FIELDS, d = P.docs || {};
+  const F = DocGen.FIELDS, d = (P.docs && P.docs[UI.lang]) || {};
+  $('docLangNote').textContent = t(UI.lang === 'fr' ? 'docLangFr' : 'docLangEn');
   $('docFields').innerHTML = `<div class="f"><label for="doc-author">${esc(t('author'))}</label><input id="doc-author" maxlength="200" value="${esc(d.author || '')}"></div>
     <div class="f"><label for="doc-sponsor">${esc(t('sponsor'))}</label><input id="doc-sponsor" maxlength="200" value="${esc(d.sponsor || '')}"></div>` +
-    F.map(([k, fr, en]) => `<div class="f wide"><label for="doc-${k}">${esc(UI.lang === 'fr' ? fr : en)}</label><textarea id="doc-${k}" class="doc-ta" rows="4" maxlength="20000" spellcheck="true">${esc(d[k] || '')}</textarea></div>`).join('');
+    F.map(([k, fr, en]) => `<div class="f wide"><label for="doc-${k}">${esc(UI.lang === 'fr' ? fr : en)}</label><textarea id="doc-${k}" class="doc-ta" rows="4" maxlength="20000" spellcheck="true" lang="${UI.lang}">${esc(d[k] || '')}</textarea></div>`).join('');
 }
 $('saveDocs').addEventListener('click', () => {
-  const docs = { author: $('doc-author').value, sponsor: $('doc-sponsor').value };
-  DocGen.FIELDS.forEach(([k]) => { docs[k] = $('doc-' + k).value; });
+  const set = { author: $('doc-author').value, sponsor: $('doc-sponsor').value };
+  DocGen.FIELDS.forEach(([k]) => { set[k] = $('doc-' + k).value; });
+  const docs = { fr: { ...((P.docs || {}).fr || {}) }, en: { ...((P.docs || {}).en || {}) } };
+  docs[UI.lang] = set;
   P = C.validateProject({ ...P, docs }).project; commit();
   $('docMsg').textContent = t('saved'); $('docMsg').className = 'ok';
 });

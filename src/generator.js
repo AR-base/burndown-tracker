@@ -97,7 +97,8 @@ const Generator = (() => {
     const project = {
       name, code: `${tp.code}-${new Date(s0).getUTCFullYear()}`, start: C.fmt(s0), end: endOf([close]), statusDate: '', workingDays: true,
       phases: PHASES.map(([id, fr, en, color]) => ({ id, fr, en, color })), milestones, tasks,
-      docs: docs({ description, client, author, lang, tp, feats, tasks, milestones, name, size })
+      docs: { fr: docs({ description, client, author, lang: 'fr', tp, feats, tasks, milestones, name, size }),
+              en: docs({ description, client, author, lang: 'en', tp, feats, tasks, milestones, name, size }) }
     };
     return { project, type: tp, detection: det };
   }

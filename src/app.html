@@ -129,6 +129,9 @@ td.r,th.r{text-align:right}
 .edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 .edit-row input[type=color]{padding:2px;height:32px}
 @media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+/* doc language note */
+.doc-lang{margin:0 0 12px;padding:8px 12px;border-radius:var(--r);background:var(--accent-soft);color:var(--ink);font-size:13px}
+
 /* burndown hint */
 .bd-hint{margin:0;padding:0 14px 12px}
 .f select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:7px 9px;min-width:0;width:100%}
@@ -353,7 +356,7 @@ td.r,th.r{text-align:right}
       </div>
       <div class="card">
         <div class="card-h"><h2 data-i="docContent"></h2><button class="btn pri" type="button" id="saveDocs" data-i="save"></button></div>
-        <div class="card-b"><p class="hint" data-i="docHint"></p><div class="form" id="docFields"></div>
+        <div class="card-b"><p class="hint" data-i="docHint"></p><p class="doc-lang" id="docLangNote"></p><div class="form" id="docFields"></div>
           <div class="actions"><span id="docMsg" role="status"></span></div></div>
       </div>
       <div class="card">

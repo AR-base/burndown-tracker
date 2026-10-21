@@ -2,83 +2,176 @@ const SAMPLE = {
   name: 'ESAIP AI Assistant', code: 'EAA-2026',
   start: '2026-09-28', end: '2026-12-18', statusDate: '', workingDays: true,
   docs: {
-    author: 'Pinninti Sai Anish — MSc Cybersecurity & Data Science, ESAIP',
-    sponsor: 'Direction des formations ESAIP / DSI ESAIP',
-    context: `Les réponses aux questions courantes des étudiants (vie de campus, aides financières, mobilité internationale, cadre CTI) sont dispersées entre le site, l’intranet et les e-mails ; les étudiants internationaux sont les plus touchés. / Answers to common student questions are scattered across the website, intranet and e-mail; international students are hit hardest.
-L’assistant IA bilingue centralise ces réponses 24 h/24, en français et en anglais, avec des sources citées. / The bilingual AI assistant centralises those answers 24/7 in French and English, with cited sources.`,
-    objectives: `# | Objectif / Objective | Indicateur / KPI | Cible / Target
-O1 | Répondre juste et sourcé / Accurate, cited answers | Exactitude sur 100 questions / Accuracy on 100 questions | ≥ 85 %
-O2 | Servir les deux langues / Serve both languages | Réponse dans la langue de la question / Reply in the question's language | 100 %
-O3 | Réduire la charge des services / Reduce staff workload | E-mails répétitifs à la scolarité / Repeat e-mails | −30 % en 3 mois
-O4 | Rester rapide / Stay fast | Latence p95 / p95 latency | < 4 s
-O5 | Coûter moins qu’une licence / Cost less than a licence | Coût mensuel vs ChatGPT Team | Inférieur / Lower`,
-    scope: `- Dans le périmètre / In scope : chat web FR/EN, base de connaissances ESAIP, panneau d’administration, déploiement, formation
-- Hors périmètre / Out of scope : connexion à l’ENT, données personnelles d’étudiants, application mobile native`,
-    stakeholders: `Partie prenante / Stakeholder | Rôle / Role | Attente / Expectation
-Direction des formations | Sponsor | Moins de demandes répétitives / Fewer repeat requests
-DSI ESAIP | Client interne, hébergement / Internal client, hosting | Sécurité, RGPD, coût maîtrisé / Security, GDPR, controlled cost
-Étudiants (dont internationaux) | Utilisateurs / Users | Réponses rapides et fiables en FR/EN / Fast, reliable answers
-Scolarité, relations internationales | Experts métier / Domain experts | Contenu exact et à jour / Accurate, current content`,
-    functional: `ID | Exigence / Requirement | Priorité / Priority
-EF1 | Détecter la langue et répondre dans la même / Detect language and reply in it | Must
-EF2 | Citer la source de chaque réponse / Cite the source of every answer | Must
-EF3 | Couvrir campus, aides, mobilité, CTI, logement, alumni / Cover campus, aid, mobility, CTI, housing, alumni | Must
-EF4 | Dire « je ne sais pas » hors base et orienter vers un contact / Say "I don't know" outside the KB | Must
-EF5 | Mettre à jour la base sans redéploiement / Update the KB without redeploying | Should
-EF6 | Vote positif/négatif par réponse / Thumbs up/down per answer | Should
-EF7 | Questions suggérées par thème / Suggested questions per topic | Could`,
-    nonfunctional: `ID | Catégorie / Category | Exigence / Requirement
-ENF1 | Performance | Latence p95 < 4 s, 50 utilisateurs simultanés / p95 < 4 s, 50 concurrent users
-ENF2 | Sécurité / Security | OWASP Top 10 et OWASP LLM Top 10 couverts / covered
-ENF3 | RGPD / GDPR | Aucune donnée personnelle stockée ; logs anonymisés 30 j / No personal data; anonymised logs 30 days
-ENF4 | Accessibilité / Accessibility | RGAA / WCAG 2.1 AA
-ENF5 | Disponibilité / Availability | 99 % hors maintenance / excluding maintenance
-ENF6 | Maintenabilité / Maintainability | Couverture de tests ≥ 70 %, CI obligatoire / Test coverage ≥ 70 %, CI required`,
-    constraints: `- Échéance fixe : soutenance le 18/12/2026 / Fixed deadline: defence on 18 Dec 2026
-- Budget : hébergement Vercel gratuit, plafond mensuel de coût LLM / Budget: free Vercel hosting, monthly LLM cost cap
-- Données : uniquement des contenus publics ESAIP / Data: public ESAIP content only`,
-    architecture: `Architecture RAG en trois couches : interface web, API sécurisée, pipeline de connaissances. Le LLM ne répond qu’à partir des passages retrouvés. / Three-layer RAG architecture: web front end, secured API, knowledge pipeline. The LLM only answers from retrieved passages.
-Composant / Component | Rôle / Role
-Front-end Next.js (Vercel) | Chat bilingue, citations cliquables / Bilingual chat, clickable citations
-API FastAPI | Validation des entrées, limitation de débit, orchestration RAG / Input validation, rate limiting, RAG orchestration
-Garde-fous / Guardrails | Bloque l’injection de prompt, masque les données personnelles / Blocks prompt injection, masks personal data
-Retriever + pgvector | Recherche hybride vecteurs + mots-clés, top-k = 5 / Hybrid vector + keyword search, top-k = 5
-Ingestion | Découpage ~500 tokens, embeddings multilingues / ~500-token chunks, multilingual embeddings
-Monitoring | Latence, taux de « je ne sais pas », votes / Latency, "I don't know" rate, votes`,
-    stack: `Couche / Layer | Choix / Choice | Pourquoi / Why
-Front-end | Next.js + TypeScript | i18n natif, hébergement Vercel / Built-in i18n, Vercel hosting
-API | Python FastAPI + Pydantic | Validation stricte / Strict validation
-Base vectorielle / Vector DB | PostgreSQL + pgvector | Une seule base / One database
-LLM | API interchangeable / Swappable API | Pas de verrouillage fournisseur / No lock-in
-Réseau / Network | Cloudflare | WAF, anti-bot, rate limit
-CI/CD | GitHub Actions → Vercel | Tests et scan à chaque push / Tests and scan on every push`,
-    security: `Menace / Threat | Mesure / Control
-Injection de prompt / Prompt injection | Prompt système isolé, réponses limitées au contexte / Isolated system prompt, context-only answers
-Fuite de données / Data leakage | Masquage des e-mails et numéros / Masking e-mails and numbers
-XSS / injection SQL | Échappement, requêtes paramétrées, CSP stricte / Escaping, parameterised queries, strict CSP
-Abus / Abuse | 20 requêtes/min par IP, plafond de coût / 20 req/min per IP, cost cap
-Secrets | Variables d’environnement, scan GitLeaks en CI / Env variables, GitLeaks scan in CI`,
-    testing: `Niveau / Level | Outil / Tool | Critère de sortie / Exit criterion
-Unitaire / Unit | Pytest | Couverture ≥ 70 % / Coverage ≥ 70 %
-Bout en bout / E2E | Playwright | Parcours FR et EN / FR and EN journeys pass
-Qualité RAG / RAG quality | 100 questions | Exactitude ≥ 85 % / Accuracy ≥ 85 %
-Sécurité / Security | OWASP ZAP + 30 attaques / attacks | 0 faille critique ou haute / 0 critical or high
-Recette / UAT | 15 étudiants / students | Satisfaction ≥ 4/5`,
-    deployment: `- Chaîne / Pipeline : branche → pull request → CI (tests + scan) → preview Vercel → production
-- Sauvegarde quotidienne, 7 jours / Daily backup, 7 days
-- Retour arrière en 1 clic sur Vercel / One-click rollback on Vercel
-- Alerte si erreurs > 2 % ou p95 > 4 s pendant 10 min / Alert if errors > 2 % or p95 > 4 s for 10 min`,
-    risks: `ID | Risque / Risk | P | I | Score | Réponse / Response
-R1 | Réponses inventées par le LLM / Hallucinations | 4 | 5 | 20 | Réponses limitées au contexte + citations / Context-only answers + citations
-R2 | Informations obsolètes / Outdated information | 4 | 4 | 16 | Panneau admin + date de mise à jour / Admin panel + last-updated date
-R3 | Injection de prompt / Prompt injection | 3 | 4 | 12 | Garde-fous + 30 tests d’attaque / Guardrails + 30 attack tests
-R5 | Retard du chemin critique / Critical-path slippage | 3 | 4 | 12 | Burndown hebdomadaire / Weekly burndown
-R4 | Coût LLM / LLM cost | 3 | 3 | 9 | Plafond mensuel + cache / Monthly cap + cache`,
-    conclusion: `- Clôturer T6 et T7 avant le 23/10 pour tenir M2 / Close T6 and T7 by 23 Oct to hold M2
-- Démarrer T8 immédiatement, premier maillon critique / Start T8 now, first critical link
-- Découper T9 (13 pts) en 3 sous-tâches hebdomadaires / Split T9 into 3 weekly sub-tasks
-- Réaffecter 1 personne de T10 vers T8–T9 / Move 1 person from T10 to T8–T9
-- Revue du burndown chaque vendredi ; alerte si SPI < 0,90 / Friday burndown review; alert if SPI < 0.90`
+    fr: {
+      author: 'Pinninti Sai Anish — MSc Cybersécurité et Data Science, ESAIP',
+      sponsor: 'Direction des formations ESAIP, DSI ESAIP',
+      context: `Les réponses aux questions courantes des étudiants (vie de campus, aides financières, mobilité internationale, cadre CTI) sont dispersées entre le site, l’intranet et les e-mails ; les étudiants internationaux sont les plus touchés.
+L’assistant IA bilingue centralise ces réponses 24 h/24, en français et en anglais, avec des sources citées.`,
+      objectives: `# | Objectif | Indicateur | Cible
+O1 | Répondre juste et sourcé | Exactitude sur 100 questions test | ≥ 85 %
+O2 | Servir les deux langues | Réponse dans la langue de la question | 100 %
+O3 | Réduire la charge des services | E-mails répétitifs à la scolarité | −30 % en 3 mois
+O4 | Rester rapide | Temps de réponse (p95) | < 4 s
+O5 | Coûter moins qu’une licence | Coût mensuel comparé à ChatGPT Team | Inférieur`,
+      scope: `## Inclus
+- Chat web en français et en anglais
+- Base de connaissances ESAIP (campus, aides, mobilité, CTI, logement, alumni)
+- Panneau d’administration, déploiement et formation
+## Exclu
+- Connexion à l’ENT
+- Données personnelles des étudiants
+- Application mobile native`,
+      stakeholders: `Partie prenante | Rôle | Attente
+Direction des formations | Sponsor | Moins de demandes répétitives
+DSI ESAIP | Client interne, hébergement | Sécurité, RGPD, coût maîtrisé
+Étudiants (dont internationaux) | Utilisateurs | Réponses rapides et fiables
+Scolarité, relations internationales | Experts métier | Contenu exact et à jour`,
+      functional: `ID | Exigence | Priorité
+EF1 | Détecter la langue et répondre dans la même langue | Indispensable
+EF2 | Citer la source de chaque réponse | Indispensable
+EF3 | Couvrir campus, aides, mobilité, CTI, logement, alumni | Indispensable
+EF4 | Dire « je ne sais pas » hors base et orienter vers un contact | Indispensable
+EF5 | Mettre à jour la base sans redéploiement | Important
+EF6 | Vote positif ou négatif sur chaque réponse | Important
+EF7 | Questions suggérées par thème | Optionnel`,
+      nonfunctional: `ID | Catégorie | Exigence
+ENF1 | Performance | Temps de réponse < 4 s, 50 utilisateurs simultanés
+ENF2 | Sécurité | OWASP Top 10 et OWASP LLM Top 10 couverts
+ENF3 | RGPD | Aucune donnée personnelle stockée ; journaux anonymisés 30 jours
+ENF4 | Accessibilité | RGAA, WCAG 2.1 AA
+ENF5 | Disponibilité | 99 % hors maintenance
+ENF6 | Maintenabilité | Couverture de tests ≥ 70 %, intégration continue obligatoire`,
+      constraints: `- Échéance fixe : soutenance le 18/12/2026
+- Budget : hébergement Vercel gratuit, plafond mensuel de coût IA
+- Données : uniquement des contenus publics d’ESAIP`,
+      architecture: `Architecture RAG en trois couches : interface web, API sécurisée, pipeline de connaissances. L’IA ne répond qu’à partir des passages retrouvés dans la base ESAIP.
+Brique | Rôle
+Front-end Next.js (Vercel) | Chat bilingue, citations cliquables
+API FastAPI | Validation des entrées, limitation de débit, orchestration RAG
+Garde-fous | Bloque l’injection de prompt, masque les données personnelles
+Recherche + pgvector | Recherche hybride vecteurs et mots-clés, 5 meilleurs passages
+Ingestion | Découpage en passages d’environ 500 tokens, embeddings multilingues
+Supervision | Latence, taux de « je ne sais pas », votes`,
+      stack: `Couche | Choix | Pourquoi
+Front-end | Next.js + TypeScript | Traduction intégrée, hébergement Vercel
+API | Python FastAPI + Pydantic | Validation stricte des entrées
+Base vectorielle | PostgreSQL + pgvector | Une seule base de données
+Modèle d’IA | API interchangeable | Pas de dépendance à un fournisseur
+Réseau | Cloudflare | Pare-feu applicatif, anti-robots, limitation de débit
+CI/CD | GitHub Actions vers Vercel | Tests et analyse de sécurité à chaque modification`,
+      security: `Menace | Protection
+Injection de prompt | Instructions système isolées, réponses limitées au contexte
+Fuite de données | Masquage automatique des e-mails et numéros
+XSS et injection SQL | Échappement, requêtes paramétrées, CSP stricte
+Abus et coût | 20 requêtes par minute et par IP, plafond de coût
+Secrets | Variables d’environnement, scan GitLeaks à chaque modification`,
+      testing: `Niveau | Outil | Critère de sortie
+Unitaire | Pytest | Couverture ≥ 70 %
+Bout en bout | Playwright | Parcours FR et EN validés
+Qualité des réponses | 100 questions test | Exactitude ≥ 85 %
+Sécurité | OWASP ZAP + 30 attaques de prompt | 0 faille critique ou haute
+Recette | 15 étudiants | Satisfaction ≥ 4/5`,
+      deployment: `- Chaîne : branche, demande de fusion, tests automatiques et analyse, prévisualisation Vercel, production
+- Sauvegarde quotidienne conservée 7 jours
+- Retour à la version précédente en 1 clic sur Vercel
+- Alerte si erreurs > 2 % ou temps de réponse > 4 s pendant 10 minutes`,
+      risks: `ID | Risque | P | I | Score | Réponse
+R1 | Réponses inventées par l’IA | 4 | 5 | 20 | Réponses limitées aux sources, citations
+R2 | Informations obsolètes | 4 | 4 | 16 | Panneau admin et date de mise à jour affichée
+R3 | Injection de prompt | 3 | 4 | 12 | Garde-fous et 30 tests d’attaque
+R4 | Retard du chemin critique | 3 | 4 | 12 | Revue du burndown chaque semaine
+R5 | Coût de l’IA | 3 | 3 | 9 | Plafond mensuel et cache`,
+      conclusion: `- Terminer T6 et T7 avant le 23/10 pour tenir le jalon M2
+- Démarrer T8 immédiatement : premier maillon du chemin critique
+- Découper T9 (13 points) en 3 sous-tâches hebdomadaires
+- Réaffecter une personne de T10 vers T8 et T9
+- Revue du burndown chaque vendredi ; alerte si SPI < 0,90`
+    },
+    en: {
+      author: 'Pinninti Sai Anish — MSc Cybersecurity & Data Science, ESAIP',
+      sponsor: 'ESAIP Training Directorate, ESAIP IT department',
+      context: `Answers to common student questions (campus life, financial aid, international mobility, CTI framework) are scattered across the website, intranet and e-mail; international students are hit hardest.
+The bilingual AI assistant centralises those answers 24/7, in French and English, with cited sources.`,
+      objectives: `# | Objective | Indicator | Target
+O1 | Accurate, cited answers | Accuracy on 100 test questions | ≥ 85 %
+O2 | Serve both languages | Reply in the question’s language | 100 %
+O3 | Reduce staff workload | Repeat e-mails to the registrar | −30 % in 3 months
+O4 | Stay fast | Response time (p95) | < 4 s
+O5 | Cost less than a licence | Monthly cost compared with ChatGPT Team | Lower`,
+      scope: `## Included
+- Web chat in French and English
+- ESAIP knowledge base (campus, aid, mobility, CTI, housing, alumni)
+- Admin panel, deployment and training
+## Excluded
+- Student portal login
+- Students’ personal data
+- Native mobile app`,
+      stakeholders: `Stakeholder | Role | Expectation
+Training Directorate | Sponsor | Fewer repeat requests
+ESAIP IT department | Internal client, hosting | Security, GDPR, controlled cost
+Students (including international) | Users | Fast, reliable answers
+Registrar, international office | Domain experts | Accurate, current content`,
+      functional: `ID | Requirement | Priority
+EF1 | Detect the language and reply in it | Must
+EF2 | Cite the source of every answer | Must
+EF3 | Cover campus, aid, mobility, CTI, housing, alumni | Must
+EF4 | Say “I don’t know” outside the knowledge base and point to a contact | Must
+EF5 | Update the knowledge base without redeploying | Should
+EF6 | Thumbs up or down on every answer | Should
+EF7 | Suggested questions per topic | Could`,
+      nonfunctional: `ID | Category | Requirement
+ENF1 | Performance | Response time < 4 s, 50 concurrent users
+ENF2 | Security | OWASP Top 10 and OWASP LLM Top 10 covered
+ENF3 | GDPR | No personal data stored; anonymised logs kept 30 days
+ENF4 | Accessibility | RGAA, WCAG 2.1 AA
+ENF5 | Availability | 99 % excluding maintenance
+ENF6 | Maintainability | Test coverage ≥ 70 %, continuous integration required`,
+      constraints: `- Fixed deadline: defence on 18 Dec 2026
+- Budget: free Vercel hosting, monthly AI cost cap
+- Data: public ESAIP content only`,
+      architecture: `Three-layer RAG architecture: web front end, secured API, knowledge pipeline. The AI only answers from passages retrieved from the ESAIP knowledge base.
+Component | Role
+Next.js front end (Vercel) | Bilingual chat, clickable citations
+FastAPI API | Input validation, rate limiting, RAG orchestration
+Guardrails | Blocks prompt injection, masks personal data
+Retrieval + pgvector | Hybrid vector and keyword search, top 5 passages
+Ingestion | Chunks of about 500 tokens, multilingual embeddings
+Monitoring | Latency, “I don’t know” rate, votes`,
+      stack: `Layer | Choice | Why
+Front end | Next.js + TypeScript | Built-in translation, Vercel hosting
+API | Python FastAPI + Pydantic | Strict input validation
+Vector database | PostgreSQL + pgvector | One single database
+AI model | Swappable API | No vendor lock-in
+Network | Cloudflare | Web firewall, anti-bot, rate limiting
+CI/CD | GitHub Actions to Vercel | Tests and security scan on every change`,
+      security: `Threat | Control
+Prompt injection | Isolated system instructions, context-only answers
+Data leakage | Automatic masking of e-mails and numbers
+XSS and SQL injection | Escaping, parameterised queries, strict CSP
+Abuse and cost | 20 requests per minute per IP, cost cap
+Secrets | Environment variables, GitLeaks scan on every change`,
+      testing: `Level | Tool | Exit criterion
+Unit | Pytest | Coverage ≥ 70 %
+End to end | Playwright | FR and EN journeys pass
+Answer quality | 100 test questions | Accuracy ≥ 85 %
+Security | OWASP ZAP + 30 prompt attacks | 0 critical or high finding
+Acceptance | 15 students | Satisfaction ≥ 4/5`,
+      deployment: `- Pipeline: branch, pull request, automatic tests and scan, Vercel preview, production
+- Daily backup kept 7 days
+- One-click rollback to the previous version on Vercel
+- Alert if errors > 2 % or response time > 4 s for 10 minutes`,
+      risks: `ID | Risk | P | I | Score | Response
+R1 | Answers made up by the AI | 4 | 5 | 20 | Source-only answers, citations
+R2 | Outdated information | 4 | 4 | 16 | Admin panel and visible update date
+R3 | Prompt injection | 3 | 4 | 12 | Guardrails and 30 attack tests
+R4 | Critical-path slippage | 3 | 4 | 12 | Weekly burndown review
+R5 | AI cost | 3 | 3 | 9 | Monthly cap and cache`,
+      conclusion: `- Finish T6 and T7 by 23 Oct to hold milestone M2
+- Start T8 now: first link of the critical path
+- Split T9 (13 points) into 3 weekly sub-tasks
+- Move one person from T10 to T8 and T9
+- Burndown review every Friday; alert if SPI < 0.90`
+    }
   },
   phases: [
     { id: 'P1', fr: 'Initialisation', en: 'Initiation', color: '#4f6bed' },

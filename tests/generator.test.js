@@ -25,7 +25,7 @@ ok('every type × size builds a valid project with a consistent schedule', () =>
     assert.deepStrictEqual(C.depViolations(r.project), [], `${id}/${size} FS violation`);
     r.project.tasks.forEach(t => { assert.ok(!C.isWeekend(C.parseDate(t.start)) && !C.isWeekend(C.parseDate(t.end)), `${id} ${t.id} weekend`); });
     assert.strictEqual(r.project.milestones.length, 6);
-    assert.ok(Object.keys(r.project.docs).length >= 15, 'docs filled');
+    assert.ok(Object.keys(r.project.docs.fr).length >= 15 && Object.keys(r.project.docs.en).length >= 15, 'docs filled in both languages');
   })));
 });
 ok('sizes order project length small < medium < large', () => {
@@ -41,8 +41,8 @@ ok('start on a weekend moves to Monday; name is cleaned', () => {
 ok('generated project → 3 Word documents', () => {
   const p = C.validateProject(G.build({ description: 'un chatbot pour le support client', client: 'ACME', start: '2026-11-02', lang: 'en' }).project).project;
   ['needs', 'technical', 'report'].forEach(k => assert.ok(DG.assemble(k, p, 'en', C.parseDate('2026-11-02'), {}).bytes.length > 5000));
-  assert.ok(p.docs.functional.split('\n').length >= 6);
-  assert.ok(!/\|\s*\|/.test(p.docs.functional));
+  assert.ok(p.docs.en.functional.split('\n').length >= 6 && p.docs.fr.functional.includes('Indispensable'));
+  assert.ok(!/\|\s*\|/.test(p.docs.en.functional));
 });
 ok('hostile description is kept as text (escaped later), no crash', () => {
   const p = C.validateProject(G.build({ description: '<script>alert(1)</script> | e-commerce', start: '2026-11-02' }).project).project;
