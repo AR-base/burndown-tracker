@@ -9,6 +9,9 @@ page = ('<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="description" content="Bilingual FR/EN burndown and Gantt tracker for any project">\n'
         '<style>[hidden]{display:none!important}img{max-width:100%}</style>\n</head>\n<body>\n' + src + '\n</body>\n</html>\n')
 (root / 'index.html').write_text(page, encoding='utf-8')
+# Vercel serves the 'public' folder (see outputDirectory in vercel.json)
+(root / 'public').mkdir(exist_ok=True)
+(root / 'public' / 'index.html').write_text(page, encoding='utf-8')
 hashes = ' '.join("'sha256-%s'" % base64.b64encode(hashlib.sha256(m.encode()).digest()).decode()
                   for m in re.findall(r'<script>(.*?)</script>', page, re.S))
 csp = ("default-src 'none'; script-src " + hashes + "; style-src 'unsafe-inline' https://fonts.googleapis.com; "
@@ -21,6 +24,6 @@ headers = [
     {"key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()"},
     {"key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains"},
 ]
-(root / 'vercel.json').write_text(json.dumps({"cleanUrls": True, "headers": [{"source": "/(.*)", "headers": headers}]}, indent=2) + '\n')
+(root / 'vercel.json').write_text(json.dumps({"$schema": "https://openapi.vercel.sh/vercel.json", "framework": None, "buildCommand": "python3 src/build.py", "outputDirectory": "public", "cleanUrls": True, "headers": [{"source": "/(.*)", "headers": headers}]}, indent=2) + '\n')
 (root / '_headers').write_text('/*\n' + ''.join(f'  {h["key"]}: {h["value"]}\n' for h in headers))
 print(f'index.html {len(page)} bytes · CSP updated')
