@@ -35,8 +35,12 @@ const Core = (() => {
       start: str(raw.start, 10), end: str(raw.end, 10),
       statusDate: str(raw.statusDate, 10),
       workingDays: raw.workingDays !== false,
-      phases: [], milestones: [], tasks: []
+      phases: [], milestones: [], tasks: [], docs: {}
     };
+    const DOC_KEYS = ['author', 'sponsor', 'context', 'objectives', 'scope', 'stakeholders', 'functional', 'nonfunctional', 'constraints',
+      'architecture', 'stack', 'security', 'testing', 'deployment', 'risks', 'conclusion'];
+    if (raw.docs && typeof raw.docs === 'object' && !Array.isArray(raw.docs))
+      DOC_KEYS.forEach(k => { if (typeof raw.docs[k] === 'string' && raw.docs[k].trim()) p.docs[k] = raw.docs[k].slice(0, 20000); });
     const ps = parseDate(p.start), pe = parseDate(p.end);
     if (ps === null) errors.push('start');
     if (pe === null) errors.push('end');

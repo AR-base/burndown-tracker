@@ -33,6 +33,12 @@ const I18N = {
     eId: 'ID : lettres, chiffres, _ ou -, 16 caractères max.', eIdTaken: 'Cet ID existe déjà.', eName: 'Le nom (FR) est obligatoire.',
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
+    download: 'Télécharger', dlDocs: 'Documents Word (.docx)', dlNeeds: 'Cahier des charges', dlTech: 'Dossier technique', dlReport: 'Rapport complet',
+    dlImgs: 'Graphiques et données', dlGs: 'Gantt synthétique', dlGm: 'Gantt maître', dlBd: 'Burndown', dlCsv: 'Gantt pour Excel', dlJson: 'Projet complet',
+    dlLang: 'Langue des documents : celle de l’interface (FR/EN).', dlFrame: 'Dans l’aperçu Claude, le navigateur peut bloquer les téléchargements : utilisez la version déployée.',
+    generating: 'Génération…', downloaded: 'Téléchargé : ', dlError: 'Échec de la génération. Réessayez.',
+    docContent: 'Contenu des documents', docHint: 'Ce texte alimente le cahier des charges, le dossier technique et le rapport. Une ligne « - » = puce · « A | B | C » = ligne de tableau (la 1re = en-tête) · « ## » = sous-titre. Le planning, les Gantt et le burndown sont générés automatiquement.',
+    author: 'Auteur / chef de projet', sponsor: 'Sponsor / client',
     fsWarn: 'Attention : commence avant la fin de ', blankName: 'Nouveau projet', pts: 'pts', d: 'j',
   },
   en: {
@@ -63,6 +69,12 @@ const I18N = {
     eId: 'ID: letters, digits, _ or -, 16 characters max.', eIdTaken: 'That ID already exists.', eName: 'Name (FR) is required.',
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
+    download: 'Download', dlDocs: 'Word documents (.docx)', dlNeeds: 'Requirements specification', dlTech: 'Technical document', dlReport: 'Full report',
+    dlImgs: 'Charts and data', dlGs: 'Summary Gantt', dlGm: 'Master Gantt', dlBd: 'Burndown', dlCsv: 'Gantt for Excel', dlJson: 'Full project',
+    dlLang: 'Document language follows the interface (FR/EN).', dlFrame: 'In the Claude preview the browser may block downloads: use the deployed version.',
+    generating: 'Generating…', downloaded: 'Downloaded: ', dlError: 'Generation failed. Try again.',
+    docContent: 'Document content', docHint: 'This text feeds the requirements spec, technical document and report. A "- " line = bullet · "A | B | C" = table row (first = header) · "## " = subheading. Schedule, Gantts and burndown are generated automatically.',
+    author: 'Author / project manager', sponsor: 'Sponsor / client',
     fsWarn: 'Warning: starts before the end of ', blankName: 'New project', pts: 'pts', d: 'd',
   }
 };
@@ -73,7 +85,7 @@ const persist = () => { try { localStorage.setItem(STORE, JSON.stringify({ proje
 const saved = load();
 let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
 const UI = Object.assign({ lang: 'fr', tab: 'burndown', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
-let editing = null;
+let editing = null, lastBurndown = null;
 const t = k => I18N[UI.lang][k] ?? k;
 const nm = o => (UI.lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
 const todayT = () => { const d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); };
@@ -173,6 +185,7 @@ function renderBurndown() {
   if (nt >= s && nt <= xEnd) g += `<line x1="${X(nt)}" x2="${X(nt)}" y1="${m.t - 8}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".55"/><text x="${X(nt)}" y="${m.t - 12}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(t('today').toUpperCase())}</text>`;
   g += `<rect id="bdHit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
   g += `<line id="bdCursor" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" visibility="hidden"/>`;
+  lastBurndown = { svg: g, W, H };
   box.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('bdTitle'))}">${g}</svg>`);
   $('bdLegend').innerHTML = `<span><i class="sw" style="border-color:var(--accent);border-top-width:3px"></i>${esc(t('actual'))}</span><span><i class="sw" style="border-color:var(--ideal);border-top-style:dashed"></i>${esc(t('ideal'))}</span><span><i class="sw" style="border-color:var(--${b.forecast !== null && b.forecast > e ? 'bad' : 'good'});border-top-style:dotted"></i>${esc(t('forecastL'))}</span><span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
   const svg = box.querySelector('svg'), hit = svg.querySelector('#bdHit'), cur = svg.querySelector('#bdCursor');
@@ -203,17 +216,17 @@ function renderFocus() {
 }
 
 /* ---------- gantt ---------- */
-function renderGantt() {
+function buildGantt(mode, dw, showDeps, showCrit) {
   const now = nowT(), cp = C.criticalPath(P);
   const allDates = [C.parseDate(P.start), C.parseDate(P.end), ...P.tasks.flatMap(k => [C.parseDate(k.start), C.parseDate(k.end)]), ...P.milestones.map(m => C.parseDate(m.date))];
   let s = Math.min(...allDates), e = Math.max(...allDates);
   while (new Date(s).getUTCDay() !== 1) s = C.addDays(s, -1);
   e = C.addDays(e, 3);
-  const dw = UI.zoom, days = C.diffDays(s, e) + 1, W = days * dw, RH = 30, HEAD = 46;
+  const days = C.diffDays(s, e) + 1, W = days * dw, RH = 30, HEAD = 46;
   const X = tm => C.diffDays(s, tm) * dw;
   const rows = [];
   rows.push({ kind: 'ms' });
-  if (UI.gMode === 'summary') C.phaseSpans(P).filter(p => p.start).forEach(p => rows.push({ kind: 'phase', p }));
+  if (mode === 'summary') C.phaseSpans(P).filter(p => p.start).forEach(p => rows.push({ kind: 'phase', p }));
   else P.phases.forEach(ph => {
     const sp = C.phaseSpans(P).find(x => x.id === ph.id);
     if (!sp.start) return;
@@ -221,7 +234,7 @@ function renderGantt() {
     P.tasks.filter(k => k.phase === ph.id).forEach(k => rows.push({ kind: 'task', k }));
   });
   const orphan = P.tasks.filter(k => !P.phases.some(p => p.id === k.phase));
-  if (UI.gMode === 'master') orphan.forEach(k => rows.push({ kind: 'task', k }));
+  if (mode === 'master') orphan.forEach(k => rows.push({ kind: 'task', k }));
   const H = HEAD + rows.length * RH + 8;
   const rowY = new Map();
   let L = '', R = '';
@@ -230,18 +243,18 @@ function renderGantt() {
   for (let tm = s; tm <= e; tm = C.addDays(tm, 1)) {
     const d = new Date(tm);
     if (C.isWeekend(tm) && dw >= 8) R += `<rect x="${X(tm)}" y="${HEAD}" width="${dw}" height="${H - HEAD}" fill="var(--grid)" opacity=".55"/>`;
-    if (d.getUTCDate() === 1 || tm === s) {
+    if (d.getUTCDate() === 1 || (tm === s && d.getUTCDate() <= 20)) {
       R += `<line x1="${X(tm)}" x2="${X(tm)}" y1="0" y2="22" stroke="var(--line)"/><text x="${X(tm) + 6}" y="15" font-size="11.5" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(d.toLocaleDateString(UI.lang === 'fr' ? 'fr-FR' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).toUpperCase())}</text>`;
     }
     if (d.getUTCDay() === 1) {
       R += `<line x1="${X(tm)}" x2="${X(tm)}" y1="22" y2="${H}" stroke="var(--line)" opacity=".7"/>`;
-      if (dw * 7 >= 44) R += `<text x="${X(tm) + 5}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${esc(t('week'))}${isoWeek(tm)} · ${esc(dLabel(tm))}</text>`;
+      if (dw * 7 >= 84) R += `<text x="${X(tm) + 5}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${esc(t('week'))}${isoWeek(tm)} · ${esc(dLabel(tm))}</text>`;
       else R += `<text x="${X(tm) + 3}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${isoWeek(tm)}</text>`;
     }
   }
   R += `<line x1="0" x2="${W}" y1="22" y2="22" stroke="var(--line)"/><line x1="0" x2="${W}" y1="${HEAD}" y2="${HEAD}" stroke="var(--line)"/>`;
   L += `<rect x="0" y="0" width="400" height="${HEAD}" fill="var(--sunk)"/><line x1="0" x2="400" y1="${HEAD}" y2="${HEAD}" stroke="var(--line)"/>
-    <text x="12" y="30" font-size="11.5" font-weight="600" fill="var(--muted)" font-family="var(--f-display)" letter-spacing=".08em">${esc((UI.gMode === 'summary' ? t('phase') : t('task')).toUpperCase())}</text>`;
+    <text x="12" y="30" font-size="11.5" font-weight="600" fill="var(--muted)" font-family="var(--f-display)" letter-spacing=".08em">${esc((mode === 'summary' ? t('phase') : t('task')).toUpperCase())}</text>`;
   rows.forEach((r, i) => {
     const y = HEAD + i * RH, cy = y + RH / 2;
     const zebra = r.kind === 'phaseHead' ? `<rect x="0" y="${y}" width="%W%" height="${RH}" fill="var(--sunk)"/>` : '';
@@ -267,7 +280,7 @@ function renderGantt() {
       return;
     }
     const k = r.k, ph = phaseOf(k.phase), x1 = X(C.parseDate(k.start)), x2 = X(C.parseDate(k.end)) + dw;
-    const st = taskStatus(k, now), crit = UI.crit && cp.critical.has(k.id);
+    const st = taskStatus(k, now), crit = showCrit && cp.critical.has(k.id);
     rowY.set(k.id, { cy, x1, x2 });
     L += `<text x="12" y="${cy + 4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(k.id)}</text><text x="52" y="${cy + 4}" font-size="12.5" fill="var(--ink)">${esc(nm(k).length > 38 ? nm(k).slice(0, 37) + '…' : nm(k))}<title>${esc(nm(k))}</title></text>`;
     R += `<g><title>${esc(`${k.id} · ${nm(k)}\n${dLabel(C.parseDate(k.start), true)} → ${dLabel(C.parseDate(k.end), true)}\n${k.owner} · ${k.points} ${t('pts')} · ${k.progress}% · ${t(statusKey[st])}`)}</title>
@@ -275,17 +288,21 @@ function renderGantt() {
       <rect x="${x1}" y="${cy - 8}" width="${(x2 - x1) * k.progress / 100}" height="16" rx="3" fill="${esc(ph.color)}"/></g>
       <text x="${x2 + 6}" y="${cy + 4}" font-size="10.5" fill="${st === 'late' ? 'var(--bad)' : 'var(--muted)'}" font-family="var(--f-mono)">${esc(k.owner)}${k.owner ? ' · ' : ''}${k.points}${st === 'late' ? ' · !' : ''}</text>`;
   });
-  if (UI.gMode === 'master' && UI.deps) {
+  if (mode === 'master' && showDeps) {
     let dp = '';
     P.tasks.forEach(k => k.deps.forEach(d => {
       const a = rowY.get(d), b2 = rowY.get(k.id); if (!a || !b2) return;
-      const crit = UI.crit && cp.critical.has(k.id) && cp.critical.has(d);
+      const crit = showCrit && cp.critical.has(k.id) && cp.critical.has(d);
       const midX = Math.max(a.x2 + 4, Math.min(b2.x1 - 6, a.x2 + 10));
       dp += `<path d="M${a.x2} ${a.cy}H${midX}V${b2.cy}H${b2.x1 - 1}" fill="none" stroke="${crit ? 'var(--bad)' : 'var(--muted)'}" stroke-opacity="${crit ? .9 : .5}" stroke-width="1.1" marker-end="url(#arr${crit ? 'C' : ''})"/>`;
     }));
     R = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker><marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--bad)"/></marker></defs>` + R + dp;
   }
-  if (now >= s && now <= e) R += `<line x1="${X(now) + dw / 2}" x2="${X(now) + dw / 2}" y1="${HEAD - 6}" y2="${H}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${X(now) + dw / 2 - 30}" y="${HEAD - 14}" width="60" height="14" rx="3" fill="var(--accent)"/><text x="${X(now) + dw / 2}" y="${HEAD - 4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="var(--f-display)" letter-spacing=".06em">${esc(t('today').toUpperCase())}</text>`;
+  if (now >= s && now <= e) R += `<line x1="${X(now) + dw / 2}" x2="${X(now) + dw / 2}" y1="${HEAD - 6}" y2="${H}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${X(now) + dw / 2 - 42}" y="${HEAD - 14}" width="84" height="14" rx="3" fill="var(--accent)"/><text x="${X(now) + dw / 2}" y="${HEAD - 4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="var(--f-display)" letter-spacing=".06em">${esc(t('today').toUpperCase())}</text>`;
+  return { L, R, W, H };
+}
+function renderGantt() {
+  const { L, R, W, H } = buildGantt(UI.gMode, UI.zoom, UI.deps, UI.crit);
   $('gLeft').innerHTML = `<svg width="400" height="${H}" viewBox="0 0 400 ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${L}</svg>`;
   $('gRight').innerHTML = `<svg width="${W + 140}" height="${H}" viewBox="0 0 ${W + 140} ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${R}</svg>`;
   $('gLegend').innerHTML = P.phases.map(p => `<span><svg width="12" height="12" viewBox="0 0 12 12"><rect width="12" height="12" rx="2" fill="${esc(p.color)}"/></svg>${esc(p.id + ' ' + nm(p))}</span>`).join('') +
@@ -468,8 +485,84 @@ twoStep($('btnBlank'), () => {
   editing = null; commit(); msg(t('saved'), true);
 });
 
+
+/* ---------- document downloads ---------- */
+const LIGHT = { bg: '#ffffff', surface: '#ffffff', sunk: '#f7f8fb', ink: '#142033', muted: '#596579', line: '#d7dde6', grid: '#e9edf3', accent: '#1f56f0',
+  'accent-soft': 'rgba(31,86,240,.10)', ideal: '#8f9bb0', good: '#16865a', warn: '#b86e00', bad: '#c42f3a', 'good-soft': 'rgba(22,134,90,.12)',
+  'warn-soft': 'rgba(184,110,0,.13)', 'bad-soft': 'rgba(196,47,58,.12)', 'f-display': 'Arial, Helvetica, sans-serif', 'f-body': 'Arial, Helvetica, sans-serif', 'f-mono': 'Consolas, Courier New, monospace' };
+const literal = s => s.replace(/var\(--([a-z-]+)\)/g, (m, k) => LIGHT[k] || '#142033');
+function ganttSvg(mode) {
+  const { L, R, W, H } = buildGantt(mode, 10, true, true), w = 400 + W + 150;
+  return { svg: literal(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${H}" viewBox="0 0 ${w} ${H}"><rect width="${w}" height="${H}" fill="#ffffff"/><g>${L}</g><g transform="translate(400,0)">${R}</g></svg>`), W: w, H };
+}
+function burndownSvg() {
+  if (!lastBurndown) renderBurndown();
+  const { svg, W, H } = lastBurndown;
+  return { svg: literal(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#ffffff"/>${svg}</svg>`), W, H };
+}
+function toPng({ svg, W, H }, scale = 2) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = Math.round(W * scale); c.height = Math.round(H * scale);
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => b ? b.arrayBuffer().then(buf => resolve({ bytes: new Uint8Array(buf), w: c.width, h: c.height })) : reject(new Error('png')), 'image/png');
+    };
+    img.onerror = () => reject(new Error('svg'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+}
+function saveFile(bytes, name, type) {
+  const url = URL.createObjectURL(new Blob([bytes], { type }));
+  const a = document.createElement('a'); a.href = url; a.download = name; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+const slug = s => String(s).replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'projet';
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+async function download(kind) {
+  const st = $('dlStatus'); st.textContent = t('generating'); st.className = 'dl-status';
+  try {
+    const base = slug(P.code || P.name);
+    if (['needs', 'technical', 'report'].includes(kind)) {
+      const imgs = {};
+      imgs.summary = await toPng(ganttSvg('summary'));
+      if (kind !== 'needs') imgs.master = await toPng(ganttSvg('master'), 1.6);
+      if (kind === 'report') imgs.burndown = await toPng(burndownSvg());
+      const d = DocGen.assemble(kind, P, UI.lang, todayT(), imgs);
+      saveFile(d.bytes, d.name, DOCX); st.textContent = t('downloaded') + d.name;
+    } else if (kind === 'gs' || kind === 'gm' || kind === 'bd') {
+      const png = await toPng(kind === 'bd' ? burndownSvg() : ganttSvg(kind === 'gs' ? 'summary' : 'master'));
+      const name = `${base}-${kind === 'bd' ? 'burndown' : kind === 'gs' ? 'gantt-summary' : 'gantt-master'}.png`;
+      saveFile(png.bytes, name, 'image/png'); st.textContent = t('downloaded') + name;
+    } else if (kind === 'csv') { saveFile(new TextEncoder().encode('﻿' + GanttIO.toCSV(P)), `${base}-gantt.csv`, 'text/csv'); st.textContent = t('downloaded') + `${base}-gantt.csv`; }
+    else if (kind === 'json') { saveFile(new TextEncoder().encode(JSON.stringify(P, null, 2)), `${base}.json`, 'application/json'); st.textContent = t('downloaded') + `${base}.json`; }
+  } catch (e) { console.warn('download failed', e); st.textContent = t('dlError'); st.className = 'dl-status err'; }
+}
+const menu = $('dlMenu'), dlBtn = $('dlBtn');
+const setMenu = open => { menu.hidden = !open; dlBtn.setAttribute('aria-expanded', open); if (open) menu.querySelector('button').focus(); };
+dlBtn.addEventListener('click', ev => { ev.stopPropagation(); setMenu(menu.hidden); });
+menu.addEventListener('click', ev => { const b = ev.target.closest('[data-dl]'); if (!b) return; ev.stopPropagation(); download(b.dataset.dl); });
+document.addEventListener('click', ev => { if (!menu.hidden && !ev.target.closest('#dl')) setMenu(false); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !menu.hidden) { setMenu(false); dlBtn.focus(); } });
+window.__export = { ganttSvg, burndownSvg };
+try { $('dlFrameNote').hidden = window.top === window.self; } catch { $('dlFrameNote').hidden = false; }
+
+function renderDocsEditor() {
+  const F = DocGen.FIELDS, d = P.docs || {};
+  $('docFields').innerHTML = `<div class="f"><label for="doc-author">${esc(t('author'))}</label><input id="doc-author" maxlength="200" value="${esc(d.author || '')}"></div>
+    <div class="f"><label for="doc-sponsor">${esc(t('sponsor'))}</label><input id="doc-sponsor" maxlength="200" value="${esc(d.sponsor || '')}"></div>` +
+    F.map(([k, fr, en]) => `<div class="f wide"><label for="doc-${k}">${esc(UI.lang === 'fr' ? fr : en)}</label><textarea id="doc-${k}" class="doc-ta" rows="4" maxlength="20000" spellcheck="true">${esc(d[k] || '')}</textarea></div>`).join('');
+}
+$('saveDocs').addEventListener('click', () => {
+  const docs = { author: $('doc-author').value, sponsor: $('doc-sponsor').value };
+  DocGen.FIELDS.forEach(([k]) => { docs[k] = $('doc-' + k).value; });
+  P = C.validateProject({ ...P, docs }).project; commit();
+  $('docMsg').textContent = t('saved'); $('docMsg').className = 'ok';
+});
+
 /* ---------- wiring ---------- */
-function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); if (!editing) fillFormSilent(); }
+function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() { persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));

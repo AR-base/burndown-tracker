@@ -129,6 +129,19 @@ td.r,th.r{text-align:right}
 .edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 .edit-row input[type=color]{padding:2px;height:32px}
 @media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+/* download menu */
+.dl{position:relative}
+.dl-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px}
+.dl-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:30;width:290px;max-width:calc(100vw - 32px);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 12px 32px rgba(20,32,51,.18);padding:6px}
+.dl-menu button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;border:0;background:none;padding:8px 10px;border-radius:4px;cursor:pointer;text-align:left;font-size:13.5px}
+.dl-menu button:hover,.dl-menu button:focus-visible{background:var(--sunk)}
+.dl-menu small{font:500 11px var(--f-mono);color:var(--muted)}
+.dl-h{font:600 11px/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 10px 4px}
+.dl-note{font-size:11.5px;color:var(--muted);margin:6px 10px 2px}
+.dl-status{font-size:12px;margin:4px 10px 4px;color:var(--good);overflow-wrap:anywhere}
+.dl-status:empty{display:none}
+.dl-status.err{color:var(--bad)}
+.doc-ta{min-height:96px !important;font:12.5px/1.5 var(--f-body) !important}
 @media (prefers-reduced-motion:no-preference){.meter i,.pbar i{transition:width .4s ease}}
 </style>
 
@@ -143,6 +156,26 @@ td.r,th.r{text-align:right}
     <div class="seg" role="group" aria-label="Language">
       <button type="button" id="lang-fr" data-lang="fr">FR</button>
       <button type="button" id="lang-en" data-lang="en">EN</button>
+    </div>
+    <div class="dl" id="dl">
+      <button class="btn pri dl-btn" type="button" id="dlBtn" aria-haspopup="true" aria-expanded="false" aria-controls="dlMenu">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v9m0 0L4.5 6.5M8 10l3.5-3.5M2 12v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-i="download"></span></button>
+      <div class="dl-menu" id="dlMenu" role="menu" hidden>
+        <p class="dl-h" data-i="dlDocs"></p>
+        <button type="button" role="menuitem" data-dl="needs"><span data-i="dlNeeds"></span><small>.docx</small></button>
+        <button type="button" role="menuitem" data-dl="technical"><span data-i="dlTech"></span><small>.docx</small></button>
+        <button type="button" role="menuitem" data-dl="report"><span data-i="dlReport"></span><small>.docx</small></button>
+        <p class="dl-h" data-i="dlImgs"></p>
+        <button type="button" role="menuitem" data-dl="gs"><span data-i="dlGs"></span><small>.png</small></button>
+        <button type="button" role="menuitem" data-dl="gm"><span data-i="dlGm"></span><small>.png</small></button>
+        <button type="button" role="menuitem" data-dl="bd"><span data-i="dlBd"></span><small>.png</small></button>
+        <button type="button" role="menuitem" data-dl="csv"><span data-i="dlCsv"></span><small>.csv</small></button>
+        <button type="button" role="menuitem" data-dl="json"><span data-i="dlJson"></span><small>.json</small></button>
+        <p class="dl-note" data-i="dlLang"></p>
+        <p class="dl-note" id="dlFrameNote" data-i="dlFrame" hidden></p>
+        <p class="dl-status" id="dlStatus" role="status"></p>
+      </div>
     </div>
   </div>
 </header>
@@ -236,6 +269,11 @@ td.r,th.r{text-align:right}
         </form>
       </div>
       <div class="card">
+        <div class="card-h"><h2 data-i="docContent"></h2><button class="btn pri" type="button" id="saveDocs" data-i="save"></button></div>
+        <div class="card-b"><p class="hint" data-i="docHint"></p><div class="form" id="docFields"></div>
+          <div class="actions"><span id="docMsg" role="status"></span></div></div>
+      </div>
+      <div class="card">
         <div class="card-h"><h2 data-i="phases"></h2><button class="btn sm" type="button" id="addPhase" data-i="addPhase"></button></div>
         <div class="card-b"><div class="edit-rows" id="phaseRows"></div>
           <div class="actions"><button class="btn pri" type="button" id="savePhases" data-i="save"></button><span class="err" id="phErr" role="alert"></span></div></div>
@@ -276,5 +314,6 @@ td.r,th.r{text-align:right}
 
 <script>/*CORE*/</script>
 <script>/*IO*/</script>
+<script>/*DOCGEN*/</script>
 <script>/*SAMPLE*/</script>
 <script>/*APP*/</script>

@@ -138,6 +138,19 @@ td.r,th.r{text-align:right}
 .edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 .edit-row input[type=color]{padding:2px;height:32px}
 @media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+/* download menu */
+.dl{position:relative}
+.dl-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px}
+.dl-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:30;width:290px;max-width:calc(100vw - 32px);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 12px 32px rgba(20,32,51,.18);padding:6px}
+.dl-menu button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;border:0;background:none;padding:8px 10px;border-radius:4px;cursor:pointer;text-align:left;font-size:13.5px}
+.dl-menu button:hover,.dl-menu button:focus-visible{background:var(--sunk)}
+.dl-menu small{font:500 11px var(--f-mono);color:var(--muted)}
+.dl-h{font:600 11px/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 10px 4px}
+.dl-note{font-size:11.5px;color:var(--muted);margin:6px 10px 2px}
+.dl-status{font-size:12px;margin:4px 10px 4px;color:var(--good);overflow-wrap:anywhere}
+.dl-status:empty{display:none}
+.dl-status.err{color:var(--bad)}
+.doc-ta{min-height:96px !important;font:12.5px/1.5 var(--f-body) !important}
 @media (prefers-reduced-motion:no-preference){.meter i,.pbar i{transition:width .4s ease}}
 </style>
 
@@ -152,6 +165,26 @@ td.r,th.r{text-align:right}
     <div class="seg" role="group" aria-label="Language">
       <button type="button" id="lang-fr" data-lang="fr">FR</button>
       <button type="button" id="lang-en" data-lang="en">EN</button>
+    </div>
+    <div class="dl" id="dl">
+      <button class="btn pri dl-btn" type="button" id="dlBtn" aria-haspopup="true" aria-expanded="false" aria-controls="dlMenu">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v9m0 0L4.5 6.5M8 10l3.5-3.5M2 12v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-i="download"></span></button>
+      <div class="dl-menu" id="dlMenu" role="menu" hidden>
+        <p class="dl-h" data-i="dlDocs"></p>
+        <button type="button" role="menuitem" data-dl="needs"><span data-i="dlNeeds"></span><small>.docx</small></button>
+        <button type="button" role="menuitem" data-dl="technical"><span data-i="dlTech"></span><small>.docx</small></button>
+        <button type="button" role="menuitem" data-dl="report"><span data-i="dlReport"></span><small>.docx</small></button>
+        <p class="dl-h" data-i="dlImgs"></p>
+        <button type="button" role="menuitem" data-dl="gs"><span data-i="dlGs"></span><small>.png</small></button>
+        <button type="button" role="menuitem" data-dl="gm"><span data-i="dlGm"></span><small>.png</small></button>
+        <button type="button" role="menuitem" data-dl="bd"><span data-i="dlBd"></span><small>.png</small></button>
+        <button type="button" role="menuitem" data-dl="csv"><span data-i="dlCsv"></span><small>.csv</small></button>
+        <button type="button" role="menuitem" data-dl="json"><span data-i="dlJson"></span><small>.json</small></button>
+        <p class="dl-note" data-i="dlLang"></p>
+        <p class="dl-note" id="dlFrameNote" data-i="dlFrame" hidden></p>
+        <p class="dl-status" id="dlStatus" role="status"></p>
+      </div>
     </div>
   </div>
 </header>
@@ -245,6 +278,11 @@ td.r,th.r{text-align:right}
         </form>
       </div>
       <div class="card">
+        <div class="card-h"><h2 data-i="docContent"></h2><button class="btn pri" type="button" id="saveDocs" data-i="save"></button></div>
+        <div class="card-b"><p class="hint" data-i="docHint"></p><div class="form" id="docFields"></div>
+          <div class="actions"><span id="docMsg" role="status"></span></div></div>
+      </div>
+      <div class="card">
         <div class="card-h"><h2 data-i="phases"></h2><button class="btn sm" type="button" id="addPhase" data-i="addPhase"></button></div>
         <div class="card-b"><div class="edit-rows" id="phaseRows"></div>
           <div class="actions"><button class="btn pri" type="button" id="savePhases" data-i="save"></button><span class="err" id="phErr" role="alert"></span></div></div>
@@ -320,8 +358,12 @@ const Core = (() => {
       start: str(raw.start, 10), end: str(raw.end, 10),
       statusDate: str(raw.statusDate, 10),
       workingDays: raw.workingDays !== false,
-      phases: [], milestones: [], tasks: []
+      phases: [], milestones: [], tasks: [], docs: {}
     };
+    const DOC_KEYS = ['author', 'sponsor', 'context', 'objectives', 'scope', 'stakeholders', 'functional', 'nonfunctional', 'constraints',
+      'architecture', 'stack', 'security', 'testing', 'deployment', 'risks', 'conclusion'];
+    if (raw.docs && typeof raw.docs === 'object' && !Array.isArray(raw.docs))
+      DOC_KEYS.forEach(k => { if (typeof raw.docs[k] === 'string' && raw.docs[k].trim()) p.docs[k] = raw.docs[k].slice(0, 20000); });
     const ps = parseDate(p.start), pe = parseDate(p.end);
     if (ps === null) errors.push('start');
     if (pe === null) errors.push('end');
@@ -691,9 +733,322 @@ const GanttIO = (() => {
 })();
 if (typeof module !== 'undefined') module.exports = GanttIO;
 </script>
+<script>/* Document generator: builds real .docx files (Office Open XML in a zip) from any project.
+   Pure JS, no dependencies, no DOM. Images are passed in as PNG bytes. */
+const DocGen = (() => {
+  const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
+  const enc = s => new TextEncoder().encode(s);
+  const x = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+
+  /* ---------- zip (store) ---------- */
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function zip(files) {
+    const parts = [], central = []; let off = 0;
+    files.forEach(f => {
+      const name = enc(f.name), data = typeof f.data === 'string' ? enc(f.data) : f.data, crc = crc32(data);
+      const h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+      h.setUint16(10, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true);
+      h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+      parts.push(new Uint8Array(h.buffer), name, data);
+      const c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+      c.setUint16(12, 0, true); c.setUint16(14, 0x21, true); c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true);
+      c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+      central.push(new Uint8Array(c.buffer), name);
+      off += 30 + name.length + data.length;
+    });
+    const cdSize = central.reduce((a, p) => a + p.length, 0);
+    const e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdSize, true); e.setUint32(16, off, true);
+    const all = [...parts, ...central, new Uint8Array(e.buffer)], out = new Uint8Array(all.reduce((a, p) => a + p.length, 0));
+    let p = 0; all.forEach(a => { out.set(a, p); p += a.length; });
+    return out;
+  }
+
+  /* ---------- docx parts ---------- */
+  const NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
+  const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:color w:val="142033"/><w:lang w:val="fr-FR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
+<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="44"/><w:color w:val="142033"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="240"/></w:pPr><w:rPr><w:sz w:val="24"/><w:color w:val="596579"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="320" w:after="120"/><w:outlineLvl w:val="0"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="1F56F0"/></w:pBdr></w:pPr><w:rPr><w:b/><w:sz w:val="30"/><w:color w:val="1F56F0"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="142033"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/><w:basedOn w:val="Normal"/><w:qFormat/><w:rPr><w:i/><w:sz w:val="17"/><w:color w:val="596579"/></w:rPr></w:style>
+</w:styles>`;
+
+  function runs(text, base = '') {
+    return String(text).split(/(\*\*[^*]+\*\*)/).filter(Boolean).map(s => {
+      const b = /^\*\*.*\*\*$/.test(s), t = b ? s.slice(2, -2) : s;
+      return `<w:r><w:rPr>${base}${b ? '<w:b/>' : ''}</w:rPr><w:t xml:space="preserve">${x(t)}</w:t></w:r>`;
+    }).join('');
+  }
+  const para = (text, style, rpr = '') => `<w:p>${style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : ''}${runs(text, rpr)}</w:p>`;
+  const bullet = text => `<w:p><w:pPr><w:ind w:left="360" w:hanging="220"/><w:spacing w:after="40"/></w:pPr>${runs('•  ' + text)}</w:p>`;
+  function table(rows, opts = {}) {
+    if (!rows.length) return '';
+    const cols = Math.max(...rows.map(r => r.length));
+    const border = '<w:tblBorders>' + ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(b => `<w:${b} w:val="single" w:sz="4" w:space="0" w:color="C9D1DD"/>`).join('') + '</w:tblBorders>';
+    const cell = (v, head, i) => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/>${head ? '<w:shd w:val="clear" w:color="auto" w:fill="E8EEFC"/>' : ''}${opts.fills && opts.fills[i] ? `<w:shd w:val="clear" w:color="auto" w:fill="${opts.fills[i]}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${runs(v, `<w:sz w:val="17"/>${head ? '<w:b/>' : ''}`)}</w:p></w:tc>`;
+    return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${border}<w:tblCellMar><w:top w:w="40" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>` +
+      rows.map((r, i) => `<w:tr>${i === 0 ? '<w:trPr><w:tblHeader/></w:trPr>' : ''}${Array.from({ length: cols }, (_, j) => cell(r[j] ?? '', i === 0, j)).join('')}</w:tr>`).join('') + '</w:tbl><w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>';
+  }
+  function image(rid, id, w, h) {
+    let cx = 6120000, cy = Math.round(cx * h / w);
+    const maxH = 8640000; if (cy > maxH) { cx = Math.round(cx * maxH / cy); cy = maxH; }
+    return `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="40"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${id}" name="Figure ${id}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="${id}" name="figure${id}.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
+  }
+
+  /* Blocks → docx bytes. Block kinds: title, subtitle, h1, h2, p, note, bullets, table, img, caption, pagebreak */
+  function build(blocks, meta) {
+    const media = []; let body = '';
+    blocks.forEach(b => {
+      if (b.k === 'title') body += para(b.t, 'Title');
+      else if (b.k === 'subtitle') body += para(b.t, 'Subtitle');
+      else if (b.k === 'h1') body += para(b.t, 'Heading1');
+      else if (b.k === 'h2') body += para(b.t, 'Heading2');
+      else if (b.k === 'p') body += para(b.t);
+      else if (b.k === 'note') body += para(b.t, null, '<w:i/><w:color w:val="8F9BB0"/>');
+      else if (b.k === 'caption') body += para(b.t, 'Caption');
+      else if (b.k === 'bullets') body += b.items.map(bullet).join('');
+      else if (b.k === 'table') body += table(b.rows, b);
+      else if (b.k === 'pagebreak') body += '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+      else if (b.k === 'img' && b.img && b.img.bytes) {
+        const n = media.length + 1; media.push(b.img.bytes);
+        body += image(`rIdImg${n}`, n, b.img.w, b.img.h);
+      }
+    });
+    const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${NS}><w:body>${body}<w:sectPr><w:footerReference w:type="default" r:id="rIdFooter"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1020" w:right="1020" w:bottom="1020" w:left="1020" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+    const footer = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr ${NS}><w:p><w:pPr><w:jc w:val="right"/></w:pPr>${runs(meta.footer + ' · ', '<w:sz w:val="16"/><w:color w:val="8F9BB0"/>')}<w:r><w:rPr><w:sz w:val="16"/><w:color w:val="8F9BB0"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:rPr><w:sz w:val="16"/></w:rPr><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:rPr><w:sz w:val="16"/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:rPr><w:sz w:val="16"/><w:color w:val="8F9BB0"/></w:rPr><w:t>1</w:t></w:r><w:r><w:rPr><w:sz w:val="16"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>`;
+    const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>${media.map((_, i) => `<Relationship Id="rIdImg${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/figure${i + 1}.png"/>`).join('')}</Relationships>`;
+    const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+    const files = [
+      { name: '[Content_Types].xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>` },
+      { name: '_rels/.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>` },
+      { name: 'docProps/core.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${x(meta.title)}</dc:title><dc:creator>${x(meta.author || '')}</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created></cp:coreProperties>` },
+      { name: 'word/document.xml', data: doc },
+      { name: 'word/styles.xml', data: STYLES },
+      { name: 'word/footer1.xml', data: footer },
+      { name: 'word/_rels/document.xml.rels', data: rels },
+      ...media.map((m, i) => ({ name: `word/media/figure${i + 1}.png`, data: m }))
+    ];
+    return zip(files);
+  }
+
+  /* ---------- free-text fields → blocks ("- " bullets, "a | b" tables, "## " subheadings) ---------- */
+  function textBlocks(text) {
+    const out = []; let buf = [], tbl = [];
+    const flush = () => { if (buf.length) out.push({ k: 'bullets', items: buf }); buf = []; if (tbl.length) out.push({ k: 'table', rows: tbl }); tbl = []; };
+    String(text || '').split(/\r?\n/).forEach(raw => {
+      const l = raw.trim();
+      if (!l) return flush();
+      if (/^#{2,3}\s/.test(l)) { flush(); out.push({ k: 'h2', t: l.replace(/^#+\s*/, '') }); }
+      else if (/^[-*•]\s+/.test(l)) { if (tbl.length) flush(); buf.push(l.replace(/^[-*•]\s+/, '')); }
+      else if (l.includes(' | ') || /^\|.*\|$/.test(l)) {
+        if (buf.length) flush();
+        if (/^\|?\s*:?-{2,}/.test(l)) return; // markdown separator row
+        tbl.push(l.replace(/^\||\|$/g, '').split('|').map(c => c.trim()));
+      } else { flush(); out.push({ k: 'p', t: l }); }
+    });
+    flush();
+    return out;
+  }
+
+  const FIELDS = [
+    ['context', 'Contexte et problème', 'Context and problem'],
+    ['objectives', 'Objectifs et indicateurs', 'Objectives and KPIs'],
+    ['scope', 'Périmètre', 'Scope'],
+    ['stakeholders', 'Parties prenantes', 'Stakeholders'],
+    ['functional', 'Exigences fonctionnelles', 'Functional requirements'],
+    ['nonfunctional', 'Exigences non fonctionnelles', 'Non-functional requirements'],
+    ['constraints', 'Contraintes et hypothèses', 'Constraints and assumptions'],
+    ['architecture', 'Architecture technique', 'Technical architecture'],
+    ['stack', 'Stack et choix techniques', 'Stack and technical choices'],
+    ['security', 'Sécurité et conformité', 'Security and compliance'],
+    ['testing', 'Stratégie de test', 'Test strategy'],
+    ['deployment', 'Déploiement et exploitation', 'Deployment and operations'],
+    ['risks', 'Risques', 'Risks'],
+    ['conclusion', 'Conclusion et prochaines étapes', 'Conclusion and next steps']
+  ];
+  const DOCS = {
+    needs: { fr: 'Cahier des charges', en: 'Requirements specification', fields: ['context', 'objectives', 'scope', 'stakeholders', 'functional', 'nonfunctional', 'constraints'], plan: 'summary', status: false },
+    technical: { fr: 'Dossier technique', en: 'Technical document', fields: ['architecture', 'stack', 'security', 'testing', 'deployment', 'risks'], plan: 'full', status: false },
+    report: { fr: 'Rapport de projet complet', en: 'Full project report', fields: FIELDS.map(f => f[0]).filter(k => k !== 'conclusion'), plan: 'full', status: true }
+  };
+  const L = {
+    fr: { card: 'Fiche projet', field: 'Champ', value: 'Valeur', name: 'Projet', code: 'Code', period: 'Période', effort: 'Charge', tasks: 'tâches', pts: 'points', phases: 'phases', ms: 'jalons',
+      author: 'Auteur / chef de projet', sponsor: 'Sponsor / client', schedule: 'Planning', phaseT: 'Phases', phase: 'Phase', start: 'Début', end: 'Fin', progress: 'Avancement', msT: 'Jalons et livrables', id: 'ID',
+      milestone: 'Jalon', date: 'Date', task: 'Tâche', owner: 'Resp.', deps: 'Dépend de', st: 'Statut', summaryG: 'Gantt synthétique', masterG: 'Gantt maître', wbs: 'Structure de découpage (WBS)',
+      crit: 'Chemin critique (marge nulle)', critTxt: 'Tout retard sur ces tâches décale la date de fin', exec: 'Résumé', statusT: 'État d’avancement', metric: 'Indicateur', kpiDone: 'Points terminés',
+      kpiEarned: 'Avancement acquis / prévu', kpiSpi: 'SPI (valeur acquise ÷ planifiée)', kpiVel: 'Vélocité / requise', kpiFc: 'Fin prévue', perWk: 'pts/sem', bd: 'Burndown', snap: 'Historique hebdomadaire',
+      ideal: 'Idéal (reste)', actual: 'Réel (reste)', gap: 'Écart', watch: 'À surveiller', late: 'En retard', inprog: 'En cours', none: 'Aucune', todo: 'À compléter dans Projet → Contenu des documents.',
+      statusW: { on: 'dans les temps', risk: 'à risque', late: 'en retard' }, sDone: 'Terminée', sLate: 'En retard', sIn: 'En cours', sTodo: 'À faire', generated: 'Généré le', asOf: 'Date d’état', days: 'jours',
+      conclusion: 'Conclusion et prochaines étapes', noVel: 'pas encore de vélocité', fig: 'Figure' },
+    en: { card: 'Project card', field: 'Field', value: 'Value', name: 'Project', code: 'Code', period: 'Period', effort: 'Effort', tasks: 'tasks', pts: 'points', phases: 'phases', ms: 'milestones',
+      author: 'Author / project manager', sponsor: 'Sponsor / client', schedule: 'Schedule', phaseT: 'Phases', phase: 'Phase', start: 'Start', end: 'End', progress: 'Progress', msT: 'Milestones and deliverables', id: 'ID',
+      milestone: 'Milestone', date: 'Date', task: 'Task', owner: 'Owner', deps: 'Depends on', st: 'Status', summaryG: 'Summary Gantt', masterG: 'Master Gantt', wbs: 'Work breakdown structure (WBS)',
+      crit: 'Critical path (zero float)', critTxt: 'Any delay on these tasks moves the finish date', exec: 'Executive summary', statusT: 'Status report', metric: 'Metric', kpiDone: 'Points done',
+      kpiEarned: 'Earned / planned progress', kpiSpi: 'SPI (earned ÷ planned value)', kpiVel: 'Velocity / required', kpiFc: 'Forecast finish', perWk: 'pts/wk', bd: 'Burndown', snap: 'Weekly history',
+      ideal: 'Ideal (remaining)', actual: 'Actual (remaining)', gap: 'Gap', watch: 'Watch list', late: 'Late', inprog: 'In progress', none: 'None', todo: 'To be completed in Project → Document content.',
+      statusW: { on: 'on track', risk: 'at risk', late: 'late' }, sDone: 'Done', sLate: 'Late', sIn: 'In progress', sTodo: 'To do', generated: 'Generated on', asOf: 'Status date', days: 'days',
+      conclusion: 'Conclusion and next steps', noVel: 'no velocity yet', fig: 'Figure' }
+  };
+  const dfmt = (t, lang) => new Date(t).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+  const num = (v, lang, d = 1) => v.toFixed(d).replace('.', lang === 'fr' ? ',' : '.');
+
+  /* Assemble one document. imgs = {summary, master, burndown} each {bytes,w,h} or undefined. */
+  function assemble(kind, P, lang, todayT, imgs = {}) {
+    const T = L[lang], spec = DOCS[kind], nm = o => (lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
+    const docs = P.docs || {}, now = C.statusTime(P, todayT), b = C.burndown(P, todayT), h = C.health(P, todayT), cp = C.criticalPath(P);
+    const st = k => k.done ? T.sDone : C.parseDate(k.end) < now ? T.sLate : C.parseDate(k.start) <= now ? T.sIn : T.sTodo;
+    const out = []; let sec = 0, fig = 0;
+    const H1 = t => out.push({ k: 'h1', t: `${++sec}. ${t}` });
+    const IMG = (img, cap) => { if (img && img.bytes) { out.push({ k: 'img', img }); out.push({ k: 'caption', t: `${T.fig} ${++fig} — ${cap}` }); } };
+    out.push({ k: 'title', t: `${P.name} — ${spec[lang]}` });
+    out.push({ k: 'subtitle', t: `${P.code ? P.code + ' · ' : ''}${dfmt(C.parseDate(P.start), lang)} → ${dfmt(C.parseDate(P.end), lang)} · ${T.generated} ${dfmt(todayT, lang)}${docs.author ? ' · ' + docs.author : ''}` });
+    if (spec.status) {
+      out.push({ k: 'h1', t: T.exec });
+      const pct = b.total ? Math.round(b.done / b.total * 100) : 0, slip = b.forecast !== null ? C.diffDays(C.parseDate(P.end), b.forecast) : null;
+      out.push({ k: 'p', t: lang === 'fr'
+        ? `Au ${dfmt(now, lang)}, ${b.done} points sur ${b.total} sont terminés (${pct} %) ; SPI ${num(h.spi, lang, 2)} : le projet est **${T.statusW[h.status]}**. ${b.forecast !== null ? `La fin prévue au rythme actuel est le ${dfmt(b.forecast, lang)} (${slip > 0 ? '+' : ''}${slip} jours par rapport au ${dfmt(C.parseDate(P.end), lang)}).` : 'Aucune vélocité mesurée pour l’instant.'} Vélocité : ${num(b.velocityWeek, lang)} pts/sem, requise : ${num(b.requiredWeek, lang)} pts/sem.`
+        : `As of ${dfmt(now, lang)}, ${b.done} of ${b.total} points are done (${pct}%); SPI ${num(h.spi, lang, 2)}: the project is **${T.statusW[h.status]}**. ${b.forecast !== null ? `At the current pace it finishes on ${dfmt(b.forecast, lang)} (${slip > 0 ? '+' : ''}${slip} days vs ${dfmt(C.parseDate(P.end), lang)}).` : 'No velocity measured yet.'} Velocity: ${num(b.velocityWeek, lang)} pts/wk, required: ${num(b.requiredWeek, lang)} pts/wk.` });
+      if (docs.context) out.push(...textBlocks(docs.context).slice(0, 1));
+    }
+    H1(T.card);
+    out.push({ k: 'table', rows: [[T.field, T.value], [T.name, P.name], ...(P.code ? [[T.code, P.code]] : []), ...(docs.author ? [[T.author, docs.author]] : []), ...(docs.sponsor ? [[T.sponsor, docs.sponsor]] : []),
+      [T.period, `${dfmt(C.parseDate(P.start), lang)} → ${dfmt(C.parseDate(P.end), lang)}`], [T.effort, `${b.total} ${T.pts} · ${P.tasks.length} ${T.tasks} · ${P.phases.length} ${T.phases} · ${P.milestones.length} ${T.ms}`]] });
+    const fieldName = key => { const f = FIELDS.find(f => f[0] === key); return lang === 'fr' ? f[1] : f[2]; };
+    const textSection = key => { H1(fieldName(key)); const bl = textBlocks(docs[key]); if (bl.length) out.push(...bl); else out.push({ k: 'note', t: T.todo }); };
+    const before = spec.fields.filter(k => k !== 'risks');
+    before.forEach(textSection);
+    // schedule
+    H1(T.schedule);
+    const spans = C.phaseSpans(P).filter(s => s.start);
+    out.push({ k: 'h2', t: T.phaseT });
+    out.push({ k: 'table', rows: [[T.id, T.phase, T.start, T.end, T.pts, T.progress], ...spans.map(s => [s.id, nm(s), dfmt(C.parseDate(s.start), lang), dfmt(C.parseDate(s.end), lang), String(s.points), Math.round(s.progress * 100) + ' %'])] });
+    if (P.milestones.length) { out.push({ k: 'h2', t: T.msT }); out.push({ k: 'table', rows: [[T.id, T.milestone, T.date], ...P.milestones.map(m => [m.id, nm(m), dfmt(C.parseDate(m.date), lang)])] }); }
+    out.push({ k: 'h2', t: T.summaryG }); IMG(imgs.summary, T.summaryG);
+    if (spec.plan === 'full') {
+      out.push({ k: 'h2', t: T.masterG }); IMG(imgs.master, T.masterG);
+      out.push({ k: 'h2', t: T.wbs });
+      out.push({ k: 'table', rows: [[T.id, T.task, T.owner, T.start, T.end, 'Pts', T.deps, T.st], ...P.tasks.map(k => [k.id, nm(k), k.owner, dfmt(C.parseDate(k.start), lang).slice(0, 5), dfmt(C.parseDate(k.end), lang).slice(0, 5), String(k.points), k.deps.join(', ') || '—', st(k)])] });
+      const crit = P.tasks.filter(k => cp.critical.has(k.id)).map(k => k.id);
+      out.push({ k: 'p', t: `**${T.crit} :** ${crit.join(' · ') || T.none}. ${T.critTxt}.` });
+    }
+    if (spec.fields.includes('risks')) textSection('risks');
+    if (spec.status) {
+      H1(T.statusT);
+      out.push({ k: 'table', rows: [[T.metric, T.value],
+        [T.asOf, dfmt(now, lang)],
+        [T.kpiDone, `${b.done} / ${b.total}`],
+        [T.kpiEarned, `${num(h.pctEarned * 100, lang)} % / ${num(h.pctPlanned * 100, lang)} %`],
+        [T.kpiSpi, `${num(h.spi, lang, 2)} — ${T.statusW[h.status]}`],
+        [T.kpiVel, `${num(b.velocityWeek, lang)} / ${num(b.requiredWeek, lang)} ${T.perWk}`],
+        [T.kpiFc, b.forecast !== null ? dfmt(b.forecast, lang) : T.noVel]] });
+      out.push({ k: 'h2', t: T.bd }); IMG(imgs.burndown, T.bd);
+      const snaps = []; let f = C.parseDate(P.start); while (new Date(f).getUTCDay() !== 5) f = C.addDays(f, 1);
+      for (; f <= now; f = C.addDays(f, 7)) snaps.push(f);
+      if (snaps.at(-1) !== now) snaps.push(now);
+      out.push({ k: 'h2', t: T.snap });
+      out.push({ k: 'table', rows: [[T.date, T.ideal, T.actual, T.gap], ...snaps.reverse().slice(0, 10).map(s => { const i = C.idealAt(P, s), a = b.total - C.donePointsAt(P, s); return [dfmt(s, lang), num(i, lang), String(a), (a - i >= 0 ? '+' : '') + num(a - i, lang)]; })] });
+      out.push({ k: 'h2', t: T.watch });
+      const late = P.tasks.filter(k => !k.done && C.parseDate(k.end) < now), prog = P.tasks.filter(k => !k.done && C.parseDate(k.start) <= now && C.parseDate(k.end) >= now);
+      out.push({ k: 'p', t: `**${T.late} :** ${late.map(k => `${k.id} ${nm(k)}`).join(' · ') || T.none}` });
+      out.push({ k: 'p', t: `**${T.inprog} :** ${prog.map(k => `${k.id} ${nm(k)} (${k.progress} %)`).join(' · ') || T.none}` });
+      H1(T.conclusion);
+      const bl = textBlocks(docs.conclusion); if (bl.length) out.push(...bl); else out.push({ k: 'note', t: T.todo });
+    }
+    const fname = `${(P.code || P.name).replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'projet'}-${spec[lang].replace(/[^\w\-]+/g, '-')}.docx`;
+    return { bytes: build(out, { title: `${P.name} — ${spec[lang]}`, author: docs.author, footer: `${P.name} — ${spec[lang]}` }), name: fname, blocks: out };
+  }
+  return { zip, crc32, build, textBlocks, assemble, FIELDS, DOCS };
+})();
+if (typeof module !== 'undefined') module.exports = DocGen;
+</script>
 <script>const SAMPLE = {
   name: 'ESAIP AI Assistant', code: 'EAA-2026',
   start: '2026-09-28', end: '2026-12-18', statusDate: '', workingDays: true,
+  docs: {
+    author: 'Pinninti Sai Anish — MSc Cybersecurity & Data Science, ESAIP',
+    sponsor: 'Direction des formations ESAIP / DSI ESAIP',
+    context: `Les réponses aux questions courantes des étudiants (vie de campus, aides financières, mobilité internationale, cadre CTI) sont dispersées entre le site, l’intranet et les e-mails ; les étudiants internationaux sont les plus touchés. / Answers to common student questions are scattered across the website, intranet and e-mail; international students are hit hardest.
+L’assistant IA bilingue centralise ces réponses 24 h/24, en français et en anglais, avec des sources citées. / The bilingual AI assistant centralises those answers 24/7 in French and English, with cited sources.`,
+    objectives: `# | Objectif / Objective | Indicateur / KPI | Cible / Target
+O1 | Répondre juste et sourcé / Accurate, cited answers | Exactitude sur 100 questions / Accuracy on 100 questions | ≥ 85 %
+O2 | Servir les deux langues / Serve both languages | Réponse dans la langue de la question / Reply in the question's language | 100 %
+O3 | Réduire la charge des services / Reduce staff workload | E-mails répétitifs à la scolarité / Repeat e-mails | −30 % en 3 mois
+O4 | Rester rapide / Stay fast | Latence p95 / p95 latency | < 4 s
+O5 | Coûter moins qu’une licence / Cost less than a licence | Coût mensuel vs ChatGPT Team | Inférieur / Lower`,
+    scope: `- Dans le périmètre / In scope : chat web FR/EN, base de connaissances ESAIP, panneau d’administration, déploiement, formation
+- Hors périmètre / Out of scope : connexion à l’ENT, données personnelles d’étudiants, application mobile native`,
+    stakeholders: `Partie prenante / Stakeholder | Rôle / Role | Attente / Expectation
+Direction des formations | Sponsor | Moins de demandes répétitives / Fewer repeat requests
+DSI ESAIP | Client interne, hébergement / Internal client, hosting | Sécurité, RGPD, coût maîtrisé / Security, GDPR, controlled cost
+Étudiants (dont internationaux) | Utilisateurs / Users | Réponses rapides et fiables en FR/EN / Fast, reliable answers
+Scolarité, relations internationales | Experts métier / Domain experts | Contenu exact et à jour / Accurate, current content`,
+    functional: `ID | Exigence / Requirement | Priorité / Priority
+EF1 | Détecter la langue et répondre dans la même / Detect language and reply in it | Must
+EF2 | Citer la source de chaque réponse / Cite the source of every answer | Must
+EF3 | Couvrir campus, aides, mobilité, CTI, logement, alumni / Cover campus, aid, mobility, CTI, housing, alumni | Must
+EF4 | Dire « je ne sais pas » hors base et orienter vers un contact / Say "I don't know" outside the KB | Must
+EF5 | Mettre à jour la base sans redéploiement / Update the KB without redeploying | Should
+EF6 | Vote positif/négatif par réponse / Thumbs up/down per answer | Should
+EF7 | Questions suggérées par thème / Suggested questions per topic | Could`,
+    nonfunctional: `ID | Catégorie / Category | Exigence / Requirement
+ENF1 | Performance | Latence p95 < 4 s, 50 utilisateurs simultanés / p95 < 4 s, 50 concurrent users
+ENF2 | Sécurité / Security | OWASP Top 10 et OWASP LLM Top 10 couverts / covered
+ENF3 | RGPD / GDPR | Aucune donnée personnelle stockée ; logs anonymisés 30 j / No personal data; anonymised logs 30 days
+ENF4 | Accessibilité / Accessibility | RGAA / WCAG 2.1 AA
+ENF5 | Disponibilité / Availability | 99 % hors maintenance / excluding maintenance
+ENF6 | Maintenabilité / Maintainability | Couverture de tests ≥ 70 %, CI obligatoire / Test coverage ≥ 70 %, CI required`,
+    constraints: `- Échéance fixe : soutenance le 18/12/2026 / Fixed deadline: defence on 18 Dec 2026
+- Budget : hébergement Vercel gratuit, plafond mensuel de coût LLM / Budget: free Vercel hosting, monthly LLM cost cap
+- Données : uniquement des contenus publics ESAIP / Data: public ESAIP content only`,
+    architecture: `Architecture RAG en trois couches : interface web, API sécurisée, pipeline de connaissances. Le LLM ne répond qu’à partir des passages retrouvés. / Three-layer RAG architecture: web front end, secured API, knowledge pipeline. The LLM only answers from retrieved passages.
+Composant / Component | Rôle / Role
+Front-end Next.js (Vercel) | Chat bilingue, citations cliquables / Bilingual chat, clickable citations
+API FastAPI | Validation des entrées, limitation de débit, orchestration RAG / Input validation, rate limiting, RAG orchestration
+Garde-fous / Guardrails | Bloque l’injection de prompt, masque les données personnelles / Blocks prompt injection, masks personal data
+Retriever + pgvector | Recherche hybride vecteurs + mots-clés, top-k = 5 / Hybrid vector + keyword search, top-k = 5
+Ingestion | Découpage ~500 tokens, embeddings multilingues / ~500-token chunks, multilingual embeddings
+Monitoring | Latence, taux de « je ne sais pas », votes / Latency, "I don't know" rate, votes`,
+    stack: `Couche / Layer | Choix / Choice | Pourquoi / Why
+Front-end | Next.js + TypeScript | i18n natif, hébergement Vercel / Built-in i18n, Vercel hosting
+API | Python FastAPI + Pydantic | Validation stricte / Strict validation
+Base vectorielle / Vector DB | PostgreSQL + pgvector | Une seule base / One database
+LLM | API interchangeable / Swappable API | Pas de verrouillage fournisseur / No lock-in
+Réseau / Network | Cloudflare | WAF, anti-bot, rate limit
+CI/CD | GitHub Actions → Vercel | Tests et scan à chaque push / Tests and scan on every push`,
+    security: `Menace / Threat | Mesure / Control
+Injection de prompt / Prompt injection | Prompt système isolé, réponses limitées au contexte / Isolated system prompt, context-only answers
+Fuite de données / Data leakage | Masquage des e-mails et numéros / Masking e-mails and numbers
+XSS / injection SQL | Échappement, requêtes paramétrées, CSP stricte / Escaping, parameterised queries, strict CSP
+Abus / Abuse | 20 requêtes/min par IP, plafond de coût / 20 req/min per IP, cost cap
+Secrets | Variables d’environnement, scan GitLeaks en CI / Env variables, GitLeaks scan in CI`,
+    testing: `Niveau / Level | Outil / Tool | Critère de sortie / Exit criterion
+Unitaire / Unit | Pytest | Couverture ≥ 70 % / Coverage ≥ 70 %
+Bout en bout / E2E | Playwright | Parcours FR et EN / FR and EN journeys pass
+Qualité RAG / RAG quality | 100 questions | Exactitude ≥ 85 % / Accuracy ≥ 85 %
+Sécurité / Security | OWASP ZAP + 30 attaques / attacks | 0 faille critique ou haute / 0 critical or high
+Recette / UAT | 15 étudiants / students | Satisfaction ≥ 4/5`,
+    deployment: `- Chaîne / Pipeline : branche → pull request → CI (tests + scan) → preview Vercel → production
+- Sauvegarde quotidienne, 7 jours / Daily backup, 7 days
+- Retour arrière en 1 clic sur Vercel / One-click rollback on Vercel
+- Alerte si erreurs > 2 % ou p95 > 4 s pendant 10 min / Alert if errors > 2 % or p95 > 4 s for 10 min`,
+    risks: `ID | Risque / Risk | P | I | Score | Réponse / Response
+R1 | Réponses inventées par le LLM / Hallucinations | 4 | 5 | 20 | Réponses limitées au contexte + citations / Context-only answers + citations
+R2 | Informations obsolètes / Outdated information | 4 | 4 | 16 | Panneau admin + date de mise à jour / Admin panel + last-updated date
+R3 | Injection de prompt / Prompt injection | 3 | 4 | 12 | Garde-fous + 30 tests d’attaque / Guardrails + 30 attack tests
+R5 | Retard du chemin critique / Critical-path slippage | 3 | 4 | 12 | Burndown hebdomadaire / Weekly burndown
+R4 | Coût LLM / LLM cost | 3 | 3 | 9 | Plafond mensuel + cache / Monthly cap + cache`,
+    conclusion: `- Clôturer T6 et T7 avant le 23/10 pour tenir M2 / Close T6 and T7 by 23 Oct to hold M2
+- Démarrer T8 immédiatement, premier maillon critique / Start T8 now, first critical link
+- Découper T9 (13 pts) en 3 sous-tâches hebdomadaires / Split T9 into 3 weekly sub-tasks
+- Réaffecter 1 personne de T10 vers T8–T9 / Move 1 person from T10 to T8–T9
+- Revue du burndown chaque vendredi ; alerte si SPI < 0,90 / Friday burndown review; alert if SPI < 0.90`
+  },
   phases: [
     { id: 'P1', fr: 'Initialisation', en: 'Initiation', color: '#4f6bed' },
     { id: 'P2', fr: 'Conception', en: 'Design', color: '#0f9d8a' },
@@ -770,6 +1125,12 @@ const I18N = {
     eId: 'ID : lettres, chiffres, _ ou -, 16 caractères max.', eIdTaken: 'Cet ID existe déjà.', eName: 'Le nom (FR) est obligatoire.',
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
+    download: 'Télécharger', dlDocs: 'Documents Word (.docx)', dlNeeds: 'Cahier des charges', dlTech: 'Dossier technique', dlReport: 'Rapport complet',
+    dlImgs: 'Graphiques et données', dlGs: 'Gantt synthétique', dlGm: 'Gantt maître', dlBd: 'Burndown', dlCsv: 'Gantt pour Excel', dlJson: 'Projet complet',
+    dlLang: 'Langue des documents : celle de l’interface (FR/EN).', dlFrame: 'Dans l’aperçu Claude, le navigateur peut bloquer les téléchargements : utilisez la version déployée.',
+    generating: 'Génération…', downloaded: 'Téléchargé : ', dlError: 'Échec de la génération. Réessayez.',
+    docContent: 'Contenu des documents', docHint: 'Ce texte alimente le cahier des charges, le dossier technique et le rapport. Une ligne « - » = puce · « A | B | C » = ligne de tableau (la 1re = en-tête) · « ## » = sous-titre. Le planning, les Gantt et le burndown sont générés automatiquement.',
+    author: 'Auteur / chef de projet', sponsor: 'Sponsor / client',
     fsWarn: 'Attention : commence avant la fin de ', blankName: 'Nouveau projet', pts: 'pts', d: 'j',
   },
   en: {
@@ -800,6 +1161,12 @@ const I18N = {
     eId: 'ID: letters, digits, _ or -, 16 characters max.', eIdTaken: 'That ID already exists.', eName: 'Name (FR) is required.',
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
+    download: 'Download', dlDocs: 'Word documents (.docx)', dlNeeds: 'Requirements specification', dlTech: 'Technical document', dlReport: 'Full report',
+    dlImgs: 'Charts and data', dlGs: 'Summary Gantt', dlGm: 'Master Gantt', dlBd: 'Burndown', dlCsv: 'Gantt for Excel', dlJson: 'Full project',
+    dlLang: 'Document language follows the interface (FR/EN).', dlFrame: 'In the Claude preview the browser may block downloads: use the deployed version.',
+    generating: 'Generating…', downloaded: 'Downloaded: ', dlError: 'Generation failed. Try again.',
+    docContent: 'Document content', docHint: 'This text feeds the requirements spec, technical document and report. A "- " line = bullet · "A | B | C" = table row (first = header) · "## " = subheading. Schedule, Gantts and burndown are generated automatically.',
+    author: 'Author / project manager', sponsor: 'Sponsor / client',
     fsWarn: 'Warning: starts before the end of ', blankName: 'New project', pts: 'pts', d: 'd',
   }
 };
@@ -810,7 +1177,7 @@ const persist = () => { try { localStorage.setItem(STORE, JSON.stringify({ proje
 const saved = load();
 let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
 const UI = Object.assign({ lang: 'fr', tab: 'burndown', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
-let editing = null;
+let editing = null, lastBurndown = null;
 const t = k => I18N[UI.lang][k] ?? k;
 const nm = o => (UI.lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
 const todayT = () => { const d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); };
@@ -910,6 +1277,7 @@ function renderBurndown() {
   if (nt >= s && nt <= xEnd) g += `<line x1="${X(nt)}" x2="${X(nt)}" y1="${m.t - 8}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".55"/><text x="${X(nt)}" y="${m.t - 12}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(t('today').toUpperCase())}</text>`;
   g += `<rect id="bdHit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
   g += `<line id="bdCursor" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" visibility="hidden"/>`;
+  lastBurndown = { svg: g, W, H };
   box.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('bdTitle'))}">${g}</svg>`);
   $('bdLegend').innerHTML = `<span><i class="sw" style="border-color:var(--accent);border-top-width:3px"></i>${esc(t('actual'))}</span><span><i class="sw" style="border-color:var(--ideal);border-top-style:dashed"></i>${esc(t('ideal'))}</span><span><i class="sw" style="border-color:var(--${b.forecast !== null && b.forecast > e ? 'bad' : 'good'});border-top-style:dotted"></i>${esc(t('forecastL'))}</span><span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
   const svg = box.querySelector('svg'), hit = svg.querySelector('#bdHit'), cur = svg.querySelector('#bdCursor');
@@ -940,17 +1308,17 @@ function renderFocus() {
 }
 
 /* ---------- gantt ---------- */
-function renderGantt() {
+function buildGantt(mode, dw, showDeps, showCrit) {
   const now = nowT(), cp = C.criticalPath(P);
   const allDates = [C.parseDate(P.start), C.parseDate(P.end), ...P.tasks.flatMap(k => [C.parseDate(k.start), C.parseDate(k.end)]), ...P.milestones.map(m => C.parseDate(m.date))];
   let s = Math.min(...allDates), e = Math.max(...allDates);
   while (new Date(s).getUTCDay() !== 1) s = C.addDays(s, -1);
   e = C.addDays(e, 3);
-  const dw = UI.zoom, days = C.diffDays(s, e) + 1, W = days * dw, RH = 30, HEAD = 46;
+  const days = C.diffDays(s, e) + 1, W = days * dw, RH = 30, HEAD = 46;
   const X = tm => C.diffDays(s, tm) * dw;
   const rows = [];
   rows.push({ kind: 'ms' });
-  if (UI.gMode === 'summary') C.phaseSpans(P).filter(p => p.start).forEach(p => rows.push({ kind: 'phase', p }));
+  if (mode === 'summary') C.phaseSpans(P).filter(p => p.start).forEach(p => rows.push({ kind: 'phase', p }));
   else P.phases.forEach(ph => {
     const sp = C.phaseSpans(P).find(x => x.id === ph.id);
     if (!sp.start) return;
@@ -958,7 +1326,7 @@ function renderGantt() {
     P.tasks.filter(k => k.phase === ph.id).forEach(k => rows.push({ kind: 'task', k }));
   });
   const orphan = P.tasks.filter(k => !P.phases.some(p => p.id === k.phase));
-  if (UI.gMode === 'master') orphan.forEach(k => rows.push({ kind: 'task', k }));
+  if (mode === 'master') orphan.forEach(k => rows.push({ kind: 'task', k }));
   const H = HEAD + rows.length * RH + 8;
   const rowY = new Map();
   let L = '', R = '';
@@ -967,18 +1335,18 @@ function renderGantt() {
   for (let tm = s; tm <= e; tm = C.addDays(tm, 1)) {
     const d = new Date(tm);
     if (C.isWeekend(tm) && dw >= 8) R += `<rect x="${X(tm)}" y="${HEAD}" width="${dw}" height="${H - HEAD}" fill="var(--grid)" opacity=".55"/>`;
-    if (d.getUTCDate() === 1 || tm === s) {
+    if (d.getUTCDate() === 1 || (tm === s && d.getUTCDate() <= 20)) {
       R += `<line x1="${X(tm)}" x2="${X(tm)}" y1="0" y2="22" stroke="var(--line)"/><text x="${X(tm) + 6}" y="15" font-size="11.5" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(d.toLocaleDateString(UI.lang === 'fr' ? 'fr-FR' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).toUpperCase())}</text>`;
     }
     if (d.getUTCDay() === 1) {
       R += `<line x1="${X(tm)}" x2="${X(tm)}" y1="22" y2="${H}" stroke="var(--line)" opacity=".7"/>`;
-      if (dw * 7 >= 44) R += `<text x="${X(tm) + 5}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${esc(t('week'))}${isoWeek(tm)} · ${esc(dLabel(tm))}</text>`;
+      if (dw * 7 >= 84) R += `<text x="${X(tm) + 5}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${esc(t('week'))}${isoWeek(tm)} · ${esc(dLabel(tm))}</text>`;
       else R += `<text x="${X(tm) + 3}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${isoWeek(tm)}</text>`;
     }
   }
   R += `<line x1="0" x2="${W}" y1="22" y2="22" stroke="var(--line)"/><line x1="0" x2="${W}" y1="${HEAD}" y2="${HEAD}" stroke="var(--line)"/>`;
   L += `<rect x="0" y="0" width="400" height="${HEAD}" fill="var(--sunk)"/><line x1="0" x2="400" y1="${HEAD}" y2="${HEAD}" stroke="var(--line)"/>
-    <text x="12" y="30" font-size="11.5" font-weight="600" fill="var(--muted)" font-family="var(--f-display)" letter-spacing=".08em">${esc((UI.gMode === 'summary' ? t('phase') : t('task')).toUpperCase())}</text>`;
+    <text x="12" y="30" font-size="11.5" font-weight="600" fill="var(--muted)" font-family="var(--f-display)" letter-spacing=".08em">${esc((mode === 'summary' ? t('phase') : t('task')).toUpperCase())}</text>`;
   rows.forEach((r, i) => {
     const y = HEAD + i * RH, cy = y + RH / 2;
     const zebra = r.kind === 'phaseHead' ? `<rect x="0" y="${y}" width="%W%" height="${RH}" fill="var(--sunk)"/>` : '';
@@ -1004,7 +1372,7 @@ function renderGantt() {
       return;
     }
     const k = r.k, ph = phaseOf(k.phase), x1 = X(C.parseDate(k.start)), x2 = X(C.parseDate(k.end)) + dw;
-    const st = taskStatus(k, now), crit = UI.crit && cp.critical.has(k.id);
+    const st = taskStatus(k, now), crit = showCrit && cp.critical.has(k.id);
     rowY.set(k.id, { cy, x1, x2 });
     L += `<text x="12" y="${cy + 4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(k.id)}</text><text x="52" y="${cy + 4}" font-size="12.5" fill="var(--ink)">${esc(nm(k).length > 38 ? nm(k).slice(0, 37) + '…' : nm(k))}<title>${esc(nm(k))}</title></text>`;
     R += `<g><title>${esc(`${k.id} · ${nm(k)}\n${dLabel(C.parseDate(k.start), true)} → ${dLabel(C.parseDate(k.end), true)}\n${k.owner} · ${k.points} ${t('pts')} · ${k.progress}% · ${t(statusKey[st])}`)}</title>
@@ -1012,17 +1380,21 @@ function renderGantt() {
       <rect x="${x1}" y="${cy - 8}" width="${(x2 - x1) * k.progress / 100}" height="16" rx="3" fill="${esc(ph.color)}"/></g>
       <text x="${x2 + 6}" y="${cy + 4}" font-size="10.5" fill="${st === 'late' ? 'var(--bad)' : 'var(--muted)'}" font-family="var(--f-mono)">${esc(k.owner)}${k.owner ? ' · ' : ''}${k.points}${st === 'late' ? ' · !' : ''}</text>`;
   });
-  if (UI.gMode === 'master' && UI.deps) {
+  if (mode === 'master' && showDeps) {
     let dp = '';
     P.tasks.forEach(k => k.deps.forEach(d => {
       const a = rowY.get(d), b2 = rowY.get(k.id); if (!a || !b2) return;
-      const crit = UI.crit && cp.critical.has(k.id) && cp.critical.has(d);
+      const crit = showCrit && cp.critical.has(k.id) && cp.critical.has(d);
       const midX = Math.max(a.x2 + 4, Math.min(b2.x1 - 6, a.x2 + 10));
       dp += `<path d="M${a.x2} ${a.cy}H${midX}V${b2.cy}H${b2.x1 - 1}" fill="none" stroke="${crit ? 'var(--bad)' : 'var(--muted)'}" stroke-opacity="${crit ? .9 : .5}" stroke-width="1.1" marker-end="url(#arr${crit ? 'C' : ''})"/>`;
     }));
     R = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker><marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--bad)"/></marker></defs>` + R + dp;
   }
-  if (now >= s && now <= e) R += `<line x1="${X(now) + dw / 2}" x2="${X(now) + dw / 2}" y1="${HEAD - 6}" y2="${H}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${X(now) + dw / 2 - 30}" y="${HEAD - 14}" width="60" height="14" rx="3" fill="var(--accent)"/><text x="${X(now) + dw / 2}" y="${HEAD - 4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="var(--f-display)" letter-spacing=".06em">${esc(t('today').toUpperCase())}</text>`;
+  if (now >= s && now <= e) R += `<line x1="${X(now) + dw / 2}" x2="${X(now) + dw / 2}" y1="${HEAD - 6}" y2="${H}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${X(now) + dw / 2 - 42}" y="${HEAD - 14}" width="84" height="14" rx="3" fill="var(--accent)"/><text x="${X(now) + dw / 2}" y="${HEAD - 4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="var(--f-display)" letter-spacing=".06em">${esc(t('today').toUpperCase())}</text>`;
+  return { L, R, W, H };
+}
+function renderGantt() {
+  const { L, R, W, H } = buildGantt(UI.gMode, UI.zoom, UI.deps, UI.crit);
   $('gLeft').innerHTML = `<svg width="400" height="${H}" viewBox="0 0 400 ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${L}</svg>`;
   $('gRight').innerHTML = `<svg width="${W + 140}" height="${H}" viewBox="0 0 ${W + 140} ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${R}</svg>`;
   $('gLegend').innerHTML = P.phases.map(p => `<span><svg width="12" height="12" viewBox="0 0 12 12"><rect width="12" height="12" rx="2" fill="${esc(p.color)}"/></svg>${esc(p.id + ' ' + nm(p))}</span>`).join('') +
@@ -1205,8 +1577,84 @@ twoStep($('btnBlank'), () => {
   editing = null; commit(); msg(t('saved'), true);
 });
 
+
+/* ---------- document downloads ---------- */
+const LIGHT = { bg: '#ffffff', surface: '#ffffff', sunk: '#f7f8fb', ink: '#142033', muted: '#596579', line: '#d7dde6', grid: '#e9edf3', accent: '#1f56f0',
+  'accent-soft': 'rgba(31,86,240,.10)', ideal: '#8f9bb0', good: '#16865a', warn: '#b86e00', bad: '#c42f3a', 'good-soft': 'rgba(22,134,90,.12)',
+  'warn-soft': 'rgba(184,110,0,.13)', 'bad-soft': 'rgba(196,47,58,.12)', 'f-display': 'Arial, Helvetica, sans-serif', 'f-body': 'Arial, Helvetica, sans-serif', 'f-mono': 'Consolas, Courier New, monospace' };
+const literal = s => s.replace(/var\(--([a-z-]+)\)/g, (m, k) => LIGHT[k] || '#142033');
+function ganttSvg(mode) {
+  const { L, R, W, H } = buildGantt(mode, 10, true, true), w = 400 + W + 150;
+  return { svg: literal(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${H}" viewBox="0 0 ${w} ${H}"><rect width="${w}" height="${H}" fill="#ffffff"/><g>${L}</g><g transform="translate(400,0)">${R}</g></svg>`), W: w, H };
+}
+function burndownSvg() {
+  if (!lastBurndown) renderBurndown();
+  const { svg, W, H } = lastBurndown;
+  return { svg: literal(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#ffffff"/>${svg}</svg>`), W, H };
+}
+function toPng({ svg, W, H }, scale = 2) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = Math.round(W * scale); c.height = Math.round(H * scale);
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => b ? b.arrayBuffer().then(buf => resolve({ bytes: new Uint8Array(buf), w: c.width, h: c.height })) : reject(new Error('png')), 'image/png');
+    };
+    img.onerror = () => reject(new Error('svg'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+}
+function saveFile(bytes, name, type) {
+  const url = URL.createObjectURL(new Blob([bytes], { type }));
+  const a = document.createElement('a'); a.href = url; a.download = name; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+const slug = s => String(s).replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'projet';
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+async function download(kind) {
+  const st = $('dlStatus'); st.textContent = t('generating'); st.className = 'dl-status';
+  try {
+    const base = slug(P.code || P.name);
+    if (['needs', 'technical', 'report'].includes(kind)) {
+      const imgs = {};
+      imgs.summary = await toPng(ganttSvg('summary'));
+      if (kind !== 'needs') imgs.master = await toPng(ganttSvg('master'), 1.6);
+      if (kind === 'report') imgs.burndown = await toPng(burndownSvg());
+      const d = DocGen.assemble(kind, P, UI.lang, todayT(), imgs);
+      saveFile(d.bytes, d.name, DOCX); st.textContent = t('downloaded') + d.name;
+    } else if (kind === 'gs' || kind === 'gm' || kind === 'bd') {
+      const png = await toPng(kind === 'bd' ? burndownSvg() : ganttSvg(kind === 'gs' ? 'summary' : 'master'));
+      const name = `${base}-${kind === 'bd' ? 'burndown' : kind === 'gs' ? 'gantt-summary' : 'gantt-master'}.png`;
+      saveFile(png.bytes, name, 'image/png'); st.textContent = t('downloaded') + name;
+    } else if (kind === 'csv') { saveFile(new TextEncoder().encode('﻿' + GanttIO.toCSV(P)), `${base}-gantt.csv`, 'text/csv'); st.textContent = t('downloaded') + `${base}-gantt.csv`; }
+    else if (kind === 'json') { saveFile(new TextEncoder().encode(JSON.stringify(P, null, 2)), `${base}.json`, 'application/json'); st.textContent = t('downloaded') + `${base}.json`; }
+  } catch (e) { console.warn('download failed', e); st.textContent = t('dlError'); st.className = 'dl-status err'; }
+}
+const menu = $('dlMenu'), dlBtn = $('dlBtn');
+const setMenu = open => { menu.hidden = !open; dlBtn.setAttribute('aria-expanded', open); if (open) menu.querySelector('button').focus(); };
+dlBtn.addEventListener('click', ev => { ev.stopPropagation(); setMenu(menu.hidden); });
+menu.addEventListener('click', ev => { const b = ev.target.closest('[data-dl]'); if (!b) return; ev.stopPropagation(); download(b.dataset.dl); });
+document.addEventListener('click', ev => { if (!menu.hidden && !ev.target.closest('#dl')) setMenu(false); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !menu.hidden) { setMenu(false); dlBtn.focus(); } });
+window.__export = { ganttSvg, burndownSvg };
+try { $('dlFrameNote').hidden = window.top === window.self; } catch { $('dlFrameNote').hidden = false; }
+
+function renderDocsEditor() {
+  const F = DocGen.FIELDS, d = P.docs || {};
+  $('docFields').innerHTML = `<div class="f"><label for="doc-author">${esc(t('author'))}</label><input id="doc-author" maxlength="200" value="${esc(d.author || '')}"></div>
+    <div class="f"><label for="doc-sponsor">${esc(t('sponsor'))}</label><input id="doc-sponsor" maxlength="200" value="${esc(d.sponsor || '')}"></div>` +
+    F.map(([k, fr, en]) => `<div class="f wide"><label for="doc-${k}">${esc(UI.lang === 'fr' ? fr : en)}</label><textarea id="doc-${k}" class="doc-ta" rows="4" maxlength="20000" spellcheck="true">${esc(d[k] || '')}</textarea></div>`).join('');
+}
+$('saveDocs').addEventListener('click', () => {
+  const docs = { author: $('doc-author').value, sponsor: $('doc-sponsor').value };
+  DocGen.FIELDS.forEach(([k]) => { docs[k] = $('doc-' + k).value; });
+  P = C.validateProject({ ...P, docs }).project; commit();
+  $('docMsg').textContent = t('saved'); $('docMsg').className = 'ok';
+});
+
 /* ---------- wiring ---------- */
-function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); if (!editing) fillFormSilent(); }
+function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() { persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));

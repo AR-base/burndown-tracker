@@ -1,5 +1,5 @@
 /*
-  Content-Security-Policy: default-src 'none'; script-src 'sha256-MKsyoe/r14Tw3AENFxuVTXJg4A+bbPTk7YL6PwJeE7E=' 'sha256-F+0OgRWw9GNbOFe1EbQa1k6/lTYmlKpJMKtdu9ei7SQ=' 'sha256-MUTJzh7EvdaCAwu1uGmK/hSs2brZROJOIL0i4HfekiU=' 'sha256-MIhMmeGgBK2U8OARKXKgmbSZJh2DFTF8HPVbqBrvMaY='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-ulw1Jn0TXoWTGTGctqOVJnhCb1BAthsuK3n+nXiCqr8=' 'sha256-F+0OgRWw9GNbOFe1EbQa1k6/lTYmlKpJMKtdu9ei7SQ=' 'sha256-y4ZMo0GE6bodQvIAsbVTFgEbYLWBwxWyy/ASzaoegGc=' 'sha256-iZySUeQ47PONWb7x7LoXjEvS2ctTNc1yK3v2da2k12c=' 'sha256-gu/AZ7JpluwLx0TC07Hcl7rFUl+6IyhtOQ7oS4CJg2U='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()

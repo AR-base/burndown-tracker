@@ -80,7 +80,24 @@ Exports : JSON (sauvegarde complète), CSV (Excel), Mermaid Gantt (à coller dan
 
 ---
 
-## 3. Calculs / Formulas
+## 3. Télécharger les documents / Download documents
+
+Bouton **Télécharger** en haut à droite / **Download** button, top right:
+
+| Fichier / File | Contenu / Content |
+| --- | --- |
+| Cahier des charges (.docx) / Requirements spec | Fiche projet, contexte, objectifs, périmètre, parties prenantes, exigences, contraintes, phases, jalons, Gantt synthétique |
+| Dossier technique (.docx) / Technical document | Architecture, stack, sécurité, tests, déploiement, Gantt synthétique + maître, WBS, chemin critique, risques |
+| Rapport complet (.docx) / Full report | Tout, plus résumé, indicateurs, burndown, historique hebdomadaire, tâches à surveiller, conclusion |
+| Gantt synthétique / maître, Burndown (.png) | Graphiques haute résolution / High-resolution charts |
+| Gantt (.csv), Projet (.json) | Pour Excel / pour réimporter / For Excel / to re-import |
+
+Ça marche pour **n'importe quel projet importé** : planning, Gantt, burndown et indicateurs sont générés automatiquement ; le texte (contexte, exigences, architecture…) se saisit dans **Projet → Contenu des documents** (`- ` puce, `A | B | C` tableau, `## ` sous-titre). Langue des documents = langue de l'interface.
+Works for **any imported project**: schedule, Gantts, burndown and KPIs are generated; text is entered in **Project → Document content**. Document language follows the interface.
+
+Les fichiers .docx sont générés dans le navigateur (aucun serveur) et s'ouvrent dans Word, LibreOffice et Google Docs. / .docx files are built in the browser (no server) and open in Word, LibreOffice and Google Docs.
+
+## 4. Calculs / Formulas
 
 | Indicateur / Metric | Calcul / Formula |
 | --- | --- |
@@ -96,15 +113,15 @@ Exports : JSON (sauvegarde complète), CSV (Excel), Mermaid Gantt (à coller dan
 
 ---
 
-## 4. Développement / Development
+## 5. Développement / Development
 
 ```bash
 npm install        # jsdom pour les tests DOM / for DOM tests
 npm run build      # src/ → index.html + hachages CSP dans vercel.json et _headers
-npm test           # 10 tests logique + 8 tests import/export + 18 tests interface
+npm test           # 10 logique + 8 import/export + 12 documents .docx + 26 interface = 56 tests
 ```
 
-Structure : `src/core.js` (calculs purs), `src/io.js` (CSV/Mermaid), `src/app.js` (interface), `src/app.html` (gabarit + CSS), `src/sample.js` (projet exemple ESAIP AI Assistant).
+Structure : `src/core.js` (calculs purs), `src/io.js` (CSV/Mermaid), `src/docgen.js` (générateur .docx sans dépendance), `src/app.js` (interface), `src/app.html` (gabarit + CSS), `src/sample.js` (projet exemple ESAIP AI Assistant).
 La CI GitHub Actions (`.github/workflows/ci.yml`) reconstruit et teste à chaque push.
 
 Sécurité / Security: entrées validées et bornées (IDs, dates, tailles ≤ 2 Mo), tout texte échappé avant affichage, détection des cycles de dépendances, aucun secret, aucune requête réseau sortante (`connect-src 'none'`).
