@@ -1128,7 +1128,7 @@ const I18N = {
     download: 'Télécharger', dlDocs: 'Documents Word (.docx)', dlNeeds: 'Cahier des charges', dlTech: 'Dossier technique', dlReport: 'Rapport complet',
     dlImgs: 'Graphiques et données', dlGs: 'Gantt synthétique', dlGm: 'Gantt maître', dlBd: 'Burndown', dlCsv: 'Gantt pour Excel', dlJson: 'Projet complet',
     dlLang: 'Langue des documents : celle de l’interface (FR/EN).', dlFrame: 'Dans l’aperçu Claude, le navigateur peut bloquer les téléchargements : utilisez la version déployée.',
-    generating: 'Génération…', downloaded: 'Téléchargé : ', dlError: 'Échec de la génération. Réessayez.',
+    generating: 'Génération…', dlDeclined: 'Téléchargement annulé.', dlBusy: 'Une confirmation est déjà ouverte, réessayez.', downloaded: 'Téléchargé : ', dlError: 'Échec de la génération. Réessayez.',
     docContent: 'Contenu des documents', docHint: 'Ce texte alimente le cahier des charges, le dossier technique et le rapport. Une ligne « - » = puce · « A | B | C » = ligne de tableau (la 1re = en-tête) · « ## » = sous-titre. Le planning, les Gantt et le burndown sont générés automatiquement.',
     author: 'Auteur / chef de projet', sponsor: 'Sponsor / client',
     fsWarn: 'Attention : commence avant la fin de ', blankName: 'Nouveau projet', pts: 'pts', d: 'j',
@@ -1164,7 +1164,7 @@ const I18N = {
     download: 'Download', dlDocs: 'Word documents (.docx)', dlNeeds: 'Requirements specification', dlTech: 'Technical document', dlReport: 'Full report',
     dlImgs: 'Charts and data', dlGs: 'Summary Gantt', dlGm: 'Master Gantt', dlBd: 'Burndown', dlCsv: 'Gantt for Excel', dlJson: 'Full project',
     dlLang: 'Document language follows the interface (FR/EN).', dlFrame: 'In the Claude preview the browser may block downloads: use the deployed version.',
-    generating: 'Generating…', downloaded: 'Downloaded: ', dlError: 'Generation failed. Try again.',
+    generating: 'Generating…', dlDeclined: 'Download cancelled.', dlBusy: 'A confirmation is already open, try again.', downloaded: 'Downloaded: ', dlError: 'Generation failed. Try again.',
     docContent: 'Document content', docHint: 'This text feeds the requirements spec, technical document and report. A "- " line = bullet · "A | B | C" = table row (first = header) · "## " = subheading. Schedule, Gantts and burndown are generated automatically.',
     author: 'Author / project manager', sponsor: 'Sponsor / client',
     fsWarn: 'Warning: starts before the end of ', blankName: 'New project', pts: 'pts', d: 'd',
@@ -1604,16 +1604,25 @@ function toPng({ svg, W, H }, scale = 2) {
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   });
 }
-function saveFile(bytes, name, type) {
-  const url = URL.createObjectURL(new Blob([bytes], { type }));
+// Inside the Claude viewer, files go through its `downloads` capability; on a normal site, a blob link.
+const dlCap = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+async function saveFile(bytes, name, type) {
+  const blob = new Blob([bytes], { type }), cap = await dlCap;
+  if (cap) {
+    try { await cap.save({ filename: name, data: blob }); return 'saved'; }
+    catch (e) { if (e && e.code === 'declined') return 'declined'; if (e && e.code === 'rate_limited') return 'busy'; }
+  }
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = name; a.rel = 'noopener';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
+  return 'saved';
 }
 const slug = s => String(s).replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'projet';
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 async function download(kind) {
   const st = $('dlStatus'); st.textContent = t('generating'); st.className = 'dl-status';
+  const report = (r, name) => { st.textContent = r === 'saved' ? t('downloaded') + name : r === 'declined' ? t('dlDeclined') : t('dlBusy'); st.className = 'dl-status' + (r === 'saved' ? '' : ' err'); };
   try {
     const base = slug(P.code || P.name);
     if (['needs', 'technical', 'report'].includes(kind)) {
@@ -1622,13 +1631,13 @@ async function download(kind) {
       if (kind !== 'needs') imgs.master = await toPng(ganttSvg('master'), 1.6);
       if (kind === 'report') imgs.burndown = await toPng(burndownSvg());
       const d = DocGen.assemble(kind, P, UI.lang, todayT(), imgs);
-      saveFile(d.bytes, d.name, DOCX); st.textContent = t('downloaded') + d.name;
+      report(await saveFile(d.bytes, d.name, DOCX), d.name);
     } else if (kind === 'gs' || kind === 'gm' || kind === 'bd') {
       const png = await toPng(kind === 'bd' ? burndownSvg() : ganttSvg(kind === 'gs' ? 'summary' : 'master'));
       const name = `${base}-${kind === 'bd' ? 'burndown' : kind === 'gs' ? 'gantt-summary' : 'gantt-master'}.png`;
-      saveFile(png.bytes, name, 'image/png'); st.textContent = t('downloaded') + name;
-    } else if (kind === 'csv') { saveFile(new TextEncoder().encode('﻿' + GanttIO.toCSV(P)), `${base}-gantt.csv`, 'text/csv'); st.textContent = t('downloaded') + `${base}-gantt.csv`; }
-    else if (kind === 'json') { saveFile(new TextEncoder().encode(JSON.stringify(P, null, 2)), `${base}.json`, 'application/json'); st.textContent = t('downloaded') + `${base}.json`; }
+      report(await saveFile(png.bytes, name, 'image/png'), name);
+    } else if (kind === 'csv') report(await saveFile(new TextEncoder().encode('\uFEFF' + GanttIO.toCSV(P)), `${base}-gantt.csv`, 'text/csv'), `${base}-gantt.csv`);
+    else if (kind === 'json') report(await saveFile(new TextEncoder().encode(JSON.stringify(P, null, 2)), `${base}.json`, 'application/json'), `${base}.json`);
   } catch (e) { console.warn('download failed', e); st.textContent = t('dlError'); st.className = 'dl-status err'; }
 }
 const menu = $('dlMenu'), dlBtn = $('dlBtn');
@@ -1637,8 +1646,7 @@ dlBtn.addEventListener('click', ev => { ev.stopPropagation(); setMenu(menu.hidde
 menu.addEventListener('click', ev => { const b = ev.target.closest('[data-dl]'); if (!b) return; ev.stopPropagation(); download(b.dataset.dl); });
 document.addEventListener('click', ev => { if (!menu.hidden && !ev.target.closest('#dl')) setMenu(false); });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !menu.hidden) { setMenu(false); dlBtn.focus(); } });
-window.__export = { ganttSvg, burndownSvg };
-try { $('dlFrameNote').hidden = window.top === window.self; } catch { $('dlFrameNote').hidden = false; }
+dlCap.then(cap => { let framed = true; try { framed = window.top !== window.self; } catch { /* cross-origin */ } $('dlFrameNote').hidden = !!cap || !framed; });
 
 function renderDocsEditor() {
   const F = DocGen.FIELDS, d = P.docs || {};

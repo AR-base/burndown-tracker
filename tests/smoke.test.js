@@ -57,9 +57,12 @@ w.HTMLAnchorElement.prototype.click = function () { saved.push(this.download); }
 click($('dlBtn'));
 check('download menu opens', !$('dlMenu').hidden && $('dlBtn').getAttribute('aria-expanded') === 'true');
 check('menu lists 3 Word documents', d.querySelectorAll('[data-dl$="s"],[data-dl="technical"],[data-dl="report"]').length >= 3);
+(async () => {
 click(d.querySelector('[data-dl="csv"]'));
+await new Promise(r => setTimeout(r, 50));
 check('CSV download triggered', saved.some(x => typeof x === 'string' && x.endsWith('-gantt.csv')));
 click(d.querySelector('[data-dl="json"]'));
+await new Promise(r => setTimeout(r, 50));
 check('JSON download triggered', saved.some(x => typeof x === 'string' && x.endsWith('.json')));
 d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape' }));
 check('Escape closes menu', $('dlMenu').hidden);
@@ -70,3 +73,4 @@ check('document content saved into project', JSON.parse(w.localStorage.getItem('
 check('docs editor escapes text', !$('docFields').querySelector('b'));
 check('no runtime errors after downloads', errors.length === 0);
 if (errors.length) console.log(errors);
+})();
