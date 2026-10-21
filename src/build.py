@@ -2,7 +2,7 @@
 import hashlib, base64, re, json, pathlib
 root = pathlib.Path(__file__).resolve().parent.parent
 src = (root / 'src' / 'app.html').read_text(encoding='utf-8')
-for k, f in [('CORE', 'core.js'), ('IO', 'io.js'), ('DOCGEN', 'docgen.js'), ('SAMPLE', 'sample.js'), ('APP', 'app.js')]:
+for k, f in [('CORE', 'core.js'), ('IO', 'io.js'), ('DOCGEN', 'docgen.js'), ('KB', 'kb.js'), ('GEN', 'generator.js'), ('SAMPLE', 'sample.js'), ('APP', 'app.js')]:
     src = src.replace('/*%s*/' % k, (root / 'src' / f).read_text(encoding='utf-8').replace('</script', '<\\/script'))
 page = ('<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'

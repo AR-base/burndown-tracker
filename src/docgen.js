@@ -176,7 +176,11 @@ const DocGen = (() => {
     if (spec.status) {
       out.push({ k: 'h1', t: T.exec });
       const pct = b.total ? Math.round(b.done / b.total * 100) : 0, slip = b.forecast !== null ? C.diffDays(C.parseDate(P.end), b.forecast) : null;
-      out.push({ k: 'p', t: lang === 'fr'
+      const firstEnd = P.tasks.length ? Math.min(...P.tasks.map(k => C.parseDate(k.end))) : Infinity;
+      if (b.done === 0 && now < firstEnd) out.push({ k: 'p', t: lang === 'fr'
+        ? `Le projet démarre le ${dfmt(C.parseDate(P.start), lang)} et se termine le ${dfmt(C.parseDate(P.end), lang)} : ${P.tasks.length} tâches, ${b.total} points d’effort, ${P.milestones.length} jalons. Le suivi (burndown, SPI, fin prévue) se met à jour dès que les premières tâches sont terminées.`
+        : `The project starts on ${dfmt(C.parseDate(P.start), lang)} and ends on ${dfmt(C.parseDate(P.end), lang)}: ${P.tasks.length} tasks, ${b.total} effort points, ${P.milestones.length} milestones. Tracking (burndown, SPI, forecast) updates as soon as the first tasks are done.` });
+      else out.push({ k: 'p', t: lang === 'fr'
         ? `Au ${dfmt(now, lang)}, ${b.done} points sur ${b.total} sont terminés (${pct} %) ; SPI ${num(h.spi, lang, 2)} : le projet est **${T.statusW[h.status]}**. ${b.forecast !== null ? `La fin prévue au rythme actuel est le ${dfmt(b.forecast, lang)} (${slip > 0 ? '+' : ''}${slip} jours par rapport au ${dfmt(C.parseDate(P.end), lang)}).` : 'Aucune vélocité mesurée pour l’instant.'} Vélocité : ${num(b.velocityWeek, lang)} pts/sem, requise : ${num(b.requiredWeek, lang)} pts/sem.`
         : `As of ${dfmt(now, lang)}, ${b.done} of ${b.total} points are done (${pct}%); SPI ${num(h.spi, lang, 2)}: the project is **${T.statusW[h.status]}**. ${b.forecast !== null ? `At the current pace it finishes on ${dfmt(b.forecast, lang)} (${slip > 0 ? '+' : ''}${slip} days vs ${dfmt(C.parseDate(P.end), lang)}).` : 'No velocity measured yet.'} Velocity: ${num(b.velocityWeek, lang)} pts/wk, required: ${num(b.requiredWeek, lang)} pts/wk.` });
       if (docs.context) out.push(...textBlocks(docs.context).slice(0, 1));

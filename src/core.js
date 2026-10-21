@@ -155,7 +155,9 @@ const Core = (() => {
   function health(p, todayT) {
     const now = statusTime(p, todayT);
     const pv = plannedAt(p, now), ev = earned(p), total = totalPoints(p);
-    const spi = pv > 0 ? ev / pv : 1;
+    // Before the first planned finish nothing is due yet: the project cannot be late.
+    const firstEnd = p.tasks.length ? Math.min(...p.tasks.map(k => parseDate(k.end))) : Infinity;
+    const spi = now < firstEnd ? 1 : pv > 0 ? ev / pv : 1;
     const status = spi >= 0.95 ? 'on' : spi >= 0.8 ? 'risk' : 'late';
     return { pv, ev, spi, status, pctEarned: total ? ev / total : 0, pctPlanned: total ? pv / total : 0 };
   }

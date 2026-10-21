@@ -138,6 +138,35 @@ td.r,th.r{text-align:right}
 .edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 .edit-row input[type=color]{padding:2px;height:32px}
 @media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+/* assistant */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.wiz{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.wiz{grid-template-columns:minmax(0,1fr)}}
+.wiz-main{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.wiz-h{font:700 26px/1.15 var(--f-display);margin:0;text-wrap:balance}
+.wiz-lead{margin:0;color:var(--muted);max-width:62ch}
+.wiz-input{width:100%;border:2px solid var(--line);border-radius:var(--r);background:var(--sunk);padding:12px 14px;font:16px/1.5 var(--f-body);resize:vertical;min-height:84px}
+.wiz-input:focus{border-color:var(--accent);outline:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:12.5px;cursor:pointer;color:var(--muted)}
+.chips button:hover{border-color:var(--accent);color:var(--accent)}
+.wiz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.wiz-grid .f input,.wiz-grid .f select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:7px 9px;width:100%;min-width:0}
+.lbl{font:600 11.5px/1.2 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.wiz-grid .seg{width:100%}.wiz-grid .seg button{flex:1;padding:8px 6px}
+.wiz-detect{margin:0;font-size:13px;color:var(--muted);min-height:1.2em}
+.wiz-detect b{color:var(--ink)}
+.wiz-go{padding:10px 18px;font-size:15px}
+.wiz-ai{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.wiz-steps{list-style:none;counter-reset:s;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.wiz-steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px 12px 48px;position:relative;display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--muted)}
+.wiz-steps li::before{content:counter(s);position:absolute;left:14px;top:12px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font:600 12px/22px var(--f-mono);text-align:center}
+.wiz-steps b{color:var(--ink);font:600 14px var(--f-display)}
+.wiz-res{margin-top:16px;border-color:var(--accent)}
+.wiz-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:0 0 4px}
+.wiz-stats div{min-width:0}.wiz-stats dt{font:600 11px/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wiz-stats dd{margin:4px 0 0;font:500 17px/1.3 var(--f-mono);overflow-wrap:anywhere}
+
 /* download menu */
 .dl{position:relative}
 .dl-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px}
@@ -166,6 +195,7 @@ td.r,th.r{text-align:right}
       <button type="button" id="lang-fr" data-lang="fr">FR</button>
       <button type="button" id="lang-en" data-lang="en">EN</button>
     </div>
+    <button class="btn" type="button" id="newBtn"><span aria-hidden="true">+</span> <span data-i="newProject"></span></button>
     <div class="dl" id="dl">
       <button class="btn pri dl-btn" type="button" id="dlBtn" aria-haspopup="true" aria-expanded="false" aria-controls="dlMenu">
         <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v9m0 0L4.5 6.5M8 10l3.5-3.5M2 12v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -192,6 +222,53 @@ td.r,th.r{text-align:right}
 <main class="wrap">
   <section class="kpis" id="kpis" aria-live="polite"></section>
   <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <section class="panel" id="tab-assistant" role="tabpanel" hidden>
+    <div class="wiz">
+      <div class="wiz-main">
+        <p class="eyebrow" data-i="wzEyebrow"></p>
+        <h2 class="wiz-h" data-i="wzTitle"></h2>
+        <p class="wiz-lead" data-i="wzLead"></p>
+        <label class="sr" for="wz-desc" data-i="wzTitle"></label>
+        <textarea id="wz-desc" class="wiz-input" rows="3" maxlength="600"></textarea>
+        <div class="chips" id="wzChips" aria-label="Examples"></div>
+        <div class="wiz-grid">
+          <div class="f"><label for="wz-client" data-i="wzClient"></label><input id="wz-client" maxlength="80"></div>
+          <div class="f"><label for="wz-start" data-i="start"></label><input id="wz-start" type="date"></div>
+          <div class="f"><label for="wz-type" data-i="wzType"></label><select id="wz-type"></select></div>
+          <div class="f"><span class="lbl" id="wzSizeLbl" data-i="wzSize"></span>
+            <div class="seg" role="group" aria-labelledby="wzSizeLbl" id="wzSize">
+              <button type="button" id="sz-small" data-size="small"></button><button type="button" id="sz-medium" data-size="medium"></button><button type="button" id="sz-large" data-size="large"></button>
+            </div></div>
+        </div>
+        <p class="wiz-detect" id="wzDetect" aria-live="polite"></p>
+        <div class="actions">
+          <button class="btn pri wiz-go" id="wzGo" type="button"></button>
+          <label class="wiz-ai" id="wzAiWrap" hidden><input type="checkbox" id="wzAi" checked> <span data-i="wzAi"></span></label>
+          <span id="wzMsg" role="status"></span>
+        </div>
+      </div>
+      <ol class="wiz-steps" aria-label="Steps">
+        <li><b data-i="wzS1"></b><span data-i="wzS1d"></span></li>
+        <li><b data-i="wzS2"></b><span data-i="wzS2d"></span></li>
+        <li><b data-i="wzS3"></b><span data-i="wzS3d"></span></li>
+      </ol>
+    </div>
+    <div class="card wiz-res" id="wzResult" hidden>
+      <div class="card-h"><h2 id="wzResTitle"></h2><button class="btn" id="wzUndo" type="button" data-i="wzUndo"></button></div>
+      <div class="card-b">
+        <dl class="wiz-stats" id="wzStats"></dl>
+        <div class="actions">
+          <button class="btn pri" type="button" data-wdl="needs"><span data-i="dlNeeds"></span> · .docx</button>
+          <button class="btn pri" type="button" data-wdl="technical"><span data-i="dlTech"></span> · .docx</button>
+          <button class="btn pri" type="button" data-wdl="report"><span data-i="dlReport"></span> · .docx</button>
+          <button class="btn" type="button" id="wzSeeGantt" data-i="wzSeeGantt"></button>
+          <button class="btn" type="button" id="wzEdit" data-i="wzEdit"></button>
+        </div>
+        <p class="dl-status" id="wzDlStatus" role="status"></p>
+      </div>
+    </div>
+  </section>
 
   <section class="panel" id="tab-burndown" role="tabpanel">
     <div class="grid2">
@@ -478,7 +555,9 @@ const Core = (() => {
   function health(p, todayT) {
     const now = statusTime(p, todayT);
     const pv = plannedAt(p, now), ev = earned(p), total = totalPoints(p);
-    const spi = pv > 0 ? ev / pv : 1;
+    // Before the first planned finish nothing is due yet: the project cannot be late.
+    const firstEnd = p.tasks.length ? Math.min(...p.tasks.map(k => parseDate(k.end))) : Infinity;
+    const spi = now < firstEnd ? 1 : pv > 0 ? ev / pv : 1;
     const status = spi >= 0.95 ? 'on' : spi >= 0.8 ? 'risk' : 'late';
     return { pv, ev, spi, status, pctEarned: total ? ev / total : 0, pctPlanned: total ? pv / total : 0 };
   }
@@ -911,7 +990,11 @@ const DocGen = (() => {
     if (spec.status) {
       out.push({ k: 'h1', t: T.exec });
       const pct = b.total ? Math.round(b.done / b.total * 100) : 0, slip = b.forecast !== null ? C.diffDays(C.parseDate(P.end), b.forecast) : null;
-      out.push({ k: 'p', t: lang === 'fr'
+      const firstEnd = P.tasks.length ? Math.min(...P.tasks.map(k => C.parseDate(k.end))) : Infinity;
+      if (b.done === 0 && now < firstEnd) out.push({ k: 'p', t: lang === 'fr'
+        ? `Le projet démarre le ${dfmt(C.parseDate(P.start), lang)} et se termine le ${dfmt(C.parseDate(P.end), lang)} : ${P.tasks.length} tâches, ${b.total} points d’effort, ${P.milestones.length} jalons. Le suivi (burndown, SPI, fin prévue) se met à jour dès que les premières tâches sont terminées.`
+        : `The project starts on ${dfmt(C.parseDate(P.start), lang)} and ends on ${dfmt(C.parseDate(P.end), lang)}: ${P.tasks.length} tasks, ${b.total} effort points, ${P.milestones.length} milestones. Tracking (burndown, SPI, forecast) updates as soon as the first tasks are done.` });
+      else out.push({ k: 'p', t: lang === 'fr'
         ? `Au ${dfmt(now, lang)}, ${b.done} points sur ${b.total} sont terminés (${pct} %) ; SPI ${num(h.spi, lang, 2)} : le projet est **${T.statusW[h.status]}**. ${b.forecast !== null ? `La fin prévue au rythme actuel est le ${dfmt(b.forecast, lang)} (${slip > 0 ? '+' : ''}${slip} jours par rapport au ${dfmt(C.parseDate(P.end), lang)}).` : 'Aucune vélocité mesurée pour l’instant.'} Vélocité : ${num(b.velocityWeek, lang)} pts/sem, requise : ${num(b.requiredWeek, lang)} pts/sem.`
         : `As of ${dfmt(now, lang)}, ${b.done} of ${b.total} points are done (${pct}%); SPI ${num(h.spi, lang, 2)}: the project is **${T.statusW[h.status]}**. ${b.forecast !== null ? `At the current pace it finishes on ${dfmt(b.forecast, lang)} (${slip > 0 ? '+' : ''}${slip} days vs ${dfmt(C.parseDate(P.end), lang)}).` : 'No velocity measured yet.'} Velocity: ${num(b.velocityWeek, lang)} pts/wk, required: ${num(b.requiredWeek, lang)} pts/wk.` });
       if (docs.context) out.push(...textBlocks(docs.context).slice(0, 1));
@@ -966,6 +1049,493 @@ const DocGen = (() => {
   return { zip, crc32, build, textBlocks, assemble, FIELDS, DOCS };
 })();
 if (typeof module !== 'undefined') module.exports = DocGen;
+</script>
+<script>/* Project knowledge base: one entry per kind of project a client may describe in plain words.
+   feature tuple: [nameFr, nameEn, plainDescFr, plainDescEn, days(medium), points, priority M|S|C]
+   stack row: [layer, choice, whyFr, whyEn] · comp: [name, roleFr, roleEn] · objective: [fr, en, kpiFr, kpiEn, target]
+   nfr: [category, fr, en] · threat: [fr, en, controlFr, controlEn] · risk: [fr, en, P, I, responseFr, responseEn] */
+const KB = [
+  {
+    id: 'ecommerce', fr: 'Site e-commerce', en: 'E-commerce website', code: 'ECOM',
+    kw: ['e-commerce', 'ecommerce', 'e commerce', 'boutique en ligne', 'online store', 'online shop', 'shop', 'boutique', 'vente en ligne', 'vendre', 'vente', 'sell', 'selling', 'acheter', 'buy', 'panier', 'cart', 'checkout', 'paiement', 'payment', 'produits', 'products', 'catalogue', 'commande', 'orders', 'magasin', 'marketplace', 'dropshipping', 'shopify', 'woocommerce', 'vetements', 'clothes', 'bijoux', 'jewelry'],
+    users: ['Acheteurs en ligne', 'Online shoppers'], owner: ['Marchand', 'Merchant'],
+    features: [
+      ['Catalogue produits et recherche', 'Product catalogue and search', 'Les visiteurs parcourent les produits par catégorie, filtrent (prix, taille, couleur) et cherchent par mot-clé.', 'Visitors browse products by category, filter (price, size, colour) and search by keyword.', 6, 8, 'M'],
+      ['Fiche produit', 'Product page', 'Chaque produit a sa page : photos, description, prix et stock disponible.', 'Each product has its page: photos, description, price and stock.', 4, 5, 'M'],
+      ['Panier et commande', 'Cart and checkout', 'Le client ajoute des articles au panier, saisit son adresse et valide sa commande en 3 étapes.', 'Customers add items to a cart, enter their address and confirm the order in 3 steps.', 6, 8, 'M'],
+      ['Paiement en ligne sécurisé', 'Secure online payment', 'Paiement par carte via un prestataire certifié (Stripe) : le site ne stocke jamais la carte.', 'Card payment through a certified provider (Stripe): the site never stores the card.', 5, 8, 'M'],
+      ['Comptes clients', 'Customer accounts', 'Création de compte, connexion, historique des commandes et adresses enregistrées.', 'Sign-up, login, order history and saved addresses.', 4, 5, 'M'],
+      ['Back-office marchand', 'Merchant back office', 'Le marchand ajoute ses produits, gère ses stocks et suit ses commandes sans aide technique.', 'The merchant adds products, manages stock and follows orders without technical help.', 7, 8, 'M'],
+      ['Livraison et suivi de colis', 'Shipping and parcel tracking', 'Choix du mode de livraison, frais calculés automatiquement, numéro de suivi envoyé au client.', 'Delivery options, automatic shipping fees, tracking number sent to the customer.', 4, 5, 'S'],
+      ['E-mails automatiques', 'Automatic e-mails', 'Confirmation de commande, avis d’expédition, mot de passe oublié.', 'Order confirmation, shipping notice, password reset.', 2, 3, 'S'],
+      ['Référencement et statistiques', 'SEO and analytics', 'Bonne visibilité sur Google et suivi des visites, ventes et paniers abandonnés.', 'Good Google visibility and tracking of visits, sales and abandoned carts.', 3, 3, 'S'],
+      ['Codes promo et avis clients', 'Discount codes and reviews', 'Codes de réduction et notes laissées par les acheteurs.', 'Discount codes and ratings left by buyers.', 3, 3, 'C']
+    ],
+    stack: [['Boutique / Storefront', 'Next.js', 'Pages rapides, bien référencées', 'Fast, SEO-friendly pages'], ['Commerce', 'Medusa (Node.js)', 'Moteur e-commerce open source', 'Open-source commerce engine'], ['Base de données / Database', 'PostgreSQL', 'Fiable pour les commandes', 'Reliable for orders'], ['Paiement / Payment', 'Stripe', 'Certifié PCI-DSS, 3-D Secure', 'PCI-DSS certified, 3-D Secure'], ['Recherche / Search', 'Meilisearch', 'Recherche instantanée', 'Instant search'], ['Hébergement / Hosting', 'Vercel + Render', 'Déploiement automatique', 'Automatic deployment']],
+    comps: [['Boutique (front-end)', 'Pages produits, panier, compte client', 'Product pages, cart, customer account'], ['API commerce', 'Prix, stocks, commandes, règles métier', 'Prices, stock, orders, business rules'], ['Base de données', 'Produits, clients, commandes', 'Products, customers, orders'], ['Paiement Stripe', 'Encaissement sécurisé par carte', 'Secure card payment'], ['Back-office', 'Gestion du catalogue et des commandes', 'Catalogue and order management'], ['Services e-mail et transport', 'Notifications et suivi de colis', 'Notifications and parcel tracking']],
+    objectives: [['Vendre en ligne 24 h/24', 'Sell online 24/7', 'Taux de conversion', 'Conversion rate', '≥ 2 %'], ['Paiement fiable', 'Reliable payment', 'Paiements réussis', 'Successful payments', '≥ 98 %'], ['Gérer la boutique sans développeur', 'Run the shop without a developer', 'Produits ajoutés par le marchand seul', 'Products added by the merchant alone', '100 %']],
+    nfr: [['Performance', 'Pages en moins de 2 s avec 1 000 produits', 'Pages under 2 s with 1,000 products'], ['Mobile', 'Achat complet possible sur smartphone', 'Full purchase possible on a smartphone'], ['Paiement / Payment', 'Conformité PCI-DSS via Stripe', 'PCI-DSS compliance through Stripe']],
+    threats: [['Fraude au paiement', 'Payment fraud', '3-D Secure et détection de fraude Stripe Radar', '3-D Secure and Stripe Radar fraud detection'], ['Vol de comptes clients', 'Customer account takeover', 'Mots de passe hachés, limite de tentatives, 2FA pour l’admin', 'Hashed passwords, login rate limit, admin 2FA']],
+    risks: [['Intégration du paiement plus longue que prévu', 'Payment integration takes longer', 3, 4, 'Compte Stripe de test ouvert dès la conception', 'Stripe test account opened during design'], ['Photos et fiches produits fournies en retard', 'Product photos and texts delivered late', 4, 3, 'Gabarit de saisie et date limite au jalon M2', 'Entry template and deadline at milestone M2'], ['Pic de trafic pendant les soldes', 'Traffic peak during sales', 2, 4, 'CDN et test de charge avant la mise en ligne', 'CDN and load test before go-live']],
+    out: [['Application mobile native', 'Native mobile app'], ['Comptabilité et facturation fournisseur', 'Accounting and supplier invoicing'], ['Vente multi-devises (phase 2)', 'Multi-currency sales (phase 2)']]
+  },
+  {
+    id: 'website', fr: 'Site web vitrine', en: 'Showcase website', code: 'WEB',
+    kw: ['site vitrine', 'site web', 'site internet', 'website', 'web site', 'landing', 'landing page', 'portfolio', 'blog', 'wordpress', 'page web', 'presentation', 'présenter', 'presenter', 'association', 'restaurant', 'entreprise', 'company website', 'cv en ligne', 'agence'],
+    users: ['Visiteurs et prospects', 'Visitors and prospects'], owner: ['Entreprise cliente', 'Client company'],
+    features: [
+      ['Page d’accueil et présentation', 'Home and about pages', 'Une page d’accueil claire qui explique l’activité en 5 secondes.', 'A clear home page explaining the business in 5 seconds.', 4, 5, 'M'],
+      ['Pages services / offres', 'Services pages', 'Une page par service avec description, photos et appel à l’action.', 'One page per service with description, photos and a call to action.', 4, 5, 'M'],
+      ['Formulaire de contact', 'Contact form', 'Les visiteurs envoient une demande ; le client la reçoit par e-mail, avec protection anti-spam.', 'Visitors send a request; the client receives it by e-mail, with spam protection.', 2, 3, 'M'],
+      ['Gestion du contenu (CMS)', 'Content management (CMS)', 'Le client modifie textes et images lui-même, sans développeur.', 'The client edits texts and images without a developer.', 5, 5, 'M'],
+      ['Référencement Google (SEO)', 'Google ranking (SEO)', 'Titres, descriptions et structure optimisés pour apparaître dans Google.', 'Titles, descriptions and structure optimised to appear in Google.', 3, 3, 'M'],
+      ['Blog / actualités', 'Blog / news', 'Publication d’articles pour animer le site.', 'Publishing articles to keep the site alive.', 3, 3, 'S'],
+      ['Version anglaise', 'English version', 'Site disponible en français et en anglais.', 'Site available in French and English.', 3, 3, 'S'],
+      ['Statistiques de visite', 'Visitor analytics', 'Suivi du nombre de visiteurs et des pages vues, conforme RGPD.', 'GDPR-compliant tracking of visitors and page views.', 1, 2, 'C']
+    ],
+    stack: [['Site / Website', 'Astro ou WordPress', 'Rapide et simple à mettre à jour', 'Fast and easy to update'], ['CMS', 'Decap CMS / WordPress', 'Édition sans code', 'No-code editing'], ['Formulaires / Forms', 'Formspree + hCaptcha', 'Anti-spam sans serveur', 'Serverless anti-spam'], ['Hébergement / Hosting', 'Netlify ou Vercel', 'Gratuit, HTTPS automatique', 'Free, automatic HTTPS']],
+    comps: [['Pages du site', 'Contenu public, responsive', 'Public, responsive content'], ['CMS', 'Édition des contenus par le client', 'Content editing by the client'], ['Formulaire', 'Envoi des demandes par e-mail', 'Requests sent by e-mail'], ['CDN / hébergement', 'Diffusion rapide et HTTPS', 'Fast delivery and HTTPS']],
+    objectives: [['Être trouvé sur Google', 'Be found on Google', 'Position sur 3 mots-clés locaux', 'Ranking on 3 local keywords', 'Top 10'], ['Générer des contacts', 'Generate leads', 'Demandes reçues par mois', 'Requests per month', '≥ 10'], ['Site autonome', 'Self-managed site', 'Mises à jour faites par le client', 'Updates done by the client', '100 %']],
+    nfr: [['Performance', 'Score Lighthouse ≥ 90', 'Lighthouse score ≥ 90'], ['Mobile', 'Lisible sur tous les écrans', 'Readable on every screen size']],
+    threats: [['Spam via le formulaire', 'Form spam', 'Captcha et limite d’envois', 'Captcha and submission limit'], ['Site piraté (CMS non à jour)', 'Hacked site (outdated CMS)', 'Mises à jour automatiques, comptes admin en 2FA', 'Automatic updates, admin accounts with 2FA']],
+    risks: [['Textes et photos fournis en retard', 'Texts and photos delivered late', 4, 3, 'Liste des contenus validée au jalon M1', 'Content list signed off at milestone M1'], ['Validation du design qui traîne', 'Design approval drags on', 3, 3, '2 propositions maximum, validation en 5 jours', 'Max 2 proposals, approval within 5 days']],
+    out: [['Vente en ligne', 'Online sales'], ['Espace membre', 'Member area']]
+  },
+  {
+    id: 'mobile', fr: 'Application mobile', en: 'Mobile app', code: 'APP',
+    kw: ['application mobile', 'app mobile', 'mobile app', 'appli', 'android', 'ios', 'iphone', 'smartphone', 'flutter', 'react native', 'play store', 'app store', 'application telephone', 'phone app', 'notifications push'],
+    users: ['Utilisateurs sur smartphone', 'Smartphone users'], owner: ['Porteur du projet', 'Product owner'],
+    features: [
+      ['Inscription et connexion', 'Sign-up and login', 'Création de compte par e-mail ou Google/Apple, mot de passe oublié.', 'Account creation by e-mail or Google/Apple, password reset.', 4, 5, 'M'],
+      ['Écran d’accueil et navigation', 'Home screen and navigation', 'Navigation simple par onglets vers les fonctions principales.', 'Simple tab navigation to the main features.', 4, 5, 'M'],
+      ['Fonction principale du service', 'Core service feature', 'Le cœur de l’application : ce pour quoi l’utilisateur la télécharge.', 'The heart of the app: what users download it for.', 8, 13, 'M'],
+      ['Profil utilisateur', 'User profile', 'L’utilisateur modifie ses informations et préférences.', 'Users edit their details and preferences.', 3, 3, 'M'],
+      ['Notifications push', 'Push notifications', 'Alertes envoyées au téléphone au bon moment.', 'Alerts sent to the phone at the right time.', 3, 5, 'S'],
+      ['Mode hors connexion', 'Offline mode', 'Les données principales restent consultables sans réseau.', 'Main data stays available without network.', 4, 5, 'S'],
+      ['Back-office d’administration', 'Admin back office', 'Une interface web pour gérer utilisateurs et contenus.', 'A web interface to manage users and content.', 5, 5, 'S'],
+      ['Publication sur les stores', 'Store publication', 'Mise en ligne sur Google Play et l’App Store, fiches et captures.', 'Release on Google Play and the App Store, listings and screenshots.', 3, 3, 'M']
+    ],
+    stack: [['Application', 'Flutter', 'Une seule base de code Android + iOS', 'One codebase for Android + iOS'], ['API', 'Node.js (NestJS)', 'Structurée et testable', 'Structured and testable'], ['Base de données / Database', 'PostgreSQL', 'Fiable', 'Reliable'], ['Notifications', 'Firebase Cloud Messaging', 'Standard Android/iOS', 'Standard for Android/iOS'], ['Hébergement / Hosting', 'Render ou Railway', 'Simple et abordable', 'Simple and affordable']],
+    comps: [['App Flutter', 'Écrans et logique côté téléphone', 'Screens and on-device logic'], ['API', 'Comptes, données, règles métier', 'Accounts, data, business rules'], ['Base de données', 'Données des utilisateurs', 'User data'], ['Firebase', 'Notifications push', 'Push notifications'], ['Back-office web', 'Administration', 'Administration']],
+    objectives: [['Adoption', 'Adoption', 'Téléchargements à 3 mois', 'Downloads after 3 months', '≥ 1 000'], ['Satisfaction', 'Satisfaction', 'Note sur les stores', 'Store rating', '≥ 4,3/5'], ['Stabilité', 'Stability', 'Sessions sans plantage', 'Crash-free sessions', '≥ 99 %']],
+    nfr: [['Compatibilité / Compatibility', 'Android 10+ et iOS 15+', 'Android 10+ and iOS 15+'], ['Performance', 'Démarrage en moins de 2 s', 'Start-up under 2 s']],
+    threats: [['Vol de session', 'Session theft', 'Jetons courts, stockage sécurisé (Keychain/Keystore)', 'Short-lived tokens, secure storage (Keychain/Keystore)'], ['API exposée', 'Exposed API', 'Authentification sur chaque appel, limitation de débit', 'Auth on every call, rate limiting']],
+    risks: [['Refus de l’App Store', 'App Store rejection', 3, 4, 'Respect des règles Apple vérifié avant soumission', 'Apple guidelines checked before submission'], ['Différences Android / iOS', 'Android / iOS differences', 3, 3, 'Tests sur 4 appareils réels', 'Tests on 4 real devices']],
+    out: [['Version tablette dédiée', 'Dedicated tablet version'], ['Paiements dans l’application (phase 2)', 'In-app payments (phase 2)']]
+  },
+  {
+    id: 'chatbot', fr: 'Assistant IA / chatbot', en: 'AI assistant / chatbot', code: 'BOT',
+    kw: ['chatbot', 'chat bot', 'assistant ia', 'assistant ai', 'ai assistant', 'agent ia', 'ai agent', 'intelligence artificielle', 'artificial intelligence', 'llm', 'gpt', 'chatgpt', 'rag', 'claude', 'repond aux questions', 'answer questions', 'faq', 'support client', 'customer support', 'conversationnel'],
+    users: ['Utilisateurs qui posent des questions', 'People asking questions'], owner: ['Service client / organisation', 'Support team / organisation'],
+    features: [
+      ['Collecte des documents de référence', 'Knowledge collection', 'Rassembler les documents (FAQ, guides, pages web) dont l’assistant tirera ses réponses.', 'Gather the documents (FAQ, guides, web pages) the assistant will answer from.', 5, 5, 'M'],
+      ['Indexation et recherche (RAG)', 'Indexing and retrieval (RAG)', 'Les documents sont découpés et indexés pour retrouver le bon passage à chaque question.', 'Documents are split and indexed to find the right passage for each question.', 6, 8, 'M'],
+      ['Moteur de réponse avec sources', 'Answer engine with sources', 'L’IA répond uniquement à partir des documents et cite ses sources.', 'The AI answers only from the documents and cites its sources.', 6, 8, 'M'],
+      ['Interface de chat', 'Chat interface', 'Une fenêtre de discussion simple, sur le site ou en page dédiée.', 'A simple chat window, on the site or as its own page.', 5, 5, 'M'],
+      ['Garde-fous', 'Guardrails', 'Refus des questions hors sujet, blocage des tentatives de manipulation, pas de données personnelles.', 'Off-topic refusals, manipulation attempts blocked, no personal data.', 4, 5, 'M'],
+      ['Multilingue FR/EN', 'Multilingual FR/EN', 'Répond dans la langue de la question.', 'Replies in the language of the question.', 2, 3, 'S'],
+      ['Transfert vers un humain', 'Human handover', 'Si l’IA ne sait pas, elle propose un contact humain.', 'If the AI does not know, it offers a human contact.', 3, 3, 'S'],
+      ['Tableau de bord des questions', 'Questions dashboard', 'Questions fréquentes, réponses mal notées, coût d’utilisation.', 'Frequent questions, poorly rated answers, usage cost.', 4, 5, 'S'],
+      ['Mise à jour des documents par l’admin', 'Admin document updates', 'L’administrateur ajoute ou retire un document sans développeur.', 'The admin adds or removes a document without a developer.', 3, 3, 'C']
+    ],
+    stack: [['Interface / UI', 'Next.js', 'Chat rapide et intégrable', 'Fast, embeddable chat'], ['API', 'Python FastAPI', 'Écosystème IA', 'AI ecosystem'], ['Recherche / Retrieval', 'PostgreSQL + pgvector', 'Une seule base', 'One database'], ['Modèle / Model', 'API LLM (Claude)', 'Qualité des réponses, pas de serveur GPU', 'Answer quality, no GPU server'], ['Hébergement / Hosting', 'Vercel + Render', 'Déploiement automatique', 'Automatic deployment']],
+    comps: [['Interface de chat', 'Questions et réponses avec sources', 'Questions and cited answers'], ['API et garde-fous', 'Validation, filtrage, limitation de débit', 'Validation, filtering, rate limiting'], ['Index de connaissances', 'Passages des documents (vecteurs)', 'Document passages (vectors)'], ['Modèle de langage', 'Rédige la réponse à partir des passages', 'Writes the answer from the passages'], ['Admin et suivi', 'Documents, statistiques, coûts', 'Documents, statistics, costs']],
+    objectives: [['Répondre juste', 'Answer correctly', 'Réponses exactes sur 100 questions test', 'Correct answers on 100 test questions', '≥ 85 %'], ['Désengorger le support', 'Relieve the support team', 'Demandes traitées sans humain', 'Requests handled without a human', '≥ 50 %'], ['Rester rapide', 'Stay fast', 'Temps de réponse', 'Response time', '< 4 s']],
+    nfr: [['Fiabilité / Reliability', 'Aucune réponse sans source', 'No answer without a source'], ['Coût / Cost', 'Plafond mensuel de dépense IA', 'Monthly AI spend cap']],
+    threats: [['Injection de prompt', 'Prompt injection', 'Instructions système isolées, réponses limitées aux documents', 'Isolated system instructions, document-only answers'], ['Fuite de données', 'Data leakage', 'Aucune donnée personnelle indexée, masquage automatique', 'No personal data indexed, automatic masking']],
+    risks: [['Réponses inventées (hallucinations)', 'Made-up answers (hallucinations)', 4, 5, 'Réponses limitées aux sources + jeu de 100 questions test', 'Source-only answers + 100-question test set'], ['Documents obsolètes', 'Outdated documents', 4, 3, 'Date de mise à jour et revue mensuelle', 'Update date and monthly review'], ['Coût IA supérieur au budget', 'AI cost over budget', 3, 3, 'Plafond et cache des questions fréquentes', 'Cap and cache for frequent questions']],
+    out: [['Accès aux données personnelles des utilisateurs', 'Access to users’ personal data'], ['Assistant vocal', 'Voice assistant']]
+  },
+  {
+    id: 'dashboard', fr: 'Tableau de bord / BI', en: 'Dashboard / BI', code: 'BI',
+    kw: ['dashboard', 'tableau de bord', 'reporting', 'rapport automatique', 'bi', 'business intelligence', 'power bi', 'tableau', 'kpi', 'indicateurs', 'statistiques', 'visualisation', 'visualization', 'data viz', 'analyse des ventes', 'sales analysis', 'graphiques', 'charts', 'excel'],
+    users: ['Direction et managers', 'Management and managers'], owner: ['Direction', 'Management'],
+    features: [
+      ['Inventaire des sources de données', 'Data source inventory', 'Lister où sont les chiffres aujourd’hui (Excel, logiciel, base) et qui les met à jour.', 'List where today’s numbers live (Excel, software, database) and who updates them.', 4, 3, 'M'],
+      ['Définition des indicateurs (KPI)', 'KPI definitions', 'Choisir avec le client 8 à 12 indicateurs et leur formule exacte.', 'Choose 8 to 12 indicators with the client, with exact formulas.', 3, 3, 'M'],
+      ['Chaîne de chargement des données (ETL)', 'Data loading pipeline (ETL)', 'Les données sont récupérées et nettoyées automatiquement chaque nuit.', 'Data is collected and cleaned automatically every night.', 7, 8, 'M'],
+      ['Entrepôt de données', 'Data warehouse', 'Une base unique et propre qui sert de référence.', 'A single clean database used as the reference.', 4, 5, 'M'],
+      ['Tableaux de bord interactifs', 'Interactive dashboards', 'Graphiques filtrables par période, équipe, produit.', 'Charts filterable by period, team, product.', 7, 8, 'M'],
+      ['Droits d’accès par profil', 'Role-based access', 'Chaque personne ne voit que ce qui la concerne.', 'Everyone sees only what concerns them.', 3, 3, 'S'],
+      ['Alertes automatiques', 'Automatic alerts', 'E-mail quand un indicateur dépasse un seuil.', 'E-mail when an indicator crosses a threshold.', 3, 3, 'S'],
+      ['Export PDF / Excel', 'PDF / Excel export', 'Rapport mensuel exporté en un clic.', 'Monthly report exported in one click.', 2, 2, 'C']
+    ],
+    stack: [['Chargement / ETL', 'Python + dbt', 'Transformations versionnées et testées', 'Versioned, tested transformations'], ['Entrepôt / Warehouse', 'PostgreSQL', 'Simple et robuste', 'Simple and robust'], ['Visualisation', 'Metabase ou Power BI', 'Tableaux sans code', 'No-code dashboards'], ['Planification / Scheduling', 'GitHub Actions / cron', 'Chargement nocturne', 'Nightly loads']],
+    comps: [['Sources', 'Fichiers, logiciels, bases existants', 'Existing files, software, databases'], ['ETL', 'Extraction, nettoyage, contrôles qualité', 'Extraction, cleaning, quality checks'], ['Entrepôt', 'Données de référence', 'Reference data'], ['Outil de visualisation', 'Tableaux et filtres', 'Dashboards and filters']],
+    objectives: [['Décider sur des chiffres fiables', 'Decide on reliable numbers', 'Écart avec les chiffres officiels', 'Gap with official figures', '< 1 %'], ['Gagner du temps', 'Save time', 'Heures de reporting manuel par mois', 'Manual reporting hours per month', '−80 %'], ['Données fraîches', 'Fresh data', 'Délai de mise à jour', 'Refresh delay', '< 24 h']],
+    nfr: [['Qualité / Quality', 'Contrôles automatiques sur chaque chargement', 'Automatic checks on every load'], ['Performance', 'Tableaux affichés en moins de 3 s', 'Dashboards load under 3 s']],
+    threats: [['Accès à des données sensibles', 'Access to sensitive data', 'Droits par profil, connexion SSO', 'Role-based rights, SSO login'], ['Identifiants de bases dans le code', 'Database credentials in code', 'Coffre à secrets, comptes en lecture seule', 'Secret vault, read-only accounts']],
+    risks: [['Données sources de mauvaise qualité', 'Poor source data quality', 4, 4, 'Audit qualité dès la conception', 'Quality audit during design'], ['Indicateurs mal définis', 'Poorly defined KPIs', 3, 4, 'Fiche de définition signée par le client', 'Definition sheet signed by the client']],
+    out: [['Saisie de données dans le tableau de bord', 'Data entry in the dashboard'], ['Prévisions par IA (phase 2)', 'AI forecasting (phase 2)']]
+  },
+  {
+    id: 'ml', fr: 'Modèle d’IA / Machine learning', en: 'Machine learning model', code: 'ML',
+    kw: ['machine learning', 'apprentissage automatique', 'deep learning', 'prediction', 'prédiction', 'predict', 'prevoir', 'forecast', 'prevision', 'classification', 'detection', 'détection', 'reconnaissance', 'recognition', 'computer vision', 'vision par ordinateur', 'modele ia', 'ai model', 'neural', 'reseau de neurones', 'scoring', 'anomalie', 'anomaly', 'recommandation', 'recommendation'],
+    users: ['Équipes métier qui utilisent les prédictions', 'Business teams using predictions'], owner: ['Direction métier', 'Business owner'],
+    features: [
+      ['Collecte et exploration des données', 'Data collection and exploration', 'Rassembler l’historique et comprendre ce qu’il contient (manques, erreurs, tendances).', 'Gather history and understand it (gaps, errors, trends).', 5, 5, 'M'],
+      ['Préparation des données', 'Data preparation', 'Nettoyage, étiquetage et création des variables utiles au modèle.', 'Cleaning, labelling and building useful features.', 6, 8, 'M'],
+      ['Modèle de référence', 'Baseline model', 'Un premier modèle simple pour mesurer le point de départ.', 'A simple first model to measure the starting point.', 3, 3, 'M'],
+      ['Entraînement et optimisation', 'Training and tuning', 'Tester plusieurs modèles et garder le plus fiable.', 'Try several models and keep the most reliable one.', 7, 8, 'M'],
+      ['Évaluation et explicabilité', 'Evaluation and explainability', 'Mesurer la précision sur des données jamais vues et expliquer les décisions.', 'Measure accuracy on unseen data and explain decisions.', 4, 5, 'M'],
+      ['API de prédiction', 'Prediction API', 'Le modèle est utilisable par les autres logiciels via une API.', 'Other software can use the model through an API.', 4, 5, 'S'],
+      ['Interface de démonstration', 'Demo interface', 'Une page simple pour tester le modèle.', 'A simple page to try the model.', 3, 3, 'S'],
+      ['Suivi du modèle en production', 'Model monitoring', 'Alerte si la qualité des prédictions baisse avec le temps.', 'Alert if prediction quality drops over time.', 3, 3, 'C']
+    ],
+    design: [['Cadrage des données et métriques', 'Data and metric framing', 'DATA', 4, 5], ['Architecture ML et environnement', 'ML architecture and environment', 'ARCH', 3, 3]],
+    stack: [['Langage / Language', 'Python', 'Standard en data science', 'Data science standard'], ['Modèles / Models', 'scikit-learn, XGBoost, PyTorch', 'Du simple au profond', 'From simple to deep'], ['Suivi / Tracking', 'MLflow', 'Expériences reproductibles', 'Reproducible experiments'], ['API', 'FastAPI + Docker', 'Déploiement portable', 'Portable deployment']],
+    comps: [['Données', 'Historique nettoyé et versionné', 'Cleaned, versioned history'], ['Pipeline d’entraînement', 'Préparation, entraînement, évaluation', 'Preparation, training, evaluation'], ['Registre de modèles', 'Versions et performances', 'Versions and performance'], ['API de prédiction', 'Sert le modèle aux applications', 'Serves the model to applications'], ['Monitoring', 'Dérive et qualité', 'Drift and quality']],
+    objectives: [['Prédire juste', 'Predict accurately', 'Précision sur données de test', 'Accuracy on test data', 'à fixer au cadrage'], ['Être utile au métier', 'Be useful to the business', 'Décisions appuyées par le modèle', 'Decisions supported by the model', '≥ 70 %'], ['Être compris', 'Be understood', 'Prédictions expliquées', 'Explained predictions', '100 %']],
+    nfr: [['Reproductibilité', 'Chaque résultat reproductible (code + données versionnés)', 'Every result reproducible (versioned code + data)'], ['Éthique / Ethics', 'Contrôle des biais sur les groupes sensibles', 'Bias check on sensitive groups']],
+    threats: [['Données personnelles dans l’entraînement', 'Personal data in training', 'Anonymisation et minimisation (RGPD)', 'Anonymisation and minimisation (GDPR)'], ['Empoisonnement des données', 'Data poisoning', 'Contrôle des sources et des valeurs aberrantes', 'Source and outlier checks']],
+    risks: [['Pas assez de données de qualité', 'Not enough quality data', 4, 5, 'Audit des données avant de promettre une précision', 'Data audit before promising accuracy'], ['Précision insuffisante', 'Insufficient accuracy', 3, 4, 'Objectif fixé après le modèle de référence', 'Target set after the baseline model']],
+    out: [['Collecte de nouvelles données terrain', 'New field data collection'], ['Décision automatique sans humain', 'Fully automatic decisions without a human']]
+  },
+  {
+    id: 'booking', fr: 'Plateforme de réservation', en: 'Booking platform', code: 'RSV',
+    kw: ['reservation', 'réservation', 'booking', 'book', 'reserver', 'rendez-vous', 'rdv', 'appointment', 'agenda', 'calendrier', 'calendar', 'creneau', 'slot', 'location', 'rental', 'salle', 'room', 'hotel', 'table', 'planning', 'prise de rendez-vous', 'doctolib'],
+    users: ['Clients qui réservent', 'Customers booking'], owner: ['Prestataire', 'Service provider'],
+    features: [
+      ['Calendrier des disponibilités', 'Availability calendar', 'Les clients voient en temps réel les créneaux libres.', 'Customers see free slots in real time.', 5, 8, 'M'],
+      ['Réservation en ligne', 'Online booking', 'Choisir un créneau, confirmer, recevoir une confirmation.', 'Pick a slot, confirm, receive a confirmation.', 5, 8, 'M'],
+      ['Annulation et modification', 'Cancel and reschedule', 'Le client annule ou déplace sa réservation selon les règles fixées.', 'Customers cancel or move a booking within set rules.', 3, 3, 'M'],
+      ['Rappels automatiques', 'Automatic reminders', 'E-mail ou SMS la veille pour éviter les absences.', 'E-mail or SMS the day before to avoid no-shows.', 3, 3, 'M'],
+      ['Espace prestataire', 'Provider space', 'Le prestataire gère horaires, congés et réservations.', 'The provider manages hours, holidays and bookings.', 6, 8, 'M'],
+      ['Paiement ou acompte en ligne', 'Online payment or deposit', 'Paiement à la réservation via Stripe.', 'Payment at booking via Stripe.', 4, 5, 'S'],
+      ['Comptes clients', 'Customer accounts', 'Historique et réservation en un clic.', 'History and one-click rebooking.', 3, 3, 'S'],
+      ['Statistiques d’occupation', 'Occupancy statistics', 'Taux de remplissage et créneaux les plus demandés.', 'Fill rate and most requested slots.', 3, 3, 'C']
+    ],
+    stack: [['Front-end', 'Next.js', 'Calendrier fluide', 'Smooth calendar'], ['API', 'Node.js (NestJS)', 'Gestion fiable des conflits', 'Reliable conflict handling'], ['Base de données / Database', 'PostgreSQL', 'Verrous contre les doubles réservations', 'Locks against double booking'], ['Rappels / Reminders', 'Brevo (e-mail/SMS)', 'Envoi fiable', 'Reliable delivery'], ['Paiement / Payment', 'Stripe', 'Acomptes sécurisés', 'Secure deposits']],
+    comps: [['Interface client', 'Calendrier et réservation', 'Calendar and booking'], ['Espace prestataire', 'Horaires et suivi', 'Hours and tracking'], ['API de réservation', 'Règles, conflits, confirmations', 'Rules, conflicts, confirmations'], ['Base de données', 'Créneaux et réservations', 'Slots and bookings'], ['Notifications', 'Rappels e-mail/SMS', 'E-mail/SMS reminders']],
+    objectives: [['Réserver sans téléphoner', 'Book without calling', 'Réservations en ligne', 'Online bookings', '≥ 70 %'], ['Moins d’absences', 'Fewer no-shows', 'Taux d’absence', 'No-show rate', '−50 %'], ['Zéro double réservation', 'Zero double booking', 'Conflits', 'Conflicts', '0']],
+    nfr: [['Fiabilité / Reliability', 'Aucune double réservation, même en simultané', 'No double booking, even concurrently'], ['Fuseaux / Time zones', 'Heures affichées dans le fuseau du client', 'Times shown in the customer’s time zone']],
+    threats: [['Réservations massives par des robots', 'Bot mass-booking', 'Captcha et limite par compte', 'Captcha and per-account limit'], ['Accès aux données des clients', 'Access to customer data', 'Espace prestataire en 2FA, chiffrement', 'Provider space with 2FA, encryption']],
+    risks: [['Règles de réservation complexes', 'Complex booking rules', 3, 4, 'Règles écrites et validées au cadrage', 'Rules written and approved during scoping'], ['Synchronisation avec un agenda existant', 'Sync with an existing calendar', 3, 3, 'Export iCal en phase 1, synchro en phase 2', 'iCal export in phase 1, sync in phase 2']],
+    out: [['Synchronisation bidirectionnelle Google/Outlook (phase 2)', 'Two-way Google/Outlook sync (phase 2)'], ['Application mobile native', 'Native mobile app']]
+  },
+  {
+    id: 'business', fr: 'Application de gestion (CRM / ERP / SaaS)', en: 'Business application (CRM / ERP / SaaS)', code: 'APPW',
+    kw: ['crm', 'erp', 'saas', 'gestion', 'management', 'logiciel de gestion', 'plateforme', 'platform', 'intranet', 'portail', 'portal', 'clients', 'stock', 'inventaire', 'inventory', 'facturation', 'invoicing', 'ressources humaines', 'hr', 'rh', 'tickets', 'suivi', 'tracking', 'workflow', 'back office', 'administration'],
+    users: ['Employés de l’entreprise', 'Company staff'], owner: ['Direction de l’entreprise', 'Company management'],
+    features: [
+      ['Comptes et rôles', 'Accounts and roles', 'Chaque employé se connecte et voit les fonctions de son rôle.', 'Each employee logs in and sees the features of their role.', 4, 5, 'M'],
+      ['Gestion des fiches (clients, produits…)', 'Records management (customers, products…)', 'Créer, rechercher, modifier et archiver les fiches métier.', 'Create, search, edit and archive business records.', 7, 8, 'M'],
+      ['Processus métier et validations', 'Business workflows and approvals', 'Les étapes du métier (demande, validation, clôture) sont suivies dans l’outil.', 'Business steps (request, approval, closure) are tracked in the tool.', 7, 8, 'M'],
+      ['Tableau de bord', 'Dashboard', 'Les chiffres clés de l’activité sur une page.', 'Key business figures on one page.', 4, 5, 'M'],
+      ['Import / export Excel', 'Excel import / export', 'Reprise des données existantes et export pour la comptabilité.', 'Load existing data and export for accounting.', 3, 3, 'M'],
+      ['Notifications', 'Notifications', 'E-mail quand une action est attendue.', 'E-mail when an action is required.', 2, 3, 'S'],
+      ['Historique et traçabilité', 'History and audit trail', 'Qui a modifié quoi et quand.', 'Who changed what and when.', 3, 3, 'S'],
+      ['Connexion avec les outils existants (API)', 'Integration with existing tools (API)', 'Échange automatique avec la messagerie, la compta ou d’autres logiciels.', 'Automatic exchange with e-mail, accounting or other software.', 5, 5, 'C']
+    ],
+    stack: [['Front-end', 'React + TypeScript', 'Interfaces riches et typées', 'Rich, typed interfaces'], ['API', 'Node.js (NestJS)', 'Architecture modulaire', 'Modular architecture'], ['Base de données / Database', 'PostgreSQL', 'Données relationnelles', 'Relational data'], ['Authentification', 'Keycloak / SSO', 'Rôles et connexion unique', 'Roles and single sign-on'], ['Hébergement / Hosting', 'Docker sur cloud européen', 'Données en Europe (RGPD)', 'Data in Europe (GDPR)']],
+    comps: [['Application web', 'Écrans métier', 'Business screens'], ['API', 'Règles métier et droits', 'Business rules and rights'], ['Base de données', 'Fiches et historique', 'Records and history'], ['SSO', 'Connexion et rôles', 'Login and roles'], ['Connecteurs', 'Échanges avec les autres outils', 'Exchanges with other tools']],
+    objectives: [['Remplacer Excel et les e-mails', 'Replace Excel and e-mails', 'Processus suivis dans l’outil', 'Processes tracked in the tool', '100 %'], ['Gagner du temps', 'Save time', 'Temps de traitement d’une demande', 'Request handling time', '−40 %'], ['Adoption', 'Adoption', 'Employés actifs chaque semaine', 'Weekly active staff', '≥ 80 %']],
+    nfr: [['Disponibilité / Availability', '99,5 % en heures ouvrées', '99.5 % during business hours'], ['RGPD / GDPR', 'Données hébergées en Europe, droit à l’oubli', 'Data hosted in Europe, right to erasure']],
+    threats: [['Accès non autorisé', 'Unauthorised access', 'Rôles stricts, SSO, 2FA', 'Strict roles, SSO, 2FA'], ['Injection et XSS', 'Injection and XSS', 'Requêtes paramétrées, échappement, CSP', 'Parameterised queries, escaping, CSP']],
+    risks: [['Processus métier mal décrits', 'Business processes poorly described', 4, 4, 'Ateliers avec les utilisateurs au cadrage', 'User workshops during scoping'], ['Reprise des données existantes', 'Migration of existing data', 3, 4, 'Import testé sur un échantillon dès la conception', 'Import tested on a sample during design'], ['Résistance au changement', 'Resistance to change', 3, 3, 'Formation et référents par service', 'Training and champions per team']],
+    out: [['Comptabilité complète', 'Full accounting'], ['Application mobile native', 'Native mobile app']]
+  },
+  {
+    id: 'elearning', fr: 'Plateforme e-learning', en: 'E-learning platform', code: 'LMS',
+    kw: ['e-learning', 'elearning', 'lms', 'formation en ligne', 'online course', 'cours en ligne', 'courses', 'cours', 'training platform', 'apprendre', 'learning', 'quiz', 'eleves', 'students', 'etudiants', 'ecole', 'school', 'moodle', 'mooc', 'education'],
+    users: ['Apprenants', 'Learners'], owner: ['Organisme de formation', 'Training organisation'],
+    features: [
+      ['Catalogue de cours', 'Course catalogue', 'Les apprenants trouvent et s’inscrivent aux cours.', 'Learners find and enrol in courses.', 4, 5, 'M'],
+      ['Lecteur de cours (vidéo, PDF)', 'Course player (video, PDF)', 'Suivre les leçons en vidéo ou en document, reprendre où l’on s’est arrêté.', 'Follow lessons by video or document, resume where you left off.', 6, 8, 'M'],
+      ['Quiz et évaluations', 'Quizzes and assessments', 'Quiz notés automatiquement après chaque module.', 'Auto-graded quizzes after each module.', 5, 5, 'M'],
+      ['Suivi de progression', 'Progress tracking', 'L’apprenant et le formateur voient l’avancement.', 'Learners and trainers see progress.', 3, 5, 'M'],
+      ['Espace formateur', 'Trainer space', 'Le formateur crée ses cours et quiz sans développeur.', 'Trainers build courses and quizzes without a developer.', 6, 8, 'M'],
+      ['Certificats', 'Certificates', 'Certificat PDF délivré à la réussite.', 'PDF certificate issued on completion.', 2, 3, 'S'],
+      ['Forum / questions', 'Forum / Q&A', 'Les apprenants posent des questions au formateur.', 'Learners ask the trainer questions.', 3, 3, 'C']
+    ],
+    stack: [['Plateforme', 'Moodle ou Next.js sur mesure', 'Standard ou sur mesure', 'Standard or custom'], ['Vidéo / Video', 'Vimeo / Bunny Stream', 'Lecture fluide et protégée', 'Smooth, protected playback'], ['Base de données / Database', 'PostgreSQL', 'Progression fiable', 'Reliable progress'], ['Standards', 'SCORM / xAPI', 'Compatibilité des contenus', 'Content compatibility']],
+    comps: [['Espace apprenant', 'Cours, quiz, progression', 'Courses, quizzes, progress'], ['Espace formateur', 'Création de contenus', 'Content authoring'], ['Service vidéo', 'Diffusion des vidéos', 'Video streaming'], ['Base de données', 'Inscriptions et résultats', 'Enrolments and results']],
+    objectives: [['Former à distance', 'Train remotely', 'Apprenants actifs', 'Active learners', 'à fixer / to set'], ['Faire finir les cours', 'Get courses completed', 'Taux de complétion', 'Completion rate', '≥ 60 %'], ['Autonomie des formateurs', 'Trainer autonomy', 'Cours créés sans aide', 'Courses created without help', '100 %']],
+    nfr: [['Accessibilité / Accessibility', 'RGAA / WCAG 2.1 AA, sous-titres', 'RGAA / WCAG 2.1 AA, subtitles'], ['Charge / Load', '200 apprenants simultanés', '200 concurrent learners']],
+    threats: [['Partage illégal des vidéos', 'Illegal video sharing', 'URLs signées et expirantes', 'Signed, expiring URLs'], ['Triche aux quiz', 'Quiz cheating', 'Questions aléatoires et temps limité', 'Random questions and time limits']],
+    risks: [['Contenus pédagogiques en retard', 'Course content late', 4, 4, 'Planning éditorial par module', 'Editorial plan per module'], ['Faible engagement des apprenants', 'Low learner engagement', 3, 3, 'Rappels et progression visible', 'Reminders and visible progress']],
+    out: [['Production des vidéos', 'Video production'], ['Classe virtuelle en direct (phase 2)', 'Live virtual classroom (phase 2)']]
+  },
+  {
+    id: 'security', fr: 'Audit et sécurisation (cybersécurité)', en: 'Security audit and hardening', code: 'SEC',
+    kw: ['cybersecurite', 'cybersécurité', 'cybersecurity', 'securite', 'sécurité', 'security', 'audit', 'pentest', 'test d intrusion', 'penetration', 'soc', 'siem', 'iso 27001', 'nis2', 'conformite', 'compliance', 'vulnerabilite', 'vulnerability', 'piratage', 'hack', 'ransomware', 'phishing', 'firewall', 'pare-feu'],
+    users: ['Utilisateurs et équipes IT', 'Users and IT teams'], owner: ['Direction / RSSI', 'Management / CISO'],
+    features: [
+      ['Inventaire des actifs', 'Asset inventory', 'Lister serveurs, postes, applications et données sensibles.', 'List servers, workstations, applications and sensitive data.', 4, 5, 'M'],
+      ['Analyse de risques (EBIOS RM)', 'Risk analysis (EBIOS RM)', 'Identifier ce qui pourrait arriver et ce que cela coûterait.', 'Identify what could happen and what it would cost.', 5, 8, 'M'],
+      ['Scan de vulnérabilités', 'Vulnerability scan', 'Recherche automatique des failles connues.', 'Automatic search for known weaknesses.', 3, 5, 'M'],
+      ['Test d’intrusion', 'Penetration test', 'Des experts tentent d’entrer comme un vrai attaquant, avec accord écrit.', 'Experts try to break in like a real attacker, with written consent.', 6, 8, 'M'],
+      ['Revue de configuration et des accès', 'Configuration and access review', 'Mots de passe, droits, sauvegardes, pare-feu.', 'Passwords, rights, backups, firewalls.', 4, 5, 'M'],
+      ['Plan de remédiation priorisé', 'Prioritised remediation plan', 'Liste des corrections classées par urgence et coût.', 'List of fixes ranked by urgency and cost.', 3, 5, 'M'],
+      ['Sensibilisation des équipes', 'Staff awareness training', 'Formation et simulation d’hameçonnage.', 'Training and phishing simulation.', 3, 3, 'S'],
+      ['Mise en place de la surveillance', 'Monitoring set-up', 'Journaux centralisés et alertes (SIEM).', 'Centralised logs and alerts (SIEM).', 5, 5, 'C']
+    ],
+    design: [['Périmètre, règles d’engagement et autorisations', 'Scope, rules of engagement and authorisations', 'SEC', 3, 3], ['Méthodologie et outillage', 'Methodology and tooling', 'SEC', 2, 2]],
+    test: [['Validation des constats avec les équipes', 'Findings validation with the teams', 'SEC', 3, 3], ['Contre-test des corrections urgentes', 'Re-test of urgent fixes', 'SEC', 3, 3]],
+    stack: [['Analyse de risques', 'EBIOS RM (ANSSI)', 'Méthode française de référence', 'French reference method'], ['Scan', 'OpenVAS / Nessus', 'Couverture large', 'Broad coverage'], ['Pentest web', 'Burp Suite, OWASP ZAP', 'Standard du métier', 'Industry standard'], ['Surveillance / Monitoring', 'Wazuh (SIEM)', 'Open source', 'Open source']],
+    comps: [['Périmètre audité', 'Réseau, postes, applications', 'Network, workstations, applications'], ['Outils d’audit', 'Scan, pentest, revue', 'Scan, pentest, review'], ['Rapport et plan', 'Constats et corrections', 'Findings and fixes'], ['SIEM', 'Surveillance continue', 'Continuous monitoring']],
+    objectives: [['Connaître son exposition', 'Know the exposure', 'Actifs inventoriés', 'Assets inventoried', '100 %'], ['Corriger le critique', 'Fix critical issues', 'Failles critiques corrigées', 'Critical flaws fixed', '100 % en 30 j'], ['Former', 'Train', 'Taux de clic à l’hameçonnage', 'Phishing click rate', '< 5 %']],
+    nfr: [['Confidentialité / Confidentiality', 'Rapport chiffré, diffusion restreinte', 'Encrypted report, restricted distribution'], ['Légalité / Legality', 'Autorisation écrite avant tout test', 'Written authorisation before any test']],
+    threats: [['Interruption de service pendant les tests', 'Service disruption during tests', 'Fenêtres de test et sauvegardes vérifiées', 'Test windows and verified backups'], ['Fuite du rapport d’audit', 'Audit report leak', 'Chiffrement et accès nominatif', 'Encryption and named access']],
+    risks: [['Accès aux systèmes accordés tardivement', 'System access granted late', 4, 3, 'Autorisations signées au jalon M1', 'Authorisations signed at milestone M1'], ['Faille critique découverte en production', 'Critical flaw found in production', 3, 5, 'Procédure d’escalade immédiate', 'Immediate escalation procedure']],
+    out: [['Correction de toutes les failles par l’équipe d’audit', 'All fixes done by the audit team'], ['Certification ISO 27001', 'ISO 27001 certification']]
+  },
+  {
+    id: 'iot', fr: 'Objets connectés (IoT)', en: 'Connected devices (IoT)', code: 'IOT',
+    kw: ['iot', 'objets connectes', 'objet connecte', 'connected device', 'capteur', 'capteurs', 'sensor', 'sensors', 'arduino', 'raspberry', 'esp32', 'domotique', 'smart home', 'maison connectee', 'temperature', 'mesure', 'telemetrie', 'telemetry', 'industrie 4.0', 'machine', 'robot'],
+    users: ['Opérateurs et techniciens', 'Operators and technicians'], owner: ['Exploitant', 'Operator'],
+    features: [
+      ['Choix et prototypage du matériel', 'Hardware selection and prototyping', 'Choisir capteurs et cartes, monter un prototype.', 'Choose sensors and boards, build a prototype.', 6, 8, 'M'],
+      ['Firmware des capteurs', 'Sensor firmware', 'Programme embarqué qui mesure et envoie les données.', 'Embedded program that measures and sends data.', 7, 8, 'M'],
+      ['Transmission des données', 'Data transmission', 'Envoi fiable et chiffré (Wi-Fi, LoRa ou 4G).', 'Reliable, encrypted sending (Wi-Fi, LoRa or 4G).', 4, 5, 'M'],
+      ['Plateforme de collecte', 'Collection platform', 'Réception et stockage des mesures dans le cloud.', 'Receiving and storing measurements in the cloud.', 5, 5, 'M'],
+      ['Tableau de bord temps réel', 'Real-time dashboard', 'Graphiques des mesures en direct.', 'Live charts of measurements.', 4, 5, 'M'],
+      ['Alertes', 'Alerts', 'SMS ou e-mail si une valeur sort des limites.', 'SMS or e-mail if a value goes out of range.', 3, 3, 'S'],
+      ['Mise à jour à distance', 'Over-the-air updates', 'Mettre à jour les capteurs sans se déplacer.', 'Update devices without going on site.', 4, 5, 'C']
+    ],
+    stack: [['Matériel / Hardware', 'ESP32 + capteurs', 'Bon marché, Wi-Fi intégré', 'Cheap, built-in Wi-Fi'], ['Protocole / Protocol', 'MQTT sur TLS', 'Léger et chiffré', 'Lightweight and encrypted'], ['Stockage / Storage', 'InfluxDB / TimescaleDB', 'Séries temporelles', 'Time series'], ['Visualisation', 'Grafana', 'Tableaux temps réel', 'Real-time dashboards']],
+    comps: [['Capteurs', 'Mesure sur le terrain', 'Field measurement'], ['Passerelle / broker MQTT', 'Réception sécurisée', 'Secure reception'], ['Base temporelle', 'Historique des mesures', 'Measurement history'], ['Grafana', 'Visualisation et alertes', 'Visualisation and alerts']],
+    objectives: [['Surveiller à distance', 'Monitor remotely', 'Données reçues', 'Data received', '≥ 99 %'], ['Réagir vite', 'React fast', 'Délai d’alerte', 'Alert delay', '< 1 min'], ['Autonomie', 'Autonomy', 'Batterie des capteurs', 'Sensor battery life', '≥ 6 mois']],
+    nfr: [['Robustesse', 'Reprise automatique après coupure', 'Automatic recovery after outage'], ['Énergie / Power', 'Mode basse consommation', 'Low-power mode']],
+    threats: [['Capteur piraté', 'Hijacked device', 'Certificat par appareil, TLS, mot de passe par défaut supprimé', 'Per-device certificate, TLS, no default password'], ['Fausses données injectées', 'Fake data injected', 'Authentification de chaque appareil', 'Authentication of every device']],
+    risks: [['Délais de livraison du matériel', 'Hardware delivery delays', 4, 4, 'Commande dès le cadrage, composants de secours', 'Order during scoping, spare parts'], ['Couverture réseau sur site', 'On-site network coverage', 3, 4, 'Test radio sur site en conception', 'On-site radio test during design']],
+    out: [['Fabrication en série', 'Mass manufacturing'], ['Certification CE', 'CE certification']]
+  },
+  {
+    id: 'software', fr: 'Application web sur mesure', en: 'Custom web application', code: 'PRJ',
+    kw: [],
+    users: ['Utilisateurs finaux', 'End users'], owner: ['Client', 'Client'],
+    features: [
+      ['Comptes utilisateurs et connexion', 'User accounts and login', 'Chaque utilisateur a son compte sécurisé.', 'Each user has a secure account.', 4, 5, 'M'],
+      ['Fonctionnalité principale 1', 'Core feature 1', 'Première fonction clé décrite par le client (à détailler au cadrage).', 'First key feature described by the client (detailed during scoping).', 7, 8, 'M'],
+      ['Fonctionnalité principale 2', 'Core feature 2', 'Deuxième fonction clé (à détailler au cadrage).', 'Second key feature (detailed during scoping).', 6, 8, 'M'],
+      ['Administration', 'Administration', 'Interface pour gérer utilisateurs et contenus.', 'Interface to manage users and content.', 5, 5, 'M'],
+      ['Notifications par e-mail', 'E-mail notifications', 'Messages automatiques aux bons moments.', 'Automatic messages at the right time.', 2, 3, 'S'],
+      ['Tableau de bord', 'Dashboard', 'Indicateurs clés sur une page.', 'Key indicators on one page.', 4, 5, 'S'],
+      ['Version anglaise', 'English version', 'Interface en français et en anglais.', 'Interface in French and English.', 3, 3, 'C']
+    ],
+    stack: [['Front-end', 'React / Next.js', 'Standard du marché', 'Market standard'], ['API', 'Node.js ou Python', 'Selon les besoins', 'Depending on needs'], ['Base de données / Database', 'PostgreSQL', 'Fiable et gratuite', 'Reliable and free'], ['Hébergement / Hosting', 'Vercel + Render', 'Déploiement automatique', 'Automatic deployment']],
+    comps: [['Application web', 'Écrans utilisateurs', 'User screens'], ['API', 'Règles métier et sécurité', 'Business rules and security'], ['Base de données', 'Données de l’application', 'Application data'], ['Administration', 'Gestion', 'Management']],
+    objectives: [['Répondre au besoin du client', 'Meet the client’s need', 'Exigences « Must » livrées', '"Must" requirements delivered', '100 %'], ['Satisfaction', 'Satisfaction', 'Note des utilisateurs en recette', 'User rating at acceptance', '≥ 4/5'], ['Qualité', 'Quality', 'Anomalies bloquantes à la mise en ligne', 'Blocking bugs at go-live', '0']],
+    nfr: [['Performance', 'Pages en moins de 2 s', 'Pages under 2 s']],
+    threats: [['Accès non autorisé', 'Unauthorised access', 'Mots de passe hachés, sessions sécurisées, 2FA admin', 'Hashed passwords, secure sessions, admin 2FA']],
+    risks: [['Besoin flou au départ', 'Unclear initial need', 4, 4, 'Ateliers de cadrage et maquettes validées', 'Scoping workshops and approved mock-ups']],
+    out: [['Application mobile native', 'Native mobile app']]
+  }
+];
+if (typeof module !== 'undefined') module.exports = KB;
+</script>
+<script>/* Project assistant: plain-language description → full project (phases, tasks, dates, dependencies,
+   milestones) + all document content. Pure functions; KB holds the knowledge per project type. */
+const Generator = (() => {
+  const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
+  const K = (typeof KB !== 'undefined') ? KB : require('./kb.js');
+  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/[^a-z0-9+\- ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const PHASES = [['P1', 'Cadrage', 'Initiation', '#4f6bed'], ['P2', 'Conception', 'Design', '#0f9d8a'], ['P3', 'Réalisation', 'Build', '#d9811e'],
+    ['P4', 'Tests et recette', 'Testing and acceptance', '#c2417a'], ['P5', 'Mise en service', 'Go-live', '#7a5af5'], ['P6', 'Clôture', 'Closure', '#5f7182']];
+  const SIZES = { small: { f: 0.7, prios: ['M'], lanes: 2 }, medium: { f: 1, prios: ['M', 'S'], lanes: 2 }, large: { f: 1.35, prios: ['M', 'S', 'C'], lanes: 2 } };
+
+  /* ---- detection: weighted keyword match on the normalised text ---- */
+  function detect(text) {
+    const t = ' ' + norm(text) + ' ';
+    const scores = K.filter(k => k.kw.length).map(k => {
+      let s = 0;
+      k.kw.forEach(w => { const n = norm(w); if (n && t.includes(' ' + n + ' ') || (n.length > 5 && t.includes(n))) s += 1 + n.split(' ').length; });
+      return { id: k.id, score: s };
+    }).sort((a, b) => b.score - a.score);
+    const best = scores[0];
+    return { id: best && best.score > 0 ? best.id : 'software', scores };
+  }
+  const type = id => K.find(k => k.id === id) || K.find(k => k.id === 'software');
+
+  /* ---- working-day calendar ---- */
+  const nextWork = t => { let x = t; while (C.isWeekend(x)) x = C.addDays(x, 1); return x; };
+  const endAfter = (start, days) => { let x = nextWork(start), left = Math.max(1, days) - 1; while (left > 0) { x = C.addDays(x, 1); if (!C.isWeekend(x)) left--; } return x; };
+  const nextMonday = t => { let x = C.addDays(t, 1); while (new Date(x).getUTCDay() !== 1) x = C.addDays(x, 1); return x; };
+
+  /* ---- cleaned project name from the description ---- */
+  function projectName(text, tp, lang) {
+    let s = String(text || '').trim().replace(/\s+/g, ' ');
+    const lead = /^(je (veux|voudrais|souhaite)|nous (voulons|souhaitons)|i (want|would like|need)( to)?|we (want|need)( to)?|j['’ ]ai besoin d['’ ]?(une?)?|to|creer|créer|create|build|develop|développer|developper|faire|make|realiser|réaliser|un|une|des|le|la|les|a|an|the)\s+/i;
+    for (let i = 0; i < 5 && lead.test(s); i++) s = s.replace(lead, '');
+    if (!s) return lang === 'fr' ? tp.fr : tp.en;
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+    return s.length > 70 ? s.slice(0, 67).replace(/\s+\S*$/, '') + '…' : s.replace(/[.!]+$/, '');
+  }
+
+  /* ---- build the schedule ---- */
+  function build({ description, client = '', start, size = 'medium', typeId, lang = 'fr', author = '', custom = null }) {
+    const det = detect(description), base = type((custom && custom.typeId) || typeId || det.id), Z = SIZES[size] || SIZES.medium;
+    const tp = custom && custom.features ? { ...base, features: custom.features } : base;
+    const s0 = nextWork(C.parseDate(start) ?? nextMonday(Date.now() - Date.now() % C.DAY));
+    const dur = d => Math.max(1, Math.round(d * Z.f)), pts = p => Math.max(1, Math.round(p * (size === 'large' ? 1.3 : size === 'small' ? 0.8 : 1)));
+    const tasks = []; let n = 0;
+    const add = (phase, fr, en, owner, days, points, deps) => {
+      const ds = deps.map(id => tasks.find(t => t.id === id));
+      const st = ds.length ? nextWork(C.addDays(Math.max(...ds.map(t => C.parseDate(t.end))), 1)) : s0;
+      const t = { id: `T${++n}`, phase, fr, en, owner, start: C.fmt(st), end: C.fmt(endAfter(st, days)), points, progress: 0, done: '', deps };
+      tasks.push(t); return t.id;
+    };
+    // P1 initiation
+    const kick = add('P1', 'Réunion de lancement et recueil des besoins', 'Kick-off and needs gathering', 'PM', dur(3), pts(3), []);
+    const spec = add('P1', 'Rédaction et validation du cahier des charges', 'Requirements specification and sign-off', 'PM', dur(4), pts(5), [kick]);
+    add('P1', 'Planning, budget et registre des risques', 'Schedule, budget and risk register', 'PM', dur(2), pts(2), [kick]);
+    // P2 design (type may override)
+    const design = (tp.design || [['Architecture technique', 'Technical architecture', 'ARCH', 4, 5], ['Maquettes et parcours utilisateur', 'Mock-ups and user journeys', 'UX', 6, 5]])
+      .map(([fr, en, o, d, p]) => add('P2', fr, en, o, dur(d), pts(p), [spec]));
+    const dataModel = tp.design ? null : add('P2', 'Modèle de données', 'Data model', 'ARCH', dur(3), pts(3), [design[0]]);
+    const designEnd = dataModel ? [...design, dataModel] : design;
+    // P3 build: environment, then features on parallel lanes
+    const env = add('P3', 'Environnement de développement et CI/CD', 'Development environment and CI/CD', 'OPS', dur(2), pts(2), [design[0]]);
+    const feats = tp.features.filter(f => Z.prios.includes(f[6]));
+    const lanes = Array.from({ length: Z.lanes }, () => null), featIds = [];
+    feats.forEach((f, i) => {
+      const lane = i % Z.lanes, prev = lanes[lane];
+      const id = add('P3', f[0], f[1], `DEV${lane + 1}`, dur(f[4]), pts(f[5]), prev ? [prev] : [env, ...designEnd.filter(d => d !== design[0])]);
+      lanes[lane] = id; featIds.push(id);
+    });
+    const buildEnd = lanes.filter(Boolean);
+    // P4 tests
+    let accept;
+    if (tp.test) {
+      const ids = tp.test.map(([fr, en, o, d, p], i) => add('P4', fr, en, o, dur(d), pts(p), i === 0 ? buildEnd : [`T${n}`]));
+      accept = ids.at(-1);
+    } else {
+      const unit = add('P4', 'Tests unitaires et d’intégration', 'Unit and integration tests', 'QA', dur(5), pts(5), buildEnd);
+      const sec = add('P4', 'Tests de sécurité', 'Security testing', 'SEC', dur(4), pts(3), buildEnd);
+      const uat = add('P4', 'Recette avec le client', 'Client acceptance testing', 'QA', dur(4), pts(3), [unit]);
+      accept = add('P4', 'Corrections avant mise en ligne', 'Fixes before go-live', 'DEV1', dur(3), pts(3), [uat, sec]);
+    }
+    // P5 go-live, P6 closure
+    const live = add('P5', tp.id === 'security' ? 'Restitution et remise du rapport d’audit' : 'Mise en production', tp.id === 'security' ? 'Debrief and audit report handover' : 'Production go-live', tp.id === 'security' ? 'SEC' : 'OPS', dur(2), pts(3), [accept]);
+    const train = add('P5', 'Formation et guide utilisateur', 'Training and user guide', 'PM', dur(3), pts(2), [accept]);
+    const close = add('P6', 'Bilan, rapport final et transfert', 'Final review, report and handover', 'PM', dur(3), pts(3), [live, train]);
+    const endOf = ids => C.fmt(Math.max(...ids.map(id => C.parseDate(tasks.find(t => t.id === id).end))));
+    const phaseEnd = p => endOf(tasks.filter(t => t.phase === p).map(t => t.id));
+    const milestones = [
+      ['M1', 'Cahier des charges validé', 'Requirements signed off', endOf([spec])],
+      ['M2', 'Conception validée', 'Design approved', phaseEnd('P2')],
+      ['M3', tp.id === 'security' ? 'Fin des tests techniques' : 'Version complète livrée (MVP)', tp.id === 'security' ? 'Technical testing complete' : 'Complete version delivered (MVP)', phaseEnd('P3')],
+      ['M4', 'Recette validée', 'Acceptance passed', phaseEnd('P4')],
+      ['M5', tp.id === 'security' ? 'Rapport remis' : 'Mise en ligne', tp.id === 'security' ? 'Report delivered' : 'Go-live', endOf([live])],
+      ['M6', 'Clôture du projet', 'Project closure', endOf([close])]
+    ].map(([id, fr, en, date]) => ({ id, fr, en, date }));
+    const name = (custom && custom.name) || projectName(description, tp, lang);
+    const project = {
+      name, code: `${tp.code}-${new Date(s0).getUTCFullYear()}`, start: C.fmt(s0), end: endOf([close]), statusDate: '', workingDays: true,
+      phases: PHASES.map(([id, fr, en, color]) => ({ id, fr, en, color })), milestones, tasks,
+      docs: docs({ description, client, author, lang, tp, feats, tasks, milestones, name, size })
+    };
+    return { project, type: tp, detection: det };
+  }
+
+  /* ---- document text, in plain language for a non-technical client ---- */
+  function docs({ description, client, author, lang, tp, feats, tasks, milestones, name, size }) {
+    const fr = lang === 'fr', L = (a, b) => fr ? a : b, row = cells => cells.join(' | ');
+    const d = s => new Date(C.parseDate(s)).toLocaleDateString(fr ? 'fr-FR' : 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+    const ms = id => milestones.find(m => m.id === id).date, weeks = Math.ceil((C.diffDays(C.parseDate(tasks[0].start), C.parseDate(ms('M6'))) + 1) / 7);
+    const sizeW = { small: L('réduite (fonctions essentielles)', 'reduced (essential features)'), medium: L('standard', 'standard'), large: L('étendue (toutes les options)', 'extended (all options)') }[size];
+    const later = tp.features.filter(f => !feats.includes(f));
+    const o = {};
+    o.author = author || L('Équipe projet', 'Project team');
+    o.sponsor = client || L(tp.owner[0], tp.owner[1]);
+    o.context = [
+      L(`Demande du client : « ${String(description).trim()} ».`, `Client request: "${String(description).trim()}".`),
+      L(`Ce projet est de type **${tp.fr}**. Il s’adresse aux ${tp.users[0].toLowerCase()} et sera porté par ${o.sponsor}.`, `This is a **${tp.en}** project. It serves ${tp.users[1].toLowerCase()} and is sponsored by ${o.sponsor}.`),
+      L(`Ce document traduit la demande en besoins précis, propose une solution technique et un planning de ${weeks} semaines (portée ${sizeW}). Les termes techniques sont expliqués dans le lexique en fin de rapport.`,
+        `This document turns the request into precise needs, proposes a technical solution and a ${weeks}-week schedule (${sizeW} scope). Technical terms are explained in the glossary at the end of the report.`)
+    ].join('\n');
+    o.objectives = [row(['#', L('Objectif', 'Objective'), L('Indicateur', 'Indicator'), L('Cible', 'Target')]),
+      ...tp.objectives.map((x, i) => row([`O${i + 1}`, fr ? x[0] : x[1], fr ? x[2] : x[3], x[4]])),
+      row([`O${tp.objectives.length + 1}`, L('Livrer à temps', 'Deliver on time'), L('Mise en service', 'Go-live'), d(ms('M5'))])].join('\n');
+    o.scope = [L('## Inclus', '## Included'), ...feats.map(f => `- ${fr ? f[0] : f[1]}`),
+      L('## Prévu pour une phase 2', '## Planned for a phase 2'), ...(later.length ? later.map(f => `- ${fr ? f[0] : f[1]}`) : [L('- Aucune fonction reportée', '- No feature postponed')]),
+      L('## Exclu', '## Excluded'), ...tp.out.map(x => `- ${fr ? x[0] : x[1]}`)].join('\n');
+    o.stakeholders = [row([L('Partie prenante', 'Stakeholder'), L('Rôle', 'Role'), L('Attente', 'Expectation')]),
+      row([o.sponsor, L('Client / sponsor : valide les étapes', 'Client / sponsor: approves each stage'), L('Un résultat conforme, dans les délais', 'A compliant result, on time')]),
+      row([fr ? tp.users[0] : tp.users[1], L('Utilisateurs finaux', 'End users'), L('Un outil simple et rapide', 'A simple, fast tool')]),
+      row([L('Chef de projet', 'Project manager'), L('Pilote le planning et les risques', 'Runs schedule and risks'), L('Décisions rapides du client', 'Fast client decisions')]),
+      row([L('Équipe technique', 'Technical team'), L('Conçoit, développe, teste', 'Designs, builds, tests'), L('Besoins clairs et stables', 'Clear, stable needs')])].join('\n');
+    o.functional = [row(['ID', L('Ce que le système doit faire', 'What the system must do'), L('Explication simple', 'Plain explanation'), L('Priorité', 'Priority')]),
+      ...feats.map((f, i) => row([`EF${i + 1}`, fr ? f[0] : f[1], fr ? f[2] : f[3], { M: L('Indispensable', 'Must'), S: L('Important', 'Should'), C: L('Optionnel', 'Could') }[f[6]]]))].join('\n');
+    o.nonfunctional = [row(['ID', L('Catégorie', 'Category'), L('Exigence', 'Requirement')]),
+      ...[['Performance', L('Pages affichées en moins de 2 secondes', 'Pages shown in under 2 seconds')],
+        [L('Sécurité', 'Security'), L('Bonnes pratiques OWASP, données chiffrées en transit (HTTPS)', 'OWASP good practice, data encrypted in transit (HTTPS)')],
+        [L('RGPD', 'GDPR'), L('Données personnelles minimales, hébergées en Europe, supprimables sur demande', 'Minimal personal data, hosted in Europe, erasable on request')],
+        [L('Accessibilité', 'Accessibility'), L('Utilisable au clavier et lisible (WCAG 2.1 AA)', 'Keyboard-usable and readable (WCAG 2.1 AA)')],
+        ...tp.nfr.map(x => [x[0], fr ? x[1] : x[2]])].map((x, i) => row([`ENF${i + 1}`, x[0], x[1]]))].join('\n');
+    o.constraints = [
+      `- ${L('Début', 'Start')} : ${d(tasks[0].start)} · ${L('mise en service', 'go-live')} : ${d(ms('M5'))} · ${L('clôture', 'closure')} : ${d(ms('M6'))}`,
+      `- ${L(`Durée estimée : ${weeks} semaines, ${tasks.length} tâches, ${tasks.reduce((a, t) => a + t.points, 0)} points d’effort`, `Estimated duration: ${weeks} weeks, ${tasks.length} tasks, ${tasks.reduce((a, t) => a + t.points, 0)} effort points`)}`,
+      `- ${L('Le client valide chaque jalon sous 5 jours ouvrés', 'The client approves each milestone within 5 working days')}`,
+      `- ${L('Contenus (textes, images, données) fournis par le client avant la fin de la conception', 'Content (texts, images, data) supplied by the client before the end of design')}`,
+      `- ${L('Budget : à chiffrer à partir des points d’effort et du taux journalier retenu', 'Budget: to be priced from effort points and the agreed day rate')}`
+    ].join('\n');
+    o.architecture = [L(`La solution est découpée en briques indépendantes, chacune remplaçable sans tout refaire :`, `The solution is split into independent building blocks, each replaceable without redoing everything:`),
+      row([L('Brique', 'Component'), L('Rôle', 'Role')]), ...tp.comps.map(c => row([c[0], fr ? c[1] : c[2]]))].join('\n');
+    o.stack = [row([L('Couche', 'Layer'), L('Choix', 'Choice'), L('Pourquoi', 'Why')]), ...tp.stack.map(s => row([s[0], s[1], fr ? s[2] : s[3]]))].join('\n');
+    o.security = [row([L('Menace', 'Threat'), L('Protection', 'Control')]),
+      ...tp.threats.map(x => row([fr ? x[0] : x[1], fr ? x[2] : x[3]])),
+      row([L('Injection de code et XSS', 'Code injection and XSS'), L('Requêtes paramétrées, échappement, en-têtes CSP', 'Parameterised queries, escaping, CSP headers')]),
+      row([L('Secrets exposés', 'Exposed secrets'), L('Variables d’environnement, aucun mot de passe dans le code', 'Environment variables, no password in code')]),
+      row([L('Perte de données', 'Data loss'), L('Sauvegarde quotidienne testée', 'Tested daily backup')])].join('\n');
+    o.testing = [row([L('Niveau', 'Level'), L('Ce qu’on vérifie', 'What is checked'), L('Critère de sortie', 'Exit criterion')]),
+      row([L('Tests unitaires', 'Unit tests'), L('Chaque fonction isolément', 'Each function on its own'), L('Couverture ≥ 70 %', 'Coverage ≥ 70 %')]),
+      row([L('Tests d’intégration', 'Integration tests'), L('Les briques ensemble', 'Components together'), L('Parcours principaux sans erreur', 'Main journeys error-free')]),
+      row([L('Tests de sécurité', 'Security tests'), L('Failles connues (OWASP)', 'Known flaws (OWASP)'), L('0 faille critique', '0 critical flaw')]),
+      row([L('Recette client', 'Client acceptance'), L('Le client teste les fonctions EF1–EF' + feats.length, 'The client tests features EF1–EF' + feats.length), L('Toutes les exigences indispensables validées', 'All must-have requirements approved')])].join('\n');
+    o.deployment = [
+      `- ${L('Chaque modification passe par des tests automatiques avant d’être mise en ligne (CI/CD)', 'Every change goes through automatic tests before going live (CI/CD)')}`,
+      `- ${L('Environnement de test pour le client, puis production', 'Test environment for the client, then production')}`,
+      `- ${L('Retour à la version précédente en 1 clic en cas de problème', 'One-click rollback to the previous version if needed')}`,
+      `- ${L('Surveillance : disponibilité, erreurs et temps de réponse, avec alertes', 'Monitoring: availability, errors and response times, with alerts')}`,
+      `- ${L('Formation et guide utilisateur remis le', 'Training and user guide delivered on')} ${d(ms('M5'))}`
+    ].join('\n');
+    const risks = [...tp.risks, ['Retard sur le planning', 'Schedule slippage', 3, 3, 'Suivi du burndown chaque semaine, alerte si SPI < 0,9', 'Weekly burndown review, alert if SPI < 0.9'],
+      ['Changement de besoin en cours de projet', 'Requirement change mid-project', 3, 3, 'Toute demande nouvelle passe en phase 2 ou fait l’objet d’un avenant', 'New requests go to phase 2 or a change order']]
+      .map(r => ({ r, s: r[2] * r[3] })).sort((a, b) => b.s - a.s);
+    o.risks = [row(['ID', L('Risque', 'Risk'), L('Probabilité (1-5)', 'Probability (1-5)'), L('Impact (1-5)', 'Impact (1-5)'), 'Score', L('Réponse prévue', 'Planned response')]),
+      ...risks.map(({ r, s }, i) => row([`R${i + 1}`, fr ? r[0] : r[1], r[2], r[3], s, fr ? r[4] : r[5]]))].join('\n');
+    o.conclusion = [L('## Prochaines étapes', '## Next steps'),
+      `- ${L('Valider ce cahier des charges avant le', 'Approve this specification before')} ${d(ms('M1'))} (M1)`,
+      `- ${L('Valider les maquettes et l’architecture avant le', 'Approve mock-ups and architecture before')} ${d(ms('M2'))} (M2)`,
+      `- ${L('Recevoir la version complète le', 'Receive the complete version on')} ${d(ms('M3'))} (M3)`,
+      `- ${L('Mise en service prévue le', 'Go-live planned on')} ${d(ms('M5'))} (M5)`,
+      L('## Lexique pour le client', '## Glossary for the client'),
+      row([L('Terme', 'Term'), L('Signification', 'Meaning')]),
+      ...[['MVP', L('Première version complète et utilisable du produit', 'First complete, usable version of the product')],
+        ['API', L('Porte d’entrée qui permet à deux logiciels de s’échanger des données', 'Doorway that lets two pieces of software exchange data')],
+        ['Front-end / Back-end', L('Ce que l’utilisateur voit / ce qui tourne sur le serveur', 'What the user sees / what runs on the server')],
+        ['CI/CD', L('Chaîne automatique qui teste puis met en ligne chaque modification', 'Automatic chain that tests then publishes each change')],
+        [L('Recette', 'Acceptance testing'), L('Tests faits par le client pour valider le produit', 'Tests by the client to approve the product')],
+        [L('Jalon', 'Milestone'), L('Date clé où le client valide une étape', 'Key date when the client approves a stage')],
+        [L('Point d’effort', 'Effort point'), L('Unité de mesure du travail d’une tâche', 'Unit measuring the work in a task')],
+        ['Burndown', L('Courbe du travail restant, qui doit descendre jusqu’à zéro', 'Chart of remaining work, which should fall to zero')],
+        ['SPI', L('Indice de respect du planning : 1 = à l’heure, moins de 1 = en retard', 'Schedule index: 1 = on time, below 1 = late')],
+        [L('RGPD', 'GDPR'), L('Loi européenne sur la protection des données personnelles', 'EU law protecting personal data')],
+        ['OWASP', L('Liste de référence des failles de sécurité web', 'Reference list of web security flaws')]].map(r => row(r))].join('\n');
+    return o;
+  }
+  /* ---- AI answer (untrusted) → validated custom plan, or null ---- */
+  function fromAI(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const str = (v, m) => typeof v === 'string' ? v.replace(/[|\n\r<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, m) : '';
+    const int = (v, lo, hi, d) => { const x = Math.round(Number(v)); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : d; };
+    const feats = (Array.isArray(raw.features) ? raw.features : []).slice(0, 12).map(f => f && [str(f.fr, 90), str(f.en, 90) || str(f.fr, 90), str(f.descFr, 260), str(f.descEn, 260) || str(f.descFr, 260),
+      int(f.days, 1, 15, 4), int(f.points, 1, 21, 5), ['M', 'S', 'C'].includes(f.priority) ? f.priority : 'S']).filter(f => f && f[0] && f[2]);
+    if (feats.length < 3) return null;
+    if (!feats.some(f => f[6] === 'M')) feats.slice(0, 3).forEach(f => { f[6] = 'M'; });
+    return { typeId: K.some(k => k.id === raw.typeId) ? raw.typeId : null, name: str(raw.name, 80) || null, features: feats };
+  }
+  function aiPrompt(description, lang) {
+    return [`You plan IT projects for clients who are not technical. The client wrote: "${String(description).slice(0, 600)}".`,
+      `Choose the closest typeId among: ${K.map(k => `${k.id} (${k.en})`).join(', ')}.`,
+      `Return only JSON: {"typeId": string, "name": short project name in ${lang === 'fr' ? 'French' : 'English'}, "features": [{"fr": feature name in French, "en": feature name in English, "descFr": one plain-language sentence in French a non-technical client understands, "descEn": same in English, "days": working days 1-15, "points": effort 1-13, "priority": "M"|"S"|"C"}]}.`,
+      'Give 6 to 10 features specific to this client project (what the product must do for its users), most important first, at least 4 with priority "M". No jargon in the descriptions. Do not use the | character.'].join('\n');
+  }
+  return { detect, build, fromAI, aiPrompt, types: () => K.map(k => ({ id: k.id, fr: k.fr, en: k.en })), norm };
+})();
+if (typeof module !== 'undefined') module.exports = Generator;
 </script>
 <script>const SAMPLE = {
   name: 'ESAIP AI Assistant', code: 'EAA-2026',
@@ -1125,6 +1695,17 @@ const I18N = {
     eId: 'ID : lettres, chiffres, _ ou -, 16 caractères max.', eIdTaken: 'Cet ID existe déjà.', eName: 'Le nom (FR) est obligatoire.',
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
+    tabAssistant: 'Assistant', newProject: 'Nouveau projet',
+    wzEyebrow: 'Assistant de projet', wzTitle: 'Décrivez votre projet, on prépare tout le reste',
+    wzLead: 'Une phrase suffit, sans termes techniques. Vous obtenez le planning (Gantt), le suivi burndown, le cahier des charges, le dossier technique et le rapport, prêts à télécharger.',
+    wzPh: 'Ex. : je veux vendre mes vêtements en ligne', wzClient: 'Client (facultatif)', wzType: 'Type de projet', wzAuto: 'Détection automatique', wzSize: 'Ampleur',
+    szSmall: 'Essentiel', szMedium: 'Standard', szLarge: 'Complet', wzDetected: 'Type détecté : ', wzNone: 'Écrivez quelques mots pour détecter le type de projet.',
+    wzGo: 'Générer le projet complet', wzAi: 'Adapter avec l’IA de Claude', wzAiRun: 'Claude adapte le projet à votre demande…', wzAiFail: 'IA indisponible : projet généré avec le modèle intégré.',
+    wzEmpty: 'Décrivez le projet en quelques mots.', wzDone: 'Projet prêt : ', wzUndo: 'Annuler', wzUndone: 'Projet précédent restauré.', wzSeeGantt: 'Voir le Gantt', wzEdit: 'Modifier les textes',
+    wzS1: 'Décrivez', wzS1d: 'En une phrase, comme vous l’expliqueriez à un ami.', wzS2: 'Générez', wzS2d: 'Tâches, dates, dépendances, jalons et textes des documents sont créés.',
+    wzS3: 'Téléchargez', wzS3d: 'Cahier des charges, dossier technique et rapport en Word, plus les Gantt.',
+    wzStType: 'Type', wzStDur: 'Durée', wzStDates: 'Dates', wzStTasks: 'Tâches', wzStPts: 'Points d’effort', wzStMs: 'Jalons', weeksU: 'semaines',
+    wzChips: ['Boutique en ligne de vêtements', 'Application mobile de suivi sportif', 'Chatbot pour le service client', 'Tableau de bord des ventes', 'Prise de rendez-vous en ligne', 'Site vitrine pour un restaurant'],
     download: 'Télécharger', dlDocs: 'Documents Word (.docx)', dlNeeds: 'Cahier des charges', dlTech: 'Dossier technique', dlReport: 'Rapport complet',
     dlImgs: 'Graphiques et données', dlGs: 'Gantt synthétique', dlGm: 'Gantt maître', dlBd: 'Burndown', dlCsv: 'Gantt pour Excel', dlJson: 'Projet complet',
     dlLang: 'Langue des documents : celle de l’interface (FR/EN).', dlFrame: 'Dans l’aperçu Claude, le navigateur peut bloquer les téléchargements : utilisez la version déployée.',
@@ -1161,6 +1742,17 @@ const I18N = {
     eId: 'ID: letters, digits, _ or -, 16 characters max.', eIdTaken: 'That ID already exists.', eName: 'Name (FR) is required.',
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
+    tabAssistant: 'Assistant', newProject: 'New project',
+    wzEyebrow: 'Project assistant', wzTitle: 'Describe your project, we prepare everything else',
+    wzLead: 'One sentence is enough, no technical terms needed. You get the schedule (Gantt), burndown tracking, requirements spec, technical document and report, ready to download.',
+    wzPh: 'E.g. I want to sell my clothes online', wzClient: 'Client (optional)', wzType: 'Project type', wzAuto: 'Automatic detection', wzSize: 'Scope',
+    szSmall: 'Essential', szMedium: 'Standard', szLarge: 'Complete', wzDetected: 'Detected type: ', wzNone: 'Type a few words to detect the project type.',
+    wzGo: 'Generate the full project', wzAi: 'Tailor with Claude AI', wzAiRun: 'Claude is tailoring the project to your request…', wzAiFail: 'AI unavailable: project generated with the built-in model.',
+    wzEmpty: 'Describe the project in a few words.', wzDone: 'Project ready: ', wzUndo: 'Undo', wzUndone: 'Previous project restored.', wzSeeGantt: 'See the Gantt', wzEdit: 'Edit the texts',
+    wzS1: 'Describe', wzS1d: 'In one sentence, as you would explain it to a friend.', wzS2: 'Generate', wzS2d: 'Tasks, dates, dependencies, milestones and document texts are created.',
+    wzS3: 'Download', wzS3d: 'Requirements spec, technical document and report in Word, plus the Gantts.',
+    wzStType: 'Type', wzStDur: 'Duration', wzStDates: 'Dates', wzStTasks: 'Tasks', wzStPts: 'Effort points', wzStMs: 'Milestones', weeksU: 'weeks',
+    wzChips: ['Online clothing shop', 'Mobile app for sports tracking', 'Customer service chatbot', 'Sales dashboard', 'Online appointment booking', 'Showcase website for a restaurant'],
     download: 'Download', dlDocs: 'Word documents (.docx)', dlNeeds: 'Requirements specification', dlTech: 'Technical document', dlReport: 'Full report',
     dlImgs: 'Charts and data', dlGs: 'Summary Gantt', dlGm: 'Master Gantt', dlBd: 'Burndown', dlCsv: 'Gantt for Excel', dlJson: 'Full project',
     dlLang: 'Document language follows the interface (FR/EN).', dlFrame: 'In the Claude preview the browser may block downloads: use the deployed version.',
@@ -1176,7 +1768,7 @@ const load = () => { try { return JSON.parse(localStorage.getItem(STORE) || 'nul
 const persist = () => { try { localStorage.setItem(STORE, JSON.stringify({ project: P, ui: UI })); } catch { /* storage unavailable: session-only */ } };
 const saved = load();
 let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
-const UI = Object.assign({ lang: 'fr', tab: 'burndown', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
+const UI = Object.assign({ lang: 'fr', tab: 'assistant', wzSize: 'medium', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
 let editing = null, lastBurndown = null;
 const t = k => I18N[UI.lang][k] ?? k;
 const nm = o => (UI.lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
@@ -1201,7 +1793,7 @@ function renderChrome() {
   $('pName').textContent = P.name;
   $('pMeta').textContent = `${dLabel(C.parseDate(P.start), true)} → ${dLabel(C.parseDate(P.end), true)} · ${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
   ['fr', 'en'].forEach(l => $('lang-' + l).setAttribute('aria-pressed', UI.lang === l));
-  const tabs = [['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['project', 'tabProject']];
+  const tabs = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['project', 'tabProject']];
   $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
   tabs.forEach(([id]) => { $('tab-' + id).hidden = UI.tab !== id; });
   $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
@@ -1620,8 +2212,8 @@ async function saveFile(bytes, name, type) {
 }
 const slug = s => String(s).replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'projet';
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-async function download(kind) {
-  const st = $('dlStatus'); st.textContent = t('generating'); st.className = 'dl-status';
+async function download(kind, st = $('dlStatus')) {
+  st = st || $('dlStatus'); st.textContent = t('generating'); st.className = 'dl-status';
   const report = (r, name) => { st.textContent = r === 'saved' ? t('downloaded') + name : r === 'declined' ? t('dlDeclined') : t('dlBusy'); st.className = 'dl-status' + (r === 'saved' ? '' : ' err'); };
   try {
     const base = slug(P.code || P.name);
@@ -1661,23 +2253,89 @@ $('saveDocs').addEventListener('click', () => {
   $('docMsg').textContent = t('saved'); $('docMsg').className = 'ok';
 });
 
+
+/* ---------- project assistant ---------- */
+let prevProject = null, lastGen = null;
+const sampleCap = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('sample').catch(() => null) : Promise.resolve(null);
+sampleCap.then(s => { $('wzAiWrap').hidden = !s; });
+function renderAssistant() {
+  $('wz-desc').placeholder = t('wzPh'); $('wzGo').textContent = t('wzGo');
+  $('wzChips').innerHTML = t('wzChips').map(c => `<button type="button" data-chip="${esc(c)}">${esc(c)}</button>`).join('');
+  const sel = $('wz-type'), cur = sel.value || 'auto';
+  sel.innerHTML = `<option value="auto">${esc(t('wzAuto'))}</option>` + Generator.types().map(x => `<option value="${esc(x.id)}">${esc(UI.lang === 'fr' ? x.fr : x.en)}</option>`).join('');
+  sel.value = cur;
+  ['small', 'medium', 'large'].forEach(s => { const b = $('sz-' + s); b.textContent = t('sz' + s[0].toUpperCase() + s.slice(1)); b.setAttribute('aria-pressed', UI.wzSize === s); });
+  if (!$('wz-start').value) { let x = C.addDays(todayT(), 1); while (new Date(x).getUTCDay() !== 1) x = C.addDays(x, 1); $('wz-start').value = C.fmt(x); }
+  showDetect();
+  if (lastGen) renderResult();
+}
+function showDetect() {
+  const v = $('wz-desc').value.trim(), el = $('wzDetect');
+  if (!v) { el.textContent = t('wzNone'); return; }
+  const id = $('wz-type').value !== 'auto' ? $('wz-type').value : Generator.detect(v).id, tp = Generator.types().find(x => x.id === id);
+  el.innerHTML = `${esc(t('wzDetected'))}<b>${esc(UI.lang === 'fr' ? tp.fr : tp.en)}</b>`;
+}
+function renderResult() {
+  const p = P, weeks = Math.ceil((C.diffDays(C.parseDate(p.start), C.parseDate(p.end)) + 1) / 7);
+  $('wzResult').hidden = false;
+  $('wzResTitle').textContent = t('wzDone') + p.name;
+  const st = (k, v) => `<div><dt>${esc(t(k))}</dt><dd>${esc(v)}</dd></div>`;
+  $('wzStats').innerHTML = st('wzStType', UI.lang === 'fr' ? lastGen.fr : lastGen.en) + st('wzStDur', `${weeks} ${t('weeksU')}`) +
+    st('wzStDates', `${dLabel(C.parseDate(p.start))} → ${dLabel(C.parseDate(p.end), true)}`) + st('wzStTasks', String(p.tasks.length)) +
+    st('wzStPts', String(C.totalPoints(p))) + st('wzStMs', String(p.milestones.length));
+  $('wzUndo').hidden = !prevProject;
+}
+$('wz-desc').addEventListener('input', showDetect);
+$('wz-type').addEventListener('change', showDetect);
+$('wzChips').addEventListener('click', ev => { const b = ev.target.closest('[data-chip]'); if (!b) return; $('wz-desc').value = b.dataset.chip; showDetect(); $('wz-desc').focus(); });
+$('wzSize').addEventListener('click', ev => { const b = ev.target.closest('[data-size]'); if (!b) return; UI.wzSize = b.dataset.size; persist(); renderAssistant(); });
+$('wzGo').addEventListener('click', async () => {
+  const desc = $('wz-desc').value.trim(), msgEl = $('wzMsg');
+  if (desc.length < 3) { msgEl.textContent = t('wzEmpty'); msgEl.className = 'err'; $('wz-desc').focus(); return; }
+  $('wzGo').disabled = true; msgEl.textContent = ''; msgEl.className = '';
+  let custom = null;
+  try {
+    const s = await sampleCap;
+    if (s && $('wzAi').checked) {
+      msgEl.textContent = t('wzAiRun');
+      try { custom = Generator.fromAI(await s.json(Generator.aiPrompt(desc, UI.lang), { modelTier: 'default' })); } catch { custom = null; }
+      msgEl.textContent = custom ? '' : t('wzAiFail');
+    }
+    const typeSel = $('wz-type').value;
+    if (custom && typeSel !== 'auto') custom.typeId = typeSel;
+    const out = Generator.build({ description: desc, client: $('wz-client').value.trim(), start: $('wz-start').value, size: UI.wzSize,
+      typeId: typeSel === 'auto' ? undefined : typeSel, lang: UI.lang, custom });
+    const r = C.validateProject(out.project);
+    if (!r.ok) throw new Error(r.errors.join(','));
+    prevProject = P; lastGen = out.type; P = r.project; editing = null;
+    commit(); renderResult();
+    $('wzResult').scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  } catch (e) { console.warn('generation failed', e); msgEl.textContent = t('dlError'); msgEl.className = 'err'; }
+  finally { $('wzGo').disabled = false; }
+});
+$('wzUndo').addEventListener('click', () => { if (!prevProject) return; P = prevProject; prevProject = null; lastGen = null; $('wzResult').hidden = true; commit(); $('wzMsg').textContent = t('wzUndone'); $('wzMsg').className = 'ok'; });
+$('wzResult').addEventListener('click', ev => { const b = ev.target.closest('[data-wdl]'); if (b) download(b.dataset.wdl, $('wzDlStatus')); });
+$('wzSeeGantt').addEventListener('click', () => { UI.tab = 'gantt'; UI.gMode = 'master'; persist(); renderChrome(); renderGantt(); });
+$('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); renderChrome(); $('doc-context')?.focus(); });
+$('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); });
+
 /* ---------- wiring ---------- */
-function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); if (!editing) fillFormSilent(); }
+function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() { persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
 $('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); });
 $('tabs').addEventListener('keydown', ev => {
   if (!['ArrowRight', 'ArrowLeft'].includes(ev.key)) return;
-  const ids = ['burndown', 'gantt', 'tasks', 'project'], i = ids.indexOf(UI.tab);
-  UI.tab = ids[(i + (ev.key === 'ArrowRight' ? 1 : 3)) % 4]; persist(); renderChrome(); $('tb-' + UI.tab).focus();
+  const ids = ['assistant', 'burndown', 'gantt', 'tasks', 'project'], i = ids.indexOf(UI.tab);
+  UI.tab = ids[(i + (ev.key === 'ArrowRight' ? 1 : ids.length - 1)) % ids.length]; persist(); renderChrome(); $('tb-' + UI.tab).focus();
 });
 $('gMode').addEventListener('click', ev => { const b = ev.target.closest('[data-mode]'); if (!b) return; UI.gMode = b.dataset.mode; persist(); renderChrome(); renderGantt(); });
 $('gZoom').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (!b) return; UI.zoom = +b.dataset.z; persist(); renderChrome(); renderGantt(); });
 $('optDeps').addEventListener('change', ev => { UI.deps = ev.target.checked; persist(); renderGantt(); });
 $('optCrit').addEventListener('change', ev => { UI.crit = ev.target.checked; persist(); renderGantt(); });
 const hash = (location.hash || '').slice(1);
-if (['burndown', 'gantt', 'tasks', 'project'].includes(hash)) UI.tab = hash;
+if (['assistant', 'burndown', 'gantt', 'tasks', 'project'].includes(hash)) UI.tab = hash;
 renderAll(); fillForm(null);
 })();
 </script>

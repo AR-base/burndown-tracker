@@ -11,6 +11,18 @@ One static page (`index.html`), no server, no database. Data stays in the browse
 
 ---
 
+## 0. Assistant de projet / Project assistant
+
+Onglet **Assistant** (ou bouton **+ Nouveau projet**) : le client décrit son projet en une phrase, sans termes techniques (« je veux vendre mes vêtements en ligne »). L'outil détecte le type de projet et génère en un clic :
+- le planning complet : 6 phases, tâches, durées en jours ouvrés, dépendances, 6 jalons, chemin critique ;
+- tous les textes des documents en langage simple : contexte, objectifs, périmètre, parties prenantes, exigences, architecture, stack, sécurité, tests, déploiement, risques, prochaines étapes et lexique ;
+- les 3 documents Word à télécharger immédiatement.
+
+**Assistant tab** (or **+ New project**): the client describes the project in one plain sentence; the tool detects the type and generates the full schedule, every document text and the 3 Word documents in one click.
+
+Types reconnus / Recognised types: e-commerce, site vitrine, application mobile, assistant IA / chatbot, tableau de bord / BI, machine learning, réservation en ligne, application de gestion (CRM/ERP/SaaS), e-learning, audit de cybersécurité, objets connectés (IoT), application sur mesure (par défaut). Ampleur : Essentiel / Standard / Complet (≈ 7 / 11 / 14 semaines).
+Dans l'aperçu Claude, l'option **Adapter avec l'IA de Claude** personnalise les fonctionnalités au projet exact ; la réponse de l'IA est validée et nettoyée avant usage, et le modèle intégré prend le relais si elle échoue.
+
 ## 1. Déployer / Deploy
 
 ### Option A — Vercel + GitHub (recommandé / recommended)
@@ -118,10 +130,10 @@ Les fichiers .docx sont générés dans le navigateur (aucun serveur) et s'ouvre
 ```bash
 npm install        # jsdom pour les tests DOM / for DOM tests
 npm run build      # src/ → index.html + hachages CSP dans vercel.json et _headers
-npm test           # 10 logique + 8 import/export + 12 documents .docx + 26 interface = 56 tests
+npm test           # 10 logique + 8 import/export + 12 .docx + 19 assistant + 34 interface = 83 tests
 ```
 
-Structure : `src/core.js` (calculs purs), `src/io.js` (CSV/Mermaid), `src/docgen.js` (générateur .docx sans dépendance), `src/app.js` (interface), `src/app.html` (gabarit + CSS), `src/sample.js` (projet exemple ESAIP AI Assistant).
+Structure : `src/core.js` (calculs purs), `src/io.js` (CSV/Mermaid), `src/docgen.js` (générateur .docx sans dépendance), `src/kb.js` + `src/generator.js` (assistant de projet), `src/app.js` (interface), `src/app.html` (gabarit + CSS), `src/sample.js` (projet exemple ESAIP AI Assistant).
 La CI GitHub Actions (`.github/workflows/ci.yml`) reconstruit et teste à chaque push.
 
 Sécurité / Security: entrées validées et bornées (IDs, dates, tailles ≤ 2 Mo), tout texte échappé avant affichage, détection des cycles de dépendances, aucun secret, aucune requête réseau sortante (`connect-src 'none'`).

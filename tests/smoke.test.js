@@ -73,4 +73,23 @@ check('document content saved into project', JSON.parse(w.localStorage.getItem('
 check('docs editor escapes text', !$('docFields').querySelector('b'));
 check('no runtime errors after downloads', errors.length === 0);
 if (errors.length) console.log(errors);
+// project assistant
+click(d.querySelector('[data-tab="assistant"]'));
+check('assistant tab visible', !$('tab-assistant').hidden);
+const before = $('pName').textContent;
+$('wz-desc').value = 'je veux vendre mes vêtements en ligne'; $('wz-desc').dispatchEvent(new w.Event('input'));
+check('type detected live (e-commerce)', /commerce/i.test($('wzDetect').textContent));
+click($('sz-small'));
+click($('wzGo'));
+await new Promise(r => setTimeout(r, 50));
+check('project generated from one sentence', /vendre mes v/i.test($('pName').textContent) && !$('wzResult').hidden);
+const proj = JSON.parse(w.localStorage.getItem('burndown-tracker-v1')).project;
+check('generated project has tasks, milestones and document text', proj.tasks.length >= 15 && proj.milestones.length === 6 && proj.docs.functional.includes('|'));
+check('result card shows 6 stats', d.querySelectorAll('#wzStats dt').length === 6);
+click($('wzUndo'));
+check('undo restores the previous project', $('pName').textContent === before);
+click(d.querySelector('#wzChips [data-chip]'));
+check('example chip fills the description', $('wz-desc').value.length > 5);
+check('no runtime errors in assistant', errors.length === 0);
+if (errors.length) console.log(errors);
 })();

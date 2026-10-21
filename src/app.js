@@ -33,6 +33,17 @@ const I18N = {
     eId: 'ID : lettres, chiffres, _ ou -, 16 caractères max.', eIdTaken: 'Cet ID existe déjà.', eName: 'Le nom (FR) est obligatoire.',
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
+    tabAssistant: 'Assistant', newProject: 'Nouveau projet',
+    wzEyebrow: 'Assistant de projet', wzTitle: 'Décrivez votre projet, on prépare tout le reste',
+    wzLead: 'Une phrase suffit, sans termes techniques. Vous obtenez le planning (Gantt), le suivi burndown, le cahier des charges, le dossier technique et le rapport, prêts à télécharger.',
+    wzPh: 'Ex. : je veux vendre mes vêtements en ligne', wzClient: 'Client (facultatif)', wzType: 'Type de projet', wzAuto: 'Détection automatique', wzSize: 'Ampleur',
+    szSmall: 'Essentiel', szMedium: 'Standard', szLarge: 'Complet', wzDetected: 'Type détecté : ', wzNone: 'Écrivez quelques mots pour détecter le type de projet.',
+    wzGo: 'Générer le projet complet', wzAi: 'Adapter avec l’IA de Claude', wzAiRun: 'Claude adapte le projet à votre demande…', wzAiFail: 'IA indisponible : projet généré avec le modèle intégré.',
+    wzEmpty: 'Décrivez le projet en quelques mots.', wzDone: 'Projet prêt : ', wzUndo: 'Annuler', wzUndone: 'Projet précédent restauré.', wzSeeGantt: 'Voir le Gantt', wzEdit: 'Modifier les textes',
+    wzS1: 'Décrivez', wzS1d: 'En une phrase, comme vous l’expliqueriez à un ami.', wzS2: 'Générez', wzS2d: 'Tâches, dates, dépendances, jalons et textes des documents sont créés.',
+    wzS3: 'Téléchargez', wzS3d: 'Cahier des charges, dossier technique et rapport en Word, plus les Gantt.',
+    wzStType: 'Type', wzStDur: 'Durée', wzStDates: 'Dates', wzStTasks: 'Tâches', wzStPts: 'Points d’effort', wzStMs: 'Jalons', weeksU: 'semaines',
+    wzChips: ['Boutique en ligne de vêtements', 'Application mobile de suivi sportif', 'Chatbot pour le service client', 'Tableau de bord des ventes', 'Prise de rendez-vous en ligne', 'Site vitrine pour un restaurant'],
     download: 'Télécharger', dlDocs: 'Documents Word (.docx)', dlNeeds: 'Cahier des charges', dlTech: 'Dossier technique', dlReport: 'Rapport complet',
     dlImgs: 'Graphiques et données', dlGs: 'Gantt synthétique', dlGm: 'Gantt maître', dlBd: 'Burndown', dlCsv: 'Gantt pour Excel', dlJson: 'Projet complet',
     dlLang: 'Langue des documents : celle de l’interface (FR/EN).', dlFrame: 'Dans l’aperçu Claude, le navigateur peut bloquer les téléchargements : utilisez la version déployée.',
@@ -69,6 +80,17 @@ const I18N = {
     eId: 'ID: letters, digits, _ or -, 16 characters max.', eIdTaken: 'That ID already exists.', eName: 'Name (FR) is required.',
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
+    tabAssistant: 'Assistant', newProject: 'New project',
+    wzEyebrow: 'Project assistant', wzTitle: 'Describe your project, we prepare everything else',
+    wzLead: 'One sentence is enough, no technical terms needed. You get the schedule (Gantt), burndown tracking, requirements spec, technical document and report, ready to download.',
+    wzPh: 'E.g. I want to sell my clothes online', wzClient: 'Client (optional)', wzType: 'Project type', wzAuto: 'Automatic detection', wzSize: 'Scope',
+    szSmall: 'Essential', szMedium: 'Standard', szLarge: 'Complete', wzDetected: 'Detected type: ', wzNone: 'Type a few words to detect the project type.',
+    wzGo: 'Generate the full project', wzAi: 'Tailor with Claude AI', wzAiRun: 'Claude is tailoring the project to your request…', wzAiFail: 'AI unavailable: project generated with the built-in model.',
+    wzEmpty: 'Describe the project in a few words.', wzDone: 'Project ready: ', wzUndo: 'Undo', wzUndone: 'Previous project restored.', wzSeeGantt: 'See the Gantt', wzEdit: 'Edit the texts',
+    wzS1: 'Describe', wzS1d: 'In one sentence, as you would explain it to a friend.', wzS2: 'Generate', wzS2d: 'Tasks, dates, dependencies, milestones and document texts are created.',
+    wzS3: 'Download', wzS3d: 'Requirements spec, technical document and report in Word, plus the Gantts.',
+    wzStType: 'Type', wzStDur: 'Duration', wzStDates: 'Dates', wzStTasks: 'Tasks', wzStPts: 'Effort points', wzStMs: 'Milestones', weeksU: 'weeks',
+    wzChips: ['Online clothing shop', 'Mobile app for sports tracking', 'Customer service chatbot', 'Sales dashboard', 'Online appointment booking', 'Showcase website for a restaurant'],
     download: 'Download', dlDocs: 'Word documents (.docx)', dlNeeds: 'Requirements specification', dlTech: 'Technical document', dlReport: 'Full report',
     dlImgs: 'Charts and data', dlGs: 'Summary Gantt', dlGm: 'Master Gantt', dlBd: 'Burndown', dlCsv: 'Gantt for Excel', dlJson: 'Full project',
     dlLang: 'Document language follows the interface (FR/EN).', dlFrame: 'In the Claude preview the browser may block downloads: use the deployed version.',
@@ -84,7 +106,7 @@ const load = () => { try { return JSON.parse(localStorage.getItem(STORE) || 'nul
 const persist = () => { try { localStorage.setItem(STORE, JSON.stringify({ project: P, ui: UI })); } catch { /* storage unavailable: session-only */ } };
 const saved = load();
 let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
-const UI = Object.assign({ lang: 'fr', tab: 'burndown', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
+const UI = Object.assign({ lang: 'fr', tab: 'assistant', wzSize: 'medium', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
 let editing = null, lastBurndown = null;
 const t = k => I18N[UI.lang][k] ?? k;
 const nm = o => (UI.lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
@@ -109,7 +131,7 @@ function renderChrome() {
   $('pName').textContent = P.name;
   $('pMeta').textContent = `${dLabel(C.parseDate(P.start), true)} → ${dLabel(C.parseDate(P.end), true)} · ${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
   ['fr', 'en'].forEach(l => $('lang-' + l).setAttribute('aria-pressed', UI.lang === l));
-  const tabs = [['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['project', 'tabProject']];
+  const tabs = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['project', 'tabProject']];
   $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
   tabs.forEach(([id]) => { $('tab-' + id).hidden = UI.tab !== id; });
   $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
@@ -528,8 +550,8 @@ async function saveFile(bytes, name, type) {
 }
 const slug = s => String(s).replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'projet';
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-async function download(kind) {
-  const st = $('dlStatus'); st.textContent = t('generating'); st.className = 'dl-status';
+async function download(kind, st = $('dlStatus')) {
+  st = st || $('dlStatus'); st.textContent = t('generating'); st.className = 'dl-status';
   const report = (r, name) => { st.textContent = r === 'saved' ? t('downloaded') + name : r === 'declined' ? t('dlDeclined') : t('dlBusy'); st.className = 'dl-status' + (r === 'saved' ? '' : ' err'); };
   try {
     const base = slug(P.code || P.name);
@@ -569,22 +591,88 @@ $('saveDocs').addEventListener('click', () => {
   $('docMsg').textContent = t('saved'); $('docMsg').className = 'ok';
 });
 
+
+/* ---------- project assistant ---------- */
+let prevProject = null, lastGen = null;
+const sampleCap = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('sample').catch(() => null) : Promise.resolve(null);
+sampleCap.then(s => { $('wzAiWrap').hidden = !s; });
+function renderAssistant() {
+  $('wz-desc').placeholder = t('wzPh'); $('wzGo').textContent = t('wzGo');
+  $('wzChips').innerHTML = t('wzChips').map(c => `<button type="button" data-chip="${esc(c)}">${esc(c)}</button>`).join('');
+  const sel = $('wz-type'), cur = sel.value || 'auto';
+  sel.innerHTML = `<option value="auto">${esc(t('wzAuto'))}</option>` + Generator.types().map(x => `<option value="${esc(x.id)}">${esc(UI.lang === 'fr' ? x.fr : x.en)}</option>`).join('');
+  sel.value = cur;
+  ['small', 'medium', 'large'].forEach(s => { const b = $('sz-' + s); b.textContent = t('sz' + s[0].toUpperCase() + s.slice(1)); b.setAttribute('aria-pressed', UI.wzSize === s); });
+  if (!$('wz-start').value) { let x = C.addDays(todayT(), 1); while (new Date(x).getUTCDay() !== 1) x = C.addDays(x, 1); $('wz-start').value = C.fmt(x); }
+  showDetect();
+  if (lastGen) renderResult();
+}
+function showDetect() {
+  const v = $('wz-desc').value.trim(), el = $('wzDetect');
+  if (!v) { el.textContent = t('wzNone'); return; }
+  const id = $('wz-type').value !== 'auto' ? $('wz-type').value : Generator.detect(v).id, tp = Generator.types().find(x => x.id === id);
+  el.innerHTML = `${esc(t('wzDetected'))}<b>${esc(UI.lang === 'fr' ? tp.fr : tp.en)}</b>`;
+}
+function renderResult() {
+  const p = P, weeks = Math.ceil((C.diffDays(C.parseDate(p.start), C.parseDate(p.end)) + 1) / 7);
+  $('wzResult').hidden = false;
+  $('wzResTitle').textContent = t('wzDone') + p.name;
+  const st = (k, v) => `<div><dt>${esc(t(k))}</dt><dd>${esc(v)}</dd></div>`;
+  $('wzStats').innerHTML = st('wzStType', UI.lang === 'fr' ? lastGen.fr : lastGen.en) + st('wzStDur', `${weeks} ${t('weeksU')}`) +
+    st('wzStDates', `${dLabel(C.parseDate(p.start))} → ${dLabel(C.parseDate(p.end), true)}`) + st('wzStTasks', String(p.tasks.length)) +
+    st('wzStPts', String(C.totalPoints(p))) + st('wzStMs', String(p.milestones.length));
+  $('wzUndo').hidden = !prevProject;
+}
+$('wz-desc').addEventListener('input', showDetect);
+$('wz-type').addEventListener('change', showDetect);
+$('wzChips').addEventListener('click', ev => { const b = ev.target.closest('[data-chip]'); if (!b) return; $('wz-desc').value = b.dataset.chip; showDetect(); $('wz-desc').focus(); });
+$('wzSize').addEventListener('click', ev => { const b = ev.target.closest('[data-size]'); if (!b) return; UI.wzSize = b.dataset.size; persist(); renderAssistant(); });
+$('wzGo').addEventListener('click', async () => {
+  const desc = $('wz-desc').value.trim(), msgEl = $('wzMsg');
+  if (desc.length < 3) { msgEl.textContent = t('wzEmpty'); msgEl.className = 'err'; $('wz-desc').focus(); return; }
+  $('wzGo').disabled = true; msgEl.textContent = ''; msgEl.className = '';
+  let custom = null;
+  try {
+    const s = await sampleCap;
+    if (s && $('wzAi').checked) {
+      msgEl.textContent = t('wzAiRun');
+      try { custom = Generator.fromAI(await s.json(Generator.aiPrompt(desc, UI.lang), { modelTier: 'default' })); } catch { custom = null; }
+      msgEl.textContent = custom ? '' : t('wzAiFail');
+    }
+    const typeSel = $('wz-type').value;
+    if (custom && typeSel !== 'auto') custom.typeId = typeSel;
+    const out = Generator.build({ description: desc, client: $('wz-client').value.trim(), start: $('wz-start').value, size: UI.wzSize,
+      typeId: typeSel === 'auto' ? undefined : typeSel, lang: UI.lang, custom });
+    const r = C.validateProject(out.project);
+    if (!r.ok) throw new Error(r.errors.join(','));
+    prevProject = P; lastGen = out.type; P = r.project; editing = null;
+    commit(); renderResult();
+    $('wzResult').scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  } catch (e) { console.warn('generation failed', e); msgEl.textContent = t('dlError'); msgEl.className = 'err'; }
+  finally { $('wzGo').disabled = false; }
+});
+$('wzUndo').addEventListener('click', () => { if (!prevProject) return; P = prevProject; prevProject = null; lastGen = null; $('wzResult').hidden = true; commit(); $('wzMsg').textContent = t('wzUndone'); $('wzMsg').className = 'ok'; });
+$('wzResult').addEventListener('click', ev => { const b = ev.target.closest('[data-wdl]'); if (b) download(b.dataset.wdl, $('wzDlStatus')); });
+$('wzSeeGantt').addEventListener('click', () => { UI.tab = 'gantt'; UI.gMode = 'master'; persist(); renderChrome(); renderGantt(); });
+$('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); renderChrome(); $('doc-context')?.focus(); });
+$('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); });
+
 /* ---------- wiring ---------- */
-function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); if (!editing) fillFormSilent(); }
+function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() { persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
 $('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); });
 $('tabs').addEventListener('keydown', ev => {
   if (!['ArrowRight', 'ArrowLeft'].includes(ev.key)) return;
-  const ids = ['burndown', 'gantt', 'tasks', 'project'], i = ids.indexOf(UI.tab);
-  UI.tab = ids[(i + (ev.key === 'ArrowRight' ? 1 : 3)) % 4]; persist(); renderChrome(); $('tb-' + UI.tab).focus();
+  const ids = ['assistant', 'burndown', 'gantt', 'tasks', 'project'], i = ids.indexOf(UI.tab);
+  UI.tab = ids[(i + (ev.key === 'ArrowRight' ? 1 : ids.length - 1)) % ids.length]; persist(); renderChrome(); $('tb-' + UI.tab).focus();
 });
 $('gMode').addEventListener('click', ev => { const b = ev.target.closest('[data-mode]'); if (!b) return; UI.gMode = b.dataset.mode; persist(); renderChrome(); renderGantt(); });
 $('gZoom').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (!b) return; UI.zoom = +b.dataset.z; persist(); renderChrome(); renderGantt(); });
 $('optDeps').addEventListener('change', ev => { UI.deps = ev.target.checked; persist(); renderGantt(); });
 $('optCrit').addEventListener('change', ev => { UI.crit = ev.target.checked; persist(); renderGantt(); });
 const hash = (location.hash || '').slice(1);
-if (['burndown', 'gantt', 'tasks', 'project'].includes(hash)) UI.tab = hash;
+if (['assistant', 'burndown', 'gantt', 'tasks', 'project'].includes(hash)) UI.tab = hash;
 renderAll(); fillForm(null);
 })();
