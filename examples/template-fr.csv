@@ -1,0 +1,5 @@
+id;type;phase;name_fr;name_en;owner;start;end;points;progress;done;deps
+T1;task;Cadrage / Initiation;Réunion de lancement;Kick-off meeting;PM;04/01/2027;08/01/2027;3;100;08/01/2027;
+T2;task;Cadrage / Initiation;Cahier des charges;Requirements spec;PM;11/01/2027;15/01/2027;5;40;;T1
+T3;task;Réalisation / Build;Développement MVP;MVP development;DEV;18/01/2027;05/02/2027;13;0;;T2
+M1;milestone;;Livraison MVP;MVP delivered;;05/02/2027;05/02/2027;0;;;

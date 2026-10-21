@@ -1,0 +1,52 @@
+const { JSDOM } = require('jsdom');
+const fs = require('fs');
+const html = fs.readFileSync(require('path').join(__dirname,'..','index.html'), 'utf8');
+const errors = [];
+const dom = new JSDOM(html, { runScripts: 'dangerously', url: 'https://example.test/', pretendToBeVisual: true,
+  beforeParse(w) { w.addEventListener('error', e => errors.push(e.message)); w.console.error = (...a) => errors.push(a.join(' ')); } });
+const d = dom.window.document, $ = id => d.getElementById(id);
+const click = el => el.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
+const check = (name, cond) => { if (!cond) { console.log('✗', name); process.exitCode = 1; } else console.log('✓', name); };
+check('no script errors on load', errors.length === 0);
+check('KPIs rendered (6)', d.querySelectorAll('.kpi').length === 6);
+check('burndown svg drawn', !!$('bdBox').querySelector('svg polyline'));
+check('master gantt has 20 task bars', ($('gRight').innerHTML.match(/<g><title>T\d+/g) || []).length === 20);
+click($('lang-en'));
+check('EN switch translates tabs', $('tabs').textContent.includes('Tasks'));
+click($('g-summary'));
+check('summary gantt draws 6 phases', ($('gLeft').innerHTML.match(/P\d · /g) || []).length === 6);
+// add a task through the form
+click(d.querySelector('[data-tab="tasks"]'));
+$('tf-fr').value = 'Démo <img src=x onerror=alert(1)>'; $('tf-start').value = '2026-10-22'; $('tf-end').value = '2026-10-23'; $('tf-deps').value = 'T4';
+$('taskForm').dispatchEvent(new dom.window.Event('submit', { cancelable: true }));
+check('task added', $('taskTable').textContent.includes('T21'));
+check('user text is escaped', !$('taskTable').querySelector('img') && !$('gLeft').querySelector('img'));
+// cycle rejection
+click(d.querySelector('[data-act="edit"][data-id="T1"]'));
+$('tf-deps').value = 'T20';
+$('taskForm').dispatchEvent(new dom.window.Event('submit', { cancelable: true }));
+check('cycle rejected', /loop|boucle/.test($('tfErr').textContent));
+// import bad json
+$('jsonBox').value = '{bad'; click($('btnImport'));
+check('bad JSON rejected', /JSON/.test($('dataMsg').textContent));
+$('jsonBox').value = JSON.stringify({ name: 'X', start: '2026-01-01', end: '2026-03-01', phases: [{ id: 'A', fr: 'A', en: 'A', color: '#123456' }], tasks: [{ id: 'K1', phase: 'A', start: '2026-01-05', end: '2026-01-09', points: 5, done: '2026-01-09' }] });
+click($('btnImport'));
+check('valid JSON imported', $('pName').textContent === 'X');
+check('no runtime errors overall', errors.length === 0);
+if (errors.length) console.log(errors);
+// CSV + Mermaid import through the UI
+const IO = require('../src/io.js');
+click(d.querySelector('[data-tab="project"]'));
+click($('btnTemplate'));
+check('CSV template fills box', $('jsonBox').value.startsWith('id;type'));
+click($('btnImport'));
+check('CSV template imports (3 tasks)', d.querySelectorAll('#taskTable tbody tr:not(.phase-row)').length === 3);
+$('jsonBox').value = 'gantt\n title Mermaid demo\n dateFormat YYYY-MM-DD\n section Build\n A :done, a1, 2027-01-04, 5d\n B :a2, after a1, 1w\n';
+click($('btnImport'));
+check('Mermaid imports', $('pName').textContent === 'Mermaid demo');
+click($('btnMermaid'));
+check('Mermaid export', $('jsonBox').value.startsWith('gantt'));
+click($('btnCsv'));
+check('CSV export', $('jsonBox').value.startsWith('id,type'));
+check('still no runtime errors', errors.length === 0);
+if (errors.length) console.log(errors);

@@ -1,0 +1,43 @@
+const SAMPLE = {
+  name: 'ESAIP AI Assistant', code: 'EAA-2026',
+  start: '2026-09-28', end: '2026-12-18', statusDate: '', workingDays: true,
+  phases: [
+    { id: 'P1', fr: 'Initialisation', en: 'Initiation', color: '#4f6bed' },
+    { id: 'P2', fr: 'Conception', en: 'Design', color: '#0f9d8a' },
+    { id: 'P3', fr: 'Développement', en: 'Build', color: '#d9811e' },
+    { id: 'P4', fr: 'Tests et recette', en: 'Test and UAT', color: '#c2417a' },
+    { id: 'P5', fr: 'Déploiement', en: 'Deployment', color: '#7a5af5' },
+    { id: 'P6', fr: 'Clôture', en: 'Closure', color: '#5f7182' }
+  ],
+  milestones: [
+    { id: 'M1', fr: 'Cahier des charges validé', en: 'Spec signed off', date: '2026-10-09' },
+    { id: 'M2', fr: 'Gel de la conception', en: 'Design freeze', date: '2026-10-23' },
+    { id: 'M3', fr: 'MVP', en: 'MVP', date: '2026-11-20' },
+    { id: 'M4', fr: 'Recette validée', en: 'UAT passed', date: '2026-12-08' },
+    { id: 'M5', fr: 'Mise en production', en: 'Go-live', date: '2026-12-11' },
+    { id: 'M6', fr: 'Soutenance', en: 'Defence', date: '2026-12-18' }
+  ],
+  tasks: [
+    { id: 'T1', phase: 'P1', fr: 'Lancement et entretiens', en: 'Kick-off and stakeholder interviews', owner: 'PM', start: '2026-09-28', end: '2026-10-02', points: 3, progress: 100, done: '2026-10-02', deps: [] },
+    { id: 'T2', phase: 'P1', fr: 'Cahier des charges', en: 'Requirements specification', owner: 'PM', start: '2026-10-05', end: '2026-10-09', points: 5, progress: 100, done: '2026-10-09', deps: ['T1'] },
+    { id: 'T3', phase: 'P1', fr: 'Registre des risques et RACI', en: 'Risk register and RACI', owner: 'PM', start: '2026-10-05', end: '2026-10-08', points: 2, progress: 100, done: '2026-10-08', deps: ['T1'] },
+    { id: 'T4', phase: 'P2', fr: 'Architecture RAG et API', en: 'RAG and API architecture', owner: 'ARCH', start: '2026-10-12', end: '2026-10-16', points: 8, progress: 100, done: '2026-10-16', deps: ['T2'] },
+    { id: 'T5', phase: 'P2', fr: 'Collecte base de connaissances', en: 'Knowledge-base data collection', owner: 'DATA', start: '2026-10-05', end: '2026-10-20', points: 8, progress: 100, done: '2026-10-20', deps: ['T1'] },
+    { id: 'T6', phase: 'P2', fr: 'Maquettes UI bilingues', en: 'Bilingual UI wireframes', owner: 'FE', start: '2026-10-12', end: '2026-10-23', points: 5, progress: 60, done: '', deps: ['T2'] },
+    { id: 'T7', phase: 'P2', fr: 'Conception sécurité et RGPD', en: 'Security and GDPR design', owner: 'SEC', start: '2026-10-19', end: '2026-10-23', points: 3, progress: 30, done: '', deps: ['T4'] },
+    { id: 'T8', phase: 'P3', fr: 'Pipeline d’ingestion et embeddings', en: 'Ingestion pipeline and embeddings', owner: 'DATA', start: '2026-10-21', end: '2026-11-03', points: 8, progress: 0, done: '', deps: ['T4', 'T5'] },
+    { id: 'T9', phase: 'P3', fr: 'Orchestration RAG et LLM', en: 'RAG retrieval and LLM orchestration', owner: 'ARCH', start: '2026-11-04', end: '2026-11-20', points: 13, progress: 0, done: '', deps: ['T8'] },
+    { id: 'T10', phase: 'P3', fr: 'API back-end et limitation de débit', en: 'Back-end API and rate limiting', owner: 'BE', start: '2026-10-19', end: '2026-11-06', points: 8, progress: 15, done: '', deps: ['T4'] },
+    { id: 'T11', phase: 'P3', fr: 'Interface de chat FR/EN', en: 'FR/EN chat interface', owner: 'FE', start: '2026-10-26', end: '2026-11-20', points: 8, progress: 0, done: '', deps: ['T6'] },
+    { id: 'T12', phase: 'P3', fr: 'Détection de langue et i18n', en: 'Language detection and i18n', owner: 'FE', start: '2026-11-09', end: '2026-11-18', points: 3, progress: 0, done: '', deps: ['T6'] },
+    { id: 'T13', phase: 'P3', fr: 'Panneau d’administration', en: 'Admin panel', owner: 'BE', start: '2026-11-23', end: '2026-12-02', points: 5, progress: 0, done: '', deps: ['T10'] },
+    { id: 'T14', phase: 'P4', fr: 'Tests unitaires et d’intégration', en: 'Unit and integration tests', owner: 'QA', start: '2026-11-23', end: '2026-12-02', points: 5, progress: 0, done: '', deps: ['T9', 'T11'] },
+    { id: 'T15', phase: 'P4', fr: 'Tests de sécurité (OWASP, injection)', en: 'Security testing (OWASP, injection)', owner: 'SEC', start: '2026-11-23', end: '2026-12-04', points: 5, progress: 0, done: '', deps: ['T7', 'T9', 'T10'] },
+    { id: 'T16', phase: 'P4', fr: 'Évaluation qualité des réponses', en: 'Answer-quality evaluation', owner: 'QA', start: '2026-11-23', end: '2026-12-03', points: 5, progress: 0, done: '', deps: ['T9'] },
+    { id: 'T17', phase: 'P4', fr: 'Recette utilisateurs', en: 'User acceptance testing', owner: 'QA', start: '2026-12-03', end: '2026-12-08', points: 3, progress: 0, done: '', deps: ['T14'] },
+    { id: 'T18', phase: 'P5', fr: 'Déploiement, CI/CD, monitoring', en: 'Deployment, CI/CD, monitoring', owner: 'BE', start: '2026-12-07', end: '2026-12-11', points: 5, progress: 0, done: '', deps: ['T15', 'T16'] },
+    { id: 'T19', phase: 'P5', fr: 'Formation et guides', en: 'Training and user guides', owner: 'PM', start: '2026-12-09', end: '2026-12-11', points: 2, progress: 0, done: '', deps: ['T17'] },
+    { id: 'T20', phase: 'P6', fr: 'Rapport final et soutenance', en: 'Final report and defence', owner: 'PM', start: '2026-12-14', end: '2026-12-18', points: 5, progress: 0, done: '', deps: ['T18', 'T19'] }
+  ]
+};
+if (typeof module !== 'undefined') module.exports = SAMPLE;

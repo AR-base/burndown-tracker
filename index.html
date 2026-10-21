@@ -1,0 +1,1230 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Bilingual FR/EN burndown and Gantt tracker for any project">
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<title>Project Burndown Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: planning-office console — sticky command bar, KPI strip, tabbed work surface (charts scroll inside their own frames) */
+:root{
+  --bg:#f2f4f8; --surface:#ffffff; --sunk:#f7f8fb; --ink:#142033; --muted:#596579; --line:#d7dde6; --grid:#e9edf3;
+  --accent:#1f56f0; --accent-soft:rgba(31,86,240,.10); --ideal:#8f9bb0;
+  --good:#16865a; --warn:#b86e00; --bad:#c42f3a; --good-soft:rgba(22,134,90,.12); --warn-soft:rgba(184,110,0,.13); --bad-soft:rgba(196,47,58,.12);
+  --f-display:'IBM Plex Sans Condensed','Arial Narrow',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d131c; --surface:#141c28; --sunk:#111823; --ink:#e5ebf4; --muted:#93a0b4; --line:#2a3546; --grid:#1d2734;
+  --accent:#7097ff; --accent-soft:rgba(112,151,255,.14); --ideal:#6c7a91;
+  --good:#3cc489; --warn:#eaa53b; --bad:#f2636f; --good-soft:rgba(60,196,137,.14); --warn-soft:rgba(234,165,59,.15); --bad-soft:rgba(242,99,111,.15);
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0d131c; --surface:#141c28; --sunk:#111823; --ink:#e5ebf4; --muted:#93a0b4; --line:#2a3546; --grid:#1d2734;
+  --accent:#7097ff; --accent-soft:rgba(112,151,255,.14); --ideal:#6c7a91;
+  --good:#3cc489; --warn:#eaa53b; --bad:#f2636f; --good-soft:rgba(60,196,137,.14); --warn-soft:rgba(234,165,59,.15); --bad-soft:rgba(242,99,111,.15);
+  color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--f-body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* command bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:12px}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1 1 280px}
+.eyebrow{font:600 11px/1.2 var(--f-display);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.brand h1{font:700 22px/1.15 var(--f-display);margin:2px 0 0;text-wrap:balance;overflow-wrap:anywhere}
+.brand .meta{font-size:12.5px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--sunk)}
+.seg button{border:0;background:none;padding:6px 12px;cursor:pointer;font:600 12.5px/1 var(--f-display);letter-spacing:.04em;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font:600 12px/1.2 var(--f-display);letter-spacing:.04em;text-transform:uppercase}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.st-on{color:var(--good);background:var(--good-soft)} .st-risk{color:var(--warn);background:var(--warn-soft)} .st-late{color:var(--bad);background:var(--bad-soft)}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:16px}
+.kpi{background:var(--surface);padding:12px 14px;min-width:0}
+.kpi .k{font:600 11px/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font:500 24px/1.2 var(--f-mono);margin-top:6px;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:13px;color:var(--muted)}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
+.meter{height:4px;background:var(--grid);border-radius:2px;margin-top:8px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+
+/* tabs */
+.tabs{display:flex;gap:4px;margin-top:20px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 14px;cursor:pointer;font:600 14px/1 var(--f-display);letter-spacing:.03em;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.panel{padding-block:16px 40px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.card-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.card-h h2{font:700 16px/1.2 var(--f-display);margin:0;letter-spacing:.01em}
+.card-b{padding:14px}
+.hint{font-size:12.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+
+/* chart */
+.chart-box{position:relative}
+.chart-box svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:0;border-top:2px solid}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font:12px/1.4 var(--f-mono);padding:6px 8px;border-radius:4px;white-space:nowrap;transform:translate(-50%,-110%)}
+.tip[hidden]{display:none!important}
+
+/* lists */
+.mini{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.mini li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--grid)}
+.mini li:last-child{border-bottom:0}
+.tid{font:500 12px var(--f-mono);color:var(--muted)}
+.chip{display:inline-block;padding:2px 8px;border-radius:4px;font:600 11.5px/1.4 var(--f-display);letter-spacing:.03em;white-space:nowrap}
+.c-done{background:var(--good-soft);color:var(--good)} .c-late{background:var(--bad-soft);color:var(--bad)}
+.c-inprog{background:var(--accent-soft);color:var(--accent)} .c-todo{background:var(--grid);color:var(--muted)}
+.sec-t{font:600 12px/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 4px}
+.sec-t:first-child{margin-top:0}
+
+/* gantt */
+.g-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.g-tools label{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer}
+.gantt{display:grid;grid-template-columns:minmax(150px,var(--lw,300px)) minmax(0,1fr)}
+.g-left{border-right:1px solid var(--line);overflow:hidden}
+.g-right{overflow-x:auto}
+.g-left svg,.g-right svg{display:block}
+@media (max-width:640px){.gantt{--lw:150px}}
+
+/* table */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font:600 11.5px/1.2 var(--f-display);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--sunk)}
+td{padding:8px;border-bottom:1px solid var(--grid);vertical-align:middle}
+tr.phase-row td{background:var(--sunk);font:600 13px var(--f-display);letter-spacing:.03em}
+td.r,th.r{text-align:right}
+.pbar{width:80px;height:6px;background:var(--grid);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.pbar i{display:block;height:100%}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:6px 12px;cursor:pointer;font:600 13px/1.2 var(--f-display);letter-spacing:.03em}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.row-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* forms */
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label{font:600 11.5px/1.2 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.f input,.f select,.f textarea{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:7px 9px;min-width:0;width:100%}
+.f.wide{grid-column:1/-1}
+.f textarea{font:12px/1.5 var(--f-mono);min-height:160px;resize:vertical}
+.err{color:var(--bad);font-size:12.5px;min-height:1em}
+.ok{color:var(--good);font-size:12.5px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.stack{display:flex;flex-direction:column;gap:16px}
+.edit-rows{display:flex;flex-direction:column;gap:8px}
+.edit-row{display:grid;grid-template-columns:70px minmax(0,1fr) minmax(0,1fr) 120px auto;gap:8px;align-items:center}
+.edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
+.edit-row input[type=color]{padding:2px;height:32px}
+@media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:no-preference){.meter i,.pbar i{transition:width .4s ease}}
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">
+      <span class="eyebrow" id="eyebrow"></span>
+      <h1 id="pName"></h1>
+      <span class="meta" id="pMeta"></span>
+    </div>
+    <span class="pill" id="pStatus"></span>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-fr" data-lang="fr">FR</button>
+      <button type="button" id="lang-en" data-lang="en">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="kpis" id="kpis" aria-live="polite"></section>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <section class="panel" id="tab-burndown" role="tabpanel">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><h2 data-i="bdTitle"></h2><div class="legend" id="bdLegend"></div></div>
+        <div class="card-b chart-box" id="bdBox"><div class="tip" id="bdTip" hidden></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="focus"></h2></div>
+        <div class="card-b" id="focus"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-gantt" role="tabpanel" hidden>
+    <div class="card">
+      <div class="card-h">
+        <div class="seg" role="group" id="gMode">
+          <button type="button" id="g-summary" data-mode="summary"></button>
+          <button type="button" id="g-master" data-mode="master"></button>
+        </div>
+        <div class="g-tools">
+          <div class="seg" role="group" id="gZoom">
+            <button type="button" id="z-s" data-z="8">S</button>
+            <button type="button" id="z-m" data-z="14">M</button>
+            <button type="button" id="z-l" data-z="26">L</button>
+          </div>
+          <label><input type="checkbox" id="optDeps" checked> <span data-i="showDeps"></span></label>
+          <label><input type="checkbox" id="optCrit" checked> <span data-i="showCrit"></span></label>
+          <button class="btn sm" type="button" id="gImport" data-i="importGantt"></button>
+        </div>
+      </div>
+      <div class="gantt" id="gantt"><div class="g-left" id="gLeft"></div><div class="g-right" id="gRight"></div></div>
+      <div class="card-b"><div class="legend" id="gLegend"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-tasks" role="tabpanel" hidden>
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h2 id="edTitle"></h2><span class="hint" data-i="edHint"></span></div>
+        <form class="card-b" id="taskForm" novalidate>
+          <div class="form">
+            <div class="f"><label for="tf-id">ID</label><input id="tf-id" maxlength="16" required></div>
+            <div class="f"><label for="tf-phase" data-i="phase"></label><select id="tf-phase"></select></div>
+            <div class="f"><label for="tf-owner" data-i="owner"></label><input id="tf-owner" maxlength="24"></div>
+            <div class="f"><label for="tf-points" data-i="points"></label><input id="tf-points" type="number" min="0" max="999" step="1" value="3"></div>
+            <div class="f wide"><label for="tf-fr" data-i="nameFr"></label><input id="tf-fr" maxlength="120" required></div>
+            <div class="f wide"><label for="tf-en" data-i="nameEn"></label><input id="tf-en" maxlength="120"></div>
+            <div class="f"><label for="tf-start" data-i="start"></label><input id="tf-start" type="date" required></div>
+            <div class="f"><label for="tf-end" data-i="end"></label><input id="tf-end" type="date" required></div>
+            <div class="f"><label for="tf-progress"><span data-i="progress"></span> <span id="tf-pv" class="num"></span></label><input id="tf-progress" type="range" min="0" max="100" step="5" value="0"></div>
+            <div class="f"><label for="tf-done" data-i="doneDate"></label><input id="tf-done" type="date"></div>
+            <div class="f wide"><label for="tf-deps" data-i="deps"></label><input id="tf-deps" maxlength="200" placeholder="T1, T4"></div>
+          </div>
+          <div class="actions">
+            <button class="btn pri" type="submit" id="tfSave"></button>
+            <button class="btn" type="button" id="tfCancel" data-i="cancel"></button>
+            <span class="err" id="tfErr" role="alert"></span>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="taskList"></h2><span class="hint" id="taskCount"></span></div>
+        <div class="tbl-wrap"><table id="taskTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-project" role="tabpanel" hidden>
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h2 data-i="projSettings"></h2><span class="hint" data-i="savedLocal"></span></div>
+        <form class="card-b" id="projForm" novalidate>
+          <div class="form">
+            <div class="f wide"><label for="pf-name" data-i="projName"></label><input id="pf-name" maxlength="120"></div>
+            <div class="f"><label for="pf-code" data-i="projCode"></label><input id="pf-code" maxlength="24"></div>
+            <div class="f"><label for="pf-start" data-i="start"></label><input id="pf-start" type="date"></div>
+            <div class="f"><label for="pf-end" data-i="end"></label><input id="pf-end" type="date"></div>
+            <div class="f"><label for="pf-status" data-i="statusDate"></label><input id="pf-status" type="date"></div>
+            <div class="f wide"><label><input type="checkbox" id="pf-wd"> <span data-i="workingDays"></span></label></div>
+          </div>
+          <div class="actions"><button class="btn pri" type="submit" data-i="save"></button><span class="err" id="pfErr" role="alert"></span></div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="phases"></h2><button class="btn sm" type="button" id="addPhase" data-i="addPhase"></button></div>
+        <div class="card-b"><div class="edit-rows" id="phaseRows"></div>
+          <div class="actions"><button class="btn pri" type="button" id="savePhases" data-i="save"></button><span class="err" id="phErr" role="alert"></span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="milestones"></h2><button class="btn sm" type="button" id="addMs" data-i="addMs"></button></div>
+        <div class="card-b"><div class="edit-rows" id="msRows"></div>
+          <div class="actions"><button class="btn pri" type="button" id="saveMs" data-i="save"></button><span class="err" id="msErr" role="alert"></span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="dataTitle"></h2></div>
+        <div class="card-b">
+          <p class="hint" data-i="dataHint"></p>
+          <div class="f wide"><label for="jsonBox" data-i="boxLabel"></label><textarea id="jsonBox" spellcheck="false"></textarea></div>
+          <div class="actions">
+            <button class="btn pri" type="button" id="btnImport" data-i="import"></button>
+            <label class="btn" for="fileIn"><span data-i="importFile"></span></label>
+            <input type="file" id="fileIn" accept=".json,.csv,.txt,.mmd,.md,application/json,text/csv,text/plain" hidden>
+            <button class="btn" type="button" id="btnTemplate" data-i="template"></button>
+            <span id="dataMsg" role="status"></span>
+          </div>
+          <div class="actions">
+            <span class="hint" data-i="exportAs"></span>
+            <button class="btn" type="button" id="btnExport">JSON</button>
+            <button class="btn" type="button" id="btnCsv">CSV (Excel)</button>
+            <button class="btn" type="button" id="btnMermaid">Mermaid Gantt</button>
+            <button class="btn" type="button" id="btnCopy" data-i="copy"></button>
+          </div>
+          <div class="actions">
+            <button class="btn" type="button" id="btnSample" data-i="loadSample"></button>
+            <button class="btn danger" type="button" id="btnBlank" data-i="newBlank"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>/* Core planning logic — pure functions, no DOM. Tested in core.test.js */
+const Core = (() => {
+  const DAY = 86400000;
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+  const ID = /^[A-Za-z0-9_-]{1,16}$/;
+  const HEX = /^#[0-9a-fA-F]{6}$/;
+
+  function parseDate(s) {
+    if (typeof s !== 'string' || !ISO.test(s)) return null;
+    const [y, m, d] = s.split('-').map(Number);
+    const t = Date.UTC(y, m - 1, d);
+    const dt = new Date(t);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return null;
+    return t;
+  }
+  const fmt = t => new Date(t).toISOString().slice(0, 10);
+  const addDays = (t, n) => t + n * DAY;
+  const diffDays = (a, b) => Math.round((b - a) / DAY);
+  const isWeekend = t => { const w = new Date(t).getUTCDay(); return w === 0 || w === 6; };
+  function workDays(a, b) { // working days in (a, b]
+    let n = 0;
+    for (let t = addDays(a, 1); t <= b; t = addDays(t, 1)) if (!isWeekend(t)) n++;
+    return n;
+  }
+  const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+  const num = (v, lo, hi, dflt) => { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : dflt; };
+
+  /* Validate + normalise an untrusted project object. Returns {ok, errors, project}. */
+  function validateProject(raw) {
+    const errors = [];
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, errors: ['root'], project: null };
+    const p = {
+      name: str(raw.name, 120) || 'Untitled project',
+      code: str(raw.code, 24),
+      start: str(raw.start, 10), end: str(raw.end, 10),
+      statusDate: str(raw.statusDate, 10),
+      workingDays: raw.workingDays !== false,
+      phases: [], milestones: [], tasks: []
+    };
+    const ps = parseDate(p.start), pe = parseDate(p.end);
+    if (ps === null) errors.push('start');
+    if (pe === null) errors.push('end');
+    if (ps !== null && pe !== null && pe <= ps) errors.push('range');
+    if (p.statusDate && parseDate(p.statusDate) === null) errors.push('statusDate');
+
+    const phases = Array.isArray(raw.phases) ? raw.phases.slice(0, 30) : [];
+    const phaseIds = new Set();
+    phases.forEach((ph, i) => {
+      const id = str(ph && ph.id, 16);
+      if (!ID.test(id) || phaseIds.has(id)) { errors.push(`phase:${i}`); return; }
+      phaseIds.add(id);
+      p.phases.push({ id, fr: str(ph.fr, 80) || id, en: str(ph.en, 80) || str(ph.fr, 80) || id, color: HEX.test(ph.color) ? ph.color : '#5b6cff' });
+    });
+
+    const ms = Array.isArray(raw.milestones) ? raw.milestones.slice(0, 50) : [];
+    ms.forEach((m, i) => {
+      const id = str(m && m.id, 16);
+      if (!ID.test(id) || parseDate(m.date) === null) { errors.push(`milestone:${i}`); return; }
+      p.milestones.push({ id, fr: str(m.fr, 80) || id, en: str(m.en, 80) || str(m.fr, 80) || id, date: m.date });
+    });
+
+    const ts = Array.isArray(raw.tasks) ? raw.tasks.slice(0, 300) : [];
+    const taskIds = new Set();
+    ts.forEach((t, i) => {
+      const id = str(t && t.id, 16);
+      const s = parseDate(t && t.start), e = parseDate(t && t.end);
+      if (!ID.test(id) || taskIds.has(id) || s === null || e === null || e < s) { errors.push(`task:${i}`); return; }
+      if (t.done && parseDate(t.done) === null) { errors.push(`task:${i}:done`); return; }
+      taskIds.add(id);
+      p.tasks.push({
+        id, fr: str(t.fr, 120) || id, en: str(t.en, 120) || str(t.fr, 120) || id,
+        phase: phaseIds.has(t.phase) ? t.phase : (p.phases[0] ? p.phases[0].id : ''),
+        owner: str(t.owner, 24), start: t.start, end: t.end,
+        points: num(t.points, 0, 999, 1),
+        progress: t.done ? 100 : num(t.progress, 0, 100, 0),
+        done: t.done || '',
+        deps: (Array.isArray(t.deps) ? t.deps : []).map(d => str(d, 16)).filter(Boolean).slice(0, 20)
+      });
+    });
+    p.tasks.forEach(t => { t.deps = t.deps.filter(d => taskIds.has(d) && d !== t.id); });
+    if (topoOrder(p.tasks) === null) errors.push('cycle');
+    return { ok: errors.length === 0, errors, project: p };
+  }
+
+  /* Kahn topological sort; null when the dependency graph has a cycle. */
+  function topoOrder(tasks) {
+    const indeg = new Map(tasks.map(t => [t.id, 0]));
+    const succ = new Map(tasks.map(t => [t.id, []]));
+    tasks.forEach(t => t.deps.forEach(d => { if (succ.has(d)) { succ.get(d).push(t.id); indeg.set(t.id, indeg.get(t.id) + 1); } }));
+    const q = tasks.filter(t => indeg.get(t.id) === 0).map(t => t.id);
+    const out = [];
+    while (q.length) {
+      const id = q.shift(); out.push(id);
+      succ.get(id).forEach(s => { indeg.set(s, indeg.get(s) - 1); if (indeg.get(s) === 0) q.push(s); });
+    }
+    return out.length === tasks.length ? out : null;
+  }
+
+  const totalPoints = p => p.tasks.reduce((a, t) => a + t.points, 0);
+  function statusTime(p, todayT) {
+    const s = parseDate(p.statusDate);
+    return s !== null ? s : todayT;
+  }
+  const donePointsAt = (p, t) => p.tasks.reduce((a, k) => a + (k.done && parseDate(k.done) <= t ? k.points : 0), 0);
+  const earned = p => p.tasks.reduce((a, k) => a + k.points * (k.done ? 1 : k.progress / 100), 0);
+
+  /* Planned value at t: each task's points spread linearly over its duration (inclusive days). */
+  function plannedAt(p, t) {
+    return p.tasks.reduce((a, k) => {
+      const s = parseDate(k.start), e = addDays(parseDate(k.end), 1);
+      const f = t >= e ? 1 : t < s ? 0 : (addDays(t, 1) - s) / (e - s);
+      return a + k.points * Math.min(1, Math.max(0, f));
+    }, 0);
+  }
+
+  function idealAt(p, t) {
+    const s = parseDate(p.start), e = parseDate(p.end), total = totalPoints(p);
+    if (t <= s) return total;
+    if (t >= e) return 0;
+    if (p.workingDays) { const all = workDays(s, e); return all ? total * (1 - workDays(s, t) / all) : 0; }
+    return total * (1 - diffDays(s, t) / diffDays(s, e));
+  }
+
+  /* Burndown: ideal series over the whole project, actual series up to the status date, and a forecast. */
+  function burndown(p, todayT) {
+    const s = parseDate(p.start), e = parseDate(p.end), total = totalPoints(p);
+    const now = Math.min(Math.max(statusTime(p, todayT), s), Math.max(e, statusTime(p, todayT)));
+    const ideal = [], actual = [];
+    for (let t = s; t <= e; t = addDays(t, 1)) ideal.push({ t, v: idealAt(p, t) });
+    const lastActual = Math.min(now, Math.max(e, now));
+    for (let t = s; t <= lastActual; t = addDays(t, 1)) actual.push({ t, v: total - donePointsAt(p, t) });
+    const done = donePointsAt(p, now);
+    const remaining = total - done;
+    const elapsed = Math.max(1, diffDays(s, now));
+    const velocityDay = done / elapsed;
+    let forecast = null;
+    if (remaining === 0) {
+      const dates = p.tasks.filter(k => k.done).map(k => parseDate(k.done));
+      forecast = dates.length ? Math.max(...dates) : now;
+    } else if (velocityDay > 0) forecast = addDays(now, Math.ceil(remaining / velocityDay));
+    const daysLeft = Math.max(1, diffDays(now, e));
+    return {
+      total, done, remaining, now, ideal, actual,
+      idealNow: idealAt(p, now),
+      velocityWeek: velocityDay * 7,
+      requiredWeek: remaining / daysLeft * 7,
+      forecast
+    };
+  }
+
+  function health(p, todayT) {
+    const now = statusTime(p, todayT);
+    const pv = plannedAt(p, now), ev = earned(p), total = totalPoints(p);
+    const spi = pv > 0 ? ev / pv : 1;
+    const status = spi >= 0.95 ? 'on' : spi >= 0.8 ? 'risk' : 'late';
+    return { pv, ev, spi, status, pctEarned: total ? ev / total : 0, pctPlanned: total ? pv / total : 0 };
+  }
+
+  /* Critical path from fixed dates: float = latest allowed start − planned start (calendar days). */
+  function criticalPath(p) {
+    const order = topoOrder(p.tasks);
+    if (!order || !p.tasks.length) return { critical: new Set(), float: new Map() };
+    const byId = new Map(p.tasks.map(t => [t.id, t]));
+    const succ = new Map(p.tasks.map(t => [t.id, []]));
+    p.tasks.forEach(t => t.deps.forEach(d => succ.get(d).push(t.id)));
+    const projEnd = Math.max(parseDate(p.end), ...p.tasks.map(t => parseDate(t.end)));
+    const ls = new Map(), fl = new Map();
+    // Weekends are not slack: the latest finish snaps back to the previous working day,
+    // and float is counted in working days when the project uses them.
+    const prevWork = t => { let x = t; while (p.workingDays && isWeekend(x)) x = addDays(x, -1); return x; };
+    [...order].reverse().forEach(id => {
+      const t = byId.get(id), dur = diffDays(parseDate(t.start), parseDate(t.end));
+      const lf = prevWork(succ.get(id).length ? Math.min(...succ.get(id).map(s => addDays(ls.get(s), -1))) : projEnd);
+      ls.set(id, addDays(lf, -dur));
+      const s0 = parseDate(t.start), l0 = ls.get(id);
+      fl.set(id, p.workingDays ? (l0 >= s0 ? workDays(s0, l0) : -workDays(l0, s0)) : diffDays(s0, l0));
+    });
+    const minFloat = Math.min(...fl.values());
+    // Critical = tasks sharing the minimum float, chained to a task without successors.
+    const critical = new Set([...fl].filter(([, f]) => f <= Math.max(0, minFloat)).map(([id]) => id));
+    return { critical, float: fl };
+  }
+
+  function phaseSpans(p) {
+    return p.phases.map(ph => {
+      const ts = p.tasks.filter(t => t.phase === ph.id);
+      if (!ts.length) return { ...ph, start: null, end: null, points: 0, progress: 0, count: 0 };
+      const pts = ts.reduce((a, t) => a + t.points, 0);
+      const ev = ts.reduce((a, t) => a + t.points * t.progress / 100, 0);
+      return {
+        ...ph, count: ts.length, points: pts,
+        start: fmt(Math.min(...ts.map(t => parseDate(t.start)))),
+        end: fmt(Math.max(...ts.map(t => parseDate(t.end)))),
+        progress: pts ? ev / pts : ts.every(t => t.done) ? 1 : 0
+      };
+    });
+  }
+
+  /* Wouldn't adding `dep` before `taskId` create a cycle? */
+  function createsCycle(tasks, taskId, deps) {
+    const copy = tasks.map(t => ({ id: t.id, deps: t.id === taskId ? deps : t.deps }));
+    if (!copy.some(t => t.id === taskId)) copy.push({ id: taskId, deps });
+    return topoOrder(copy) === null;
+  }
+
+  /* Finish-to-start violations: a task starting on/before a predecessor's end. */
+  function depViolations(p) {
+    const byId = new Map(p.tasks.map(t => [t.id, t]));
+    const out = [];
+    p.tasks.forEach(t => t.deps.forEach(d => { if (parseDate(t.start) <= parseDate(byId.get(d).end)) out.push([d, t.id]); }));
+    return out;
+  }
+
+  return { DAY, parseDate, fmt, addDays, diffDays, isWeekend, workDays, validateProject, topoOrder, totalPoints,
+    statusTime, donePointsAt, earned, plannedAt, idealAt, burndown, health, criticalPath, phaseSpans, createsCycle, depViolations };
+})();
+if (typeof module !== 'undefined') module.exports = Core;
+</script>
+<script>/* Gantt interchange: CSV (Excel / Google Sheets / MS Project / GanttProject exports) and Mermaid gantt.
+   Every parser returns a RAW project object that still goes through Core.validateProject. */
+const GanttIO = (() => {
+  const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
+  const PALETTE = ['#4f6bed', '#0f9d8a', '#d9811e', '#c2417a', '#7a5af5', '#5f7182', '#2f8fd6', '#a15c2b'];
+  const MAX = 2e6;
+
+  /* ---- dates: 2026-10-05 | 05/10/2026 | 5/10/26 | 05.10.2026 (day first, French/European) ---- */
+  function toIso(v) {
+    if (typeof v !== 'string') return null;
+    const s = v.trim();
+    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return iso(+m[1], +m[2], +m[3]);
+    m = s.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{2,4})/);
+    if (m) return iso(m[3].length === 2 ? 2000 + +m[3] : +m[3], +m[2], +m[1]);
+    return null;
+  }
+  function iso(y, mo, d) {
+    const s = `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    return C.parseDate(s) === null ? null : s;
+  }
+  const workDur = (s, e) => Math.max(1, C.workDays(C.addDays(C.parseDate(s), -1), C.parseDate(e)));
+  const nextWork = t => { let x = t; while (C.isWeekend(x)) x = C.addDays(x, 1); return x; };
+  const splitName = n => { const i = n.indexOf(' / '); return i > 0 ? [n.slice(0, i).trim(), n.slice(i + 3).trim()] : [n.trim(), n.trim()]; };
+  const safeId = (s, prefix, i) => { const c = String(s || '').trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16); return c || `${prefix}${i}`; };
+
+  /* ---- CSV ---- */
+  function parseCSV(text) {
+    const first = text.split(/\r?\n/, 1)[0] || '';
+    const counts = [';', ',', '\t'].map(d => [d, first.split(d).length]);
+    const delim = counts.sort((a, b) => b[1] - a[1])[0][0];
+    const rows = []; let row = [], cell = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === delim) { row.push(cell); cell = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+      else cell += ch;
+    }
+    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+    return rows.filter(r => r.some(c => c.trim() !== ''));
+  }
+  const norm = h => h.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9%]/g, '');
+  const ALIASES = {
+    id: ['id', 'code', 'wbs', 'ref', 'num', 'no', 'n'],
+    type: ['type', 'kind'],
+    phase: ['phase', 'section', 'groupe', 'group', 'lot', 'epic', 'sprint', 'outlinelevel1'],
+    fr: ['namefr', 'nomfr', 'name', 'nom', 'task', 'tache', 'taskname', 'nomdelatache', 'title', 'titre', 'libelle', 'activite', 'activity'],
+    en: ['nameen', 'nomen', 'english', 'anglais'],
+    owner: ['owner', 'responsable', 'resource', 'resources', 'resourcenames', 'ressources', 'assignee', 'assigne', 'role', 'qui', 'who'],
+    start: ['start', 'debut', 'startdate', 'begindate', 'begin date', 'datededebut', 'begin', 'from'],
+    end: ['end', 'fin', 'finish', 'enddate', 'datedefin', 'due', 'echeance', 'to'],
+    points: ['points', 'pts', 'storypoints', 'sp', 'effort', 'charge', 'estimate', 'estimation', 'work', 'jh'],
+    progress: ['progress', 'avancement', '%complete', 'complete', 'percentcomplete', 'pourcentage', '%', 'pct', 'completion'],
+    done: ['done', 'termine', 'terminee', 'completed', 'completedon', 'actualfinish', 'findereelle', 'dateterminee'],
+    deps: ['deps', 'dependencies', 'dependances', 'dependsOn', 'dependson', 'predecessors', 'predecesseurs', 'pred']
+  };
+  function fromCSV(text) {
+    if (text.length > MAX) throw new Error('size');
+    const rows = parseCSV(text.replace(/^﻿/, ''));
+    if (rows.length < 2) throw new Error('csv-empty');
+    const head = rows[0].map(norm), col = {};
+    Object.entries(ALIASES).forEach(([k, al]) => { const i = head.findIndex(h => al.map(norm).includes(h)); if (i >= 0) col[k] = i; });
+    if (col.fr === undefined || col.start === undefined || (col.end === undefined)) throw new Error('csv-columns');
+    const get = (r, k) => (col[k] === undefined ? '' : String(r[col[k]] ?? '').trim());
+    const phases = new Map(), tasks = [], milestones = [];
+    rows.slice(1, 1201).forEach((r, i) => {
+      const name = get(r, 'fr'); if (!name) return;
+      const start = toIso(get(r, 'start')), end = toIso(get(r, 'end')) || start;
+      if (!start) return;
+      const type = norm(get(r, 'type'));
+      if (type === 'milestone' || type === 'jalon') { const [fr, en] = splitName(name); milestones.push({ id: safeId(get(r, 'id'), 'M', milestones.length + 1), fr, en, date: start }); return; }
+      const phName = get(r, 'phase') || '—';
+      if (!phases.has(phName)) { const n = phases.size + 1; const [pf, pe] = splitName(phName); phases.set(phName, { id: `P${n}`, fr: pf, en: pe, color: PALETTE[(n - 1) % PALETTE.length] }); }
+      const [fr, en0] = splitName(name);
+      const prog = parseFloat(get(r, 'progress').replace(',', '.').replace('%', ''));
+      const doneRaw = get(r, 'done'), doneIso = toIso(doneRaw);
+      const yes = /^(1|y|yes|oui|true|x|done|ok)$/i.test(doneRaw);
+      const pts = parseFloat(get(r, 'points').replace(',', '.'));
+      tasks.push({
+        id: safeId(get(r, 'id'), 'T', i + 1), phase: phases.get(phName).id, fr, en: get(r, 'en') || en0, owner: get(r, 'owner'),
+        start, end: end < start ? start : end,
+        points: Number.isFinite(pts) ? pts : workDur(start, end < start ? start : end),
+        progress: Number.isFinite(prog) ? (prog <= 1 && /\./.test(get(r, 'progress')) ? prog * 100 : prog) : 0,
+        done: doneIso || (yes || prog >= 100 ? end : ''),
+        deps: get(r, 'deps').split(/[,;\s]+/).map(d => d.replace(/(FS|SS|FF|SF)([+-]\d+\w*)?$/i, '')).filter(Boolean)
+      });
+    });
+    return wrap('Imported project', tasks, [...phases.values()], milestones);
+  }
+
+  /* ---- Mermaid gantt ---- */
+  function fromMermaid(text) {
+    if (text.length > MAX) throw new Error('size');
+    const lines = text.replace(/```(mermaid)?/g, '').split(/\r?\n/).map(l => l.trim());
+    if (!lines.some(l => /^gantt\b/.test(l))) throw new Error('mermaid');
+    let title = 'Imported project', section = null, sCount = 0;
+    const phases = [], tasks = [], milestones = [], byId = new Map(); let auto = 0, prevEnd = null;
+    for (const l of lines) {
+      if (!l || l.startsWith('%%') || /^(gantt|dateFormat|axisFormat|tickInterval|excludes|todayMarker|weekday|includes)\b/.test(l)) continue;
+      if (/^title\s/.test(l)) { title = l.slice(6).trim().slice(0, 120); continue; }
+      if (/^section\s/.test(l)) {
+        sCount++; const raw = l.slice(8).trim(); const [fr, en] = splitName(raw);
+        section = { id: `P${sCount}`, fr, en, color: PALETTE[(sCount - 1) % PALETTE.length] }; phases.push(section); continue;
+      }
+      const ci = l.lastIndexOf(':'); if (ci <= 0) continue;
+      const name = l.slice(0, ci).trim(), parts = l.slice(ci + 1).split(',').map(s => s.trim()).filter(Boolean);
+      const tags = new Set(); while (parts.length && /^(done|active|crit|milestone)$/.test(parts[0])) tags.add(parts.shift());
+      let id = null, startTok = null, endTok = null;
+      if (parts.length >= 3) [id, startTok, endTok] = parts;
+      else if (parts.length === 2) { if (toIso(parts[0]) || /^after\s/.test(parts[0])) [startTok, endTok] = parts; else [id, endTok] = parts; }
+      else endTok = parts[0];
+      id = safeId(id, 'T', ++auto);
+      let start = null; const deps = [];
+      if (startTok && /^after\s/.test(startTok)) {
+        startTok.slice(6).trim().split(/\s+/).forEach(d => { if (byId.has(d)) deps.push(d); });
+        const ends = deps.map(d => C.parseDate(byId.get(d).end));
+        if (ends.length) start = C.fmt(nextWork(C.addDays(Math.max(...ends), 1)));
+      } else if (startTok) start = toIso(startTok);
+      if (!start && prevEnd) start = C.fmt(nextWork(C.addDays(C.parseDate(prevEnd), 1)));
+      if (!start) continue;
+      let end = null; const s0 = C.parseDate(start);
+      const dur = endTok && endTok.match(/^(\d+(?:\.\d+)?)\s*([dwh])$/i);
+      if (dur) { const n = +dur[1] * (dur[2].toLowerCase() === 'w' ? 7 : dur[2].toLowerCase() === 'h' ? 1 / 24 : 1); end = C.fmt(C.addDays(s0, Math.max(0, Math.ceil(n) - 1))); }
+      else if (endTok && toIso(endTok)) end = C.fmt(Math.max(s0, C.addDays(C.parseDate(toIso(endTok)), -1))); // Mermaid end date is exclusive
+      else end = start;
+      const [fr, en] = splitName(name);
+      if (tags.has('milestone') || (dur && +dur[1] === 0)) { milestones.push({ id, fr, en, date: start }); continue; }
+      if (!section) { section = { id: 'P1', fr: 'Tâches', en: 'Tasks', color: PALETTE[0] }; phases.push(section); sCount = 1; }
+      const t = { id, phase: section.id, fr, en, owner: '', start, end, points: workDur(start, end), progress: tags.has('done') ? 100 : 0, done: tags.has('done') ? end : '', deps };
+      tasks.push(t); byId.set(id, t); prevEnd = end;
+    }
+    return wrap(title, tasks, phases, milestones);
+  }
+
+  function wrap(name, tasks, phases, milestones) {
+    if (!tasks.length) throw new Error('no-tasks');
+    const ds = [...tasks.flatMap(t => [t.start, t.end]), ...milestones.map(m => m.date)].map(C.parseDate);
+    let s = Math.min(...ds), e = Math.max(...ds);
+    if (e <= s) e = C.addDays(s, 1);
+    return { name, code: '', start: C.fmt(s), end: C.fmt(e), statusDate: '', workingDays: true, phases, milestones, tasks };
+  }
+
+  /* ---- exports ---- */
+  const q = v => { const s = String(v ?? ''); return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  function toCSV(p) {
+    const head = ['id', 'type', 'phase', 'name_fr', 'name_en', 'owner', 'start', 'end', 'points', 'progress', 'done', 'deps'];
+    const ph = id => { const x = p.phases.find(f => f.id === id); return x ? (x.fr === x.en ? x.fr : `${x.fr} / ${x.en}`) : ''; };
+    const rows = p.tasks.map(t => [t.id, 'task', ph(t.phase), t.fr, t.en, t.owner, t.start, t.end, t.points, t.progress, t.done, t.deps.join(' ')]);
+    p.milestones.forEach(m => rows.push([m.id, 'milestone', '', m.fr, m.en, '', m.date, m.date, 0, '', '', '']));
+    return [head, ...rows].map(r => r.map(q).join(',')).join('\n');
+  }
+  function toMermaid(p, lang, todayT) {
+    const nm = o => (lang === 'en' ? o.en : o.fr) || o.fr || o.id;
+    const clean = s => String(s).replace(/[:#;\n]/g, ' ').trim();
+    const crit = C.criticalPath(p).critical, now = todayT ?? Date.now();
+    const out = ['gantt', `  title ${clean(p.name)}`, '  dateFormat YYYY-MM-DD', '  axisFormat %d/%m'];
+    p.phases.forEach(ph => {
+      const ts = p.tasks.filter(t => t.phase === ph.id); if (!ts.length) return;
+      out.push(`  section ${clean(ph.id + ' ' + nm(ph))}`);
+      ts.forEach(t => {
+        const tags = [crit.has(t.id) && 'crit', t.done ? 'done' : (C.parseDate(t.start) <= now ? 'active' : '')].filter(Boolean);
+        out.push(`  ${clean(t.id + ' ' + nm(t))} :${tags.length ? tags.join(', ') + ', ' : ''}${t.id}, ${t.start}, ${C.fmt(C.addDays(C.parseDate(t.end), 1))}`);
+      });
+    });
+    if (p.milestones.length) {
+      out.push(`  section ${lang === 'en' ? 'Milestones' : 'Jalons'}`);
+      p.milestones.forEach(m => out.push(`  ${clean(m.id + ' ' + nm(m))} :milestone, ${m.id}, ${m.date}, 0d`));
+    }
+    return out.join('\n');
+  }
+  const CSV_TEMPLATE = [
+    'id;type;phase;name_fr;name_en;owner;start;end;points;progress;done;deps',
+    'T1;task;Cadrage / Initiation;Réunion de lancement;Kick-off meeting;PM;04/01/2027;08/01/2027;3;100;08/01/2027;',
+    'T2;task;Cadrage / Initiation;Cahier des charges;Requirements spec;PM;11/01/2027;15/01/2027;5;40;;T1',
+    'T3;task;Réalisation / Build;Développement MVP;MVP development;DEV;18/01/2027;05/02/2027;13;0;;T2',
+    'M1;milestone;;Livraison MVP;MVP delivered;;05/02/2027;05/02/2027;0;;;'
+  ].join('\n') + '\n';
+
+  function detect(text) {
+    const s = text.trim();
+    if (s.startsWith('{')) return 'json';
+    if (/^(```\s*mermaid\s*)?\s*gantt\b/m.test(s)) return 'mermaid';
+    return 'csv';
+  }
+  return { toIso, parseCSV, fromCSV, fromMermaid, toCSV, toMermaid, detect, CSV_TEMPLATE };
+})();
+if (typeof module !== 'undefined') module.exports = GanttIO;
+</script>
+<script>const SAMPLE = {
+  name: 'ESAIP AI Assistant', code: 'EAA-2026',
+  start: '2026-09-28', end: '2026-12-18', statusDate: '', workingDays: true,
+  phases: [
+    { id: 'P1', fr: 'Initialisation', en: 'Initiation', color: '#4f6bed' },
+    { id: 'P2', fr: 'Conception', en: 'Design', color: '#0f9d8a' },
+    { id: 'P3', fr: 'Développement', en: 'Build', color: '#d9811e' },
+    { id: 'P4', fr: 'Tests et recette', en: 'Test and UAT', color: '#c2417a' },
+    { id: 'P5', fr: 'Déploiement', en: 'Deployment', color: '#7a5af5' },
+    { id: 'P6', fr: 'Clôture', en: 'Closure', color: '#5f7182' }
+  ],
+  milestones: [
+    { id: 'M1', fr: 'Cahier des charges validé', en: 'Spec signed off', date: '2026-10-09' },
+    { id: 'M2', fr: 'Gel de la conception', en: 'Design freeze', date: '2026-10-23' },
+    { id: 'M3', fr: 'MVP', en: 'MVP', date: '2026-11-20' },
+    { id: 'M4', fr: 'Recette validée', en: 'UAT passed', date: '2026-12-08' },
+    { id: 'M5', fr: 'Mise en production', en: 'Go-live', date: '2026-12-11' },
+    { id: 'M6', fr: 'Soutenance', en: 'Defence', date: '2026-12-18' }
+  ],
+  tasks: [
+    { id: 'T1', phase: 'P1', fr: 'Lancement et entretiens', en: 'Kick-off and stakeholder interviews', owner: 'PM', start: '2026-09-28', end: '2026-10-02', points: 3, progress: 100, done: '2026-10-02', deps: [] },
+    { id: 'T2', phase: 'P1', fr: 'Cahier des charges', en: 'Requirements specification', owner: 'PM', start: '2026-10-05', end: '2026-10-09', points: 5, progress: 100, done: '2026-10-09', deps: ['T1'] },
+    { id: 'T3', phase: 'P1', fr: 'Registre des risques et RACI', en: 'Risk register and RACI', owner: 'PM', start: '2026-10-05', end: '2026-10-08', points: 2, progress: 100, done: '2026-10-08', deps: ['T1'] },
+    { id: 'T4', phase: 'P2', fr: 'Architecture RAG et API', en: 'RAG and API architecture', owner: 'ARCH', start: '2026-10-12', end: '2026-10-16', points: 8, progress: 100, done: '2026-10-16', deps: ['T2'] },
+    { id: 'T5', phase: 'P2', fr: 'Collecte base de connaissances', en: 'Knowledge-base data collection', owner: 'DATA', start: '2026-10-05', end: '2026-10-20', points: 8, progress: 100, done: '2026-10-20', deps: ['T1'] },
+    { id: 'T6', phase: 'P2', fr: 'Maquettes UI bilingues', en: 'Bilingual UI wireframes', owner: 'FE', start: '2026-10-12', end: '2026-10-23', points: 5, progress: 60, done: '', deps: ['T2'] },
+    { id: 'T7', phase: 'P2', fr: 'Conception sécurité et RGPD', en: 'Security and GDPR design', owner: 'SEC', start: '2026-10-19', end: '2026-10-23', points: 3, progress: 30, done: '', deps: ['T4'] },
+    { id: 'T8', phase: 'P3', fr: 'Pipeline d’ingestion et embeddings', en: 'Ingestion pipeline and embeddings', owner: 'DATA', start: '2026-10-21', end: '2026-11-03', points: 8, progress: 0, done: '', deps: ['T4', 'T5'] },
+    { id: 'T9', phase: 'P3', fr: 'Orchestration RAG et LLM', en: 'RAG retrieval and LLM orchestration', owner: 'ARCH', start: '2026-11-04', end: '2026-11-20', points: 13, progress: 0, done: '', deps: ['T8'] },
+    { id: 'T10', phase: 'P3', fr: 'API back-end et limitation de débit', en: 'Back-end API and rate limiting', owner: 'BE', start: '2026-10-19', end: '2026-11-06', points: 8, progress: 15, done: '', deps: ['T4'] },
+    { id: 'T11', phase: 'P3', fr: 'Interface de chat FR/EN', en: 'FR/EN chat interface', owner: 'FE', start: '2026-10-26', end: '2026-11-20', points: 8, progress: 0, done: '', deps: ['T6'] },
+    { id: 'T12', phase: 'P3', fr: 'Détection de langue et i18n', en: 'Language detection and i18n', owner: 'FE', start: '2026-11-09', end: '2026-11-18', points: 3, progress: 0, done: '', deps: ['T6'] },
+    { id: 'T13', phase: 'P3', fr: 'Panneau d’administration', en: 'Admin panel', owner: 'BE', start: '2026-11-23', end: '2026-12-02', points: 5, progress: 0, done: '', deps: ['T10'] },
+    { id: 'T14', phase: 'P4', fr: 'Tests unitaires et d’intégration', en: 'Unit and integration tests', owner: 'QA', start: '2026-11-23', end: '2026-12-02', points: 5, progress: 0, done: '', deps: ['T9', 'T11'] },
+    { id: 'T15', phase: 'P4', fr: 'Tests de sécurité (OWASP, injection)', en: 'Security testing (OWASP, injection)', owner: 'SEC', start: '2026-11-23', end: '2026-12-04', points: 5, progress: 0, done: '', deps: ['T7', 'T9', 'T10'] },
+    { id: 'T16', phase: 'P4', fr: 'Évaluation qualité des réponses', en: 'Answer-quality evaluation', owner: 'QA', start: '2026-11-23', end: '2026-12-03', points: 5, progress: 0, done: '', deps: ['T9'] },
+    { id: 'T17', phase: 'P4', fr: 'Recette utilisateurs', en: 'User acceptance testing', owner: 'QA', start: '2026-12-03', end: '2026-12-08', points: 3, progress: 0, done: '', deps: ['T14'] },
+    { id: 'T18', phase: 'P5', fr: 'Déploiement, CI/CD, monitoring', en: 'Deployment, CI/CD, monitoring', owner: 'BE', start: '2026-12-07', end: '2026-12-11', points: 5, progress: 0, done: '', deps: ['T15', 'T16'] },
+    { id: 'T19', phase: 'P5', fr: 'Formation et guides', en: 'Training and user guides', owner: 'PM', start: '2026-12-09', end: '2026-12-11', points: 2, progress: 0, done: '', deps: ['T17'] },
+    { id: 'T20', phase: 'P6', fr: 'Rapport final et soutenance', en: 'Final report and defence', owner: 'PM', start: '2026-12-14', end: '2026-12-18', points: 5, progress: 0, done: '', deps: ['T18', 'T19'] }
+  ]
+};
+if (typeof module !== 'undefined') module.exports = SAMPLE;
+</script>
+<script>(() => {
+'use strict';
+const C = Core, $ = id => document.getElementById(id);
+const STORE = 'burndown-tracker-v1';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const I18N = {
+  fr: {
+    eyebrow: 'Suivi de projet', tabBurndown: 'Burndown', tabGantt: 'Gantt', tabTasks: 'Tâches', tabProject: 'Projet',
+    on: 'Dans les temps', risk: 'À risque', late: 'En retard',
+    kRemaining: 'Reste à faire', kDone: 'pts terminés sur', kEarned: 'Avancement acquis', kPlanned: 'prévu', kVelocity: 'Vélocité',
+    kRequired: 'requise', kSpi: 'SPI (délai)', kSpiS: 'valeur acquise ÷ planifiée', kForecast: 'Fin prévue', kPlannedEnd: 'fin planifiée', kCritical: 'Chemin critique', kTasks: 'tâches',
+    perWeek: 'pts/sem', none: '—', noVelocity: 'pas encore de vélocité',
+    bdTitle: 'Burndown (points restants)', ideal: 'Idéal', actual: 'Réel', forecastL: 'Projection', today: "Aujourd'hui", milestone: 'Jalon',
+    focus: 'À surveiller', lateTasks: 'En retard', inProgress: 'En cours', nextUp: 'À venir (14 jours)', nothing: 'Rien à signaler',
+    summary: 'Gantt synthétique', master: 'Gantt maître', showDeps: 'Dépendances', showCrit: 'Chemin critique',
+    milestones: 'Jalons', phase: 'Phase', owner: 'Responsable', points: 'Points', nameFr: 'Nom (FR)', nameEn: 'Nom (EN)',
+    start: 'Début', end: 'Fin', progress: 'Avancement', doneDate: 'Terminée le', deps: 'Dépend de (IDs séparés par des virgules)',
+    addTask: 'Ajouter une tâche', editTask: 'Modifier', saveTask: 'Enregistrer la tâche', addBtn: 'Ajouter', cancel: 'Annuler',
+    edHint: 'Fin-à-début : une tâche commence après ses prédécesseurs.', taskList: 'Tâches', status: 'Statut', task: 'Tâche',
+    sDone: 'Terminée', sLate: 'En retard', sInprog: 'En cours', sTodo: 'À faire', markDone: 'Terminer', edit: 'Modifier', del: 'Supprimer', confirmDel: 'Confirmer ?',
+    projSettings: 'Paramètres du projet', savedLocal: 'Enregistré dans ce navigateur', projName: 'Nom du projet', projCode: 'Code',
+    statusDate: "Date d'état (vide = aujourd'hui)", workingDays: 'Ligne idéale sur jours ouvrés (week-ends exclus)', save: 'Enregistrer',
+    phases: 'Phases', addPhase: 'Ajouter une phase', addMs: 'Ajouter un jalon', remove: 'Retirer',
+    dataTitle: 'Importer un Gantt / exporter', dataHint: "Chargez n'importe quel projet : collez ou choisissez un Gantt en CSV (Excel, Google Sheets, MS Project, GanttProject — séparateur ; ou , et dates JJ/MM/AAAA acceptés), un Gantt Mermaid, ou un JSON exporté ici. Le format est détecté automatiquement.",
+    boxLabel: 'Gantt à importer (CSV, Mermaid ou JSON)', template: 'Modèle CSV', exportAs: 'Exporter :', importGantt: 'Importer un Gantt',
+    eCsvCols: 'CSV : colonnes obligatoires introuvables (nom de tâche, début, fin).', eNoTasks: 'Aucune tâche lisible dans ce Gantt.', eMermaid: 'Gantt Mermaid illisible : la première ligne doit être « gantt ».', eSize: 'Fichier trop volumineux (2 Mo max).',
+    importedN: 'Importé : ', fmtJson: 'JSON', fmtCsv: 'CSV', fmtMermaid: 'Mermaid',
+    copy: 'Copier', import: 'Importer', importFile: 'Choisir un fichier…', loadSample: 'Charger l’exemple ESAIP', newBlank: 'Nouveau projet vide',
+    copied: 'Copié.', copyFail: 'Copie refusée : le texte est sélectionné, utilisez Ctrl+C.', imported: 'Projet importé.', saved: 'Enregistré.',
+    sure: 'Cliquez encore pour confirmer', week: 'S',
+    eBadJson: 'JSON illisible : vérifiez les accolades et les guillemets.', eInvalid: 'Projet refusé, champs invalides : ',
+    eId: 'ID : lettres, chiffres, _ ou -, 16 caractères max.', eIdTaken: 'Cet ID existe déjà.', eName: 'Le nom (FR) est obligatoire.',
+    eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
+    eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
+    fsWarn: 'Attention : commence avant la fin de ', blankName: 'Nouveau projet', pts: 'pts', d: 'j',
+  },
+  en: {
+    eyebrow: 'Project tracking', tabBurndown: 'Burndown', tabGantt: 'Gantt', tabTasks: 'Tasks', tabProject: 'Project',
+    on: 'On track', risk: 'At risk', late: 'Late',
+    kRemaining: 'Remaining', kDone: 'pts done of', kEarned: 'Earned progress', kPlanned: 'planned', kVelocity: 'Velocity',
+    kRequired: 'required', kSpi: 'SPI (schedule)', kSpiS: 'earned ÷ planned value', kForecast: 'Forecast finish', kPlannedEnd: 'planned end', kCritical: 'Critical path', kTasks: 'tasks',
+    perWeek: 'pts/wk', none: '—', noVelocity: 'no velocity yet',
+    bdTitle: 'Burndown (points remaining)', ideal: 'Ideal', actual: 'Actual', forecastL: 'Projection', today: 'Today', milestone: 'Milestone',
+    focus: 'Watch list', lateTasks: 'Late', inProgress: 'In progress', nextUp: 'Starting soon (14 days)', nothing: 'Nothing to flag',
+    summary: 'Summary Gantt', master: 'Master Gantt', showDeps: 'Dependencies', showCrit: 'Critical path',
+    milestones: 'Milestones', phase: 'Phase', owner: 'Owner', points: 'Points', nameFr: 'Name (FR)', nameEn: 'Name (EN)',
+    start: 'Start', end: 'End', progress: 'Progress', doneDate: 'Completed on', deps: 'Depends on (comma-separated IDs)',
+    addTask: 'Add a task', editTask: 'Edit', saveTask: 'Save task', addBtn: 'Add', cancel: 'Cancel',
+    edHint: 'Finish-to-start: a task starts after its predecessors end.', taskList: 'Tasks', status: 'Status', task: 'Task',
+    sDone: 'Done', sLate: 'Late', sInprog: 'In progress', sTodo: 'To do', markDone: 'Complete', edit: 'Edit', del: 'Delete', confirmDel: 'Confirm?',
+    projSettings: 'Project settings', savedLocal: 'Saved in this browser', projName: 'Project name', projCode: 'Code',
+    statusDate: 'Status date (blank = today)', workingDays: 'Ideal line on working days (weekends excluded)', save: 'Save',
+    phases: 'Phases', addPhase: 'Add a phase', addMs: 'Add a milestone', remove: 'Remove',
+    dataTitle: 'Import a Gantt / export', dataHint: 'Load any project: paste or pick a Gantt as CSV (Excel, Google Sheets, MS Project, GanttProject; ; or , separators and DD/MM/YYYY dates accepted), a Mermaid gantt, or a JSON exported from here. The format is detected automatically.',
+    boxLabel: 'Gantt to import (CSV, Mermaid or JSON)', template: 'CSV template', exportAs: 'Export:', importGantt: 'Import a Gantt',
+    eCsvCols: 'CSV: required columns not found (task name, start, end).', eNoTasks: 'No readable tasks in this Gantt.', eMermaid: 'Unreadable Mermaid gantt: the first line must be "gantt".', eSize: 'File too large (2 MB max).',
+    importedN: 'Imported: ', fmtJson: 'JSON', fmtCsv: 'CSV', fmtMermaid: 'Mermaid',
+    copy: 'Copy', import: 'Import', importFile: 'Choose a file…', loadSample: 'Load the ESAIP sample', newBlank: 'New blank project',
+    copied: 'Copied.', copyFail: 'Copy blocked: the text is selected, press Ctrl+C.', imported: 'Project imported.', saved: 'Saved.',
+    sure: 'Click again to confirm', week: 'W',
+    eBadJson: 'Unreadable JSON: check braces and quotes.', eInvalid: 'Project rejected, invalid fields: ',
+    eId: 'ID: letters, digits, _ or -, 16 characters max.', eIdTaken: 'That ID already exists.', eName: 'Name (FR) is required.',
+    eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
+    eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
+    fsWarn: 'Warning: starts before the end of ', blankName: 'New project', pts: 'pts', d: 'd',
+  }
+};
+
+/* ---------- state ---------- */
+const load = () => { try { return JSON.parse(localStorage.getItem(STORE) || 'null'); } catch { return null; } };
+const persist = () => { try { localStorage.setItem(STORE, JSON.stringify({ project: P, ui: UI })); } catch { /* storage unavailable: session-only */ } };
+const saved = load();
+let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
+const UI = Object.assign({ lang: 'fr', tab: 'burndown', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
+let editing = null;
+const t = k => I18N[UI.lang][k] ?? k;
+const nm = o => (UI.lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
+const todayT = () => { const d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); };
+const nowT = () => C.statusTime(P, todayT());
+const dLabel = (tm, long) => new Date(tm).toLocaleDateString(UI.lang === 'fr' ? 'fr-FR' : 'en-GB', long ? { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' } : { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+const isoWeek = tm => { const d = new Date(tm); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day + 3); const f = new Date(Date.UTC(d.getUTCFullYear(), 0, 4)); return 1 + Math.round(((d - f) / C.DAY - 3 + ((f.getUTCDay() + 6) % 7)) / 7); };
+const phaseOf = id => P.phases.find(p => p.id === id) || { id: '', fr: '—', en: '—', color: '#8f9bb0' };
+function taskStatus(k, now) {
+  if (k.done) return 'done';
+  if (C.parseDate(k.end) < now) return 'late';
+  if (C.parseDate(k.start) <= now) return 'inprog';
+  return 'todo';
+}
+const statusKey = { done: 'sDone', late: 'sLate', inprog: 'sInprog', todo: 'sTodo' };
+
+/* ---------- chrome ---------- */
+function renderChrome() {
+  document.documentElement.lang = UI.lang;
+  document.querySelectorAll('[data-i]').forEach(el => { el.textContent = t(el.dataset.i); });
+  $('eyebrow').textContent = t('eyebrow') + (P.code ? ' · ' + P.code : '');
+  $('pName').textContent = P.name;
+  $('pMeta').textContent = `${dLabel(C.parseDate(P.start), true)} → ${dLabel(C.parseDate(P.end), true)} · ${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
+  ['fr', 'en'].forEach(l => $('lang-' + l).setAttribute('aria-pressed', UI.lang === l));
+  const tabs = [['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['project', 'tabProject']];
+  $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
+  tabs.forEach(([id]) => { $('tab-' + id).hidden = UI.tab !== id; });
+  $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
+  $('g-summary').setAttribute('aria-pressed', UI.gMode === 'summary'); $('g-master').setAttribute('aria-pressed', UI.gMode === 'master');
+  document.querySelectorAll('#gZoom button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.z === UI.zoom));
+  $('optDeps').checked = UI.deps; $('optCrit').checked = UI.crit;
+}
+
+function renderKpis() {
+  const b = C.burndown(P, todayT()), h = C.health(P, todayT()), cp = C.criticalPath(P);
+  const end = C.parseDate(P.end);
+  const st = $('pStatus'); st.className = 'pill st-' + h.status; st.textContent = t(h.status);
+  const fcLate = b.forecast !== null && b.forecast > end;
+  const slip = b.forecast !== null ? C.diffDays(end, b.forecast) : null;
+  const pct = x => Math.round(x * 100) + '%';
+  $('kpis').innerHTML = `
+    <div class="kpi"><div class="k">${esc(t('kRemaining'))}</div><div class="v">${Math.round(b.remaining)} <small>${esc(t('pts'))}</small></div>
+      <div class="s">${b.done} ${esc(t('kDone'))} ${b.total}</div><div class="meter"><i style="width:${b.total ? b.done / b.total * 100 : 0}%"></i></div></div>
+    <div class="kpi"><div class="k">${esc(t('kEarned'))}</div><div class="v">${pct(h.pctEarned)}</div>
+      <div class="s">${pct(h.pctPlanned)} ${esc(t('kPlanned'))}</div><div class="meter"><i style="width:${h.pctEarned * 100}%"></i></div></div>
+    <div class="kpi"><div class="k">${esc(t('kVelocity'))}</div><div class="v">${b.velocityWeek.toFixed(1)} <small>${esc(t('perWeek'))}</small></div>
+      <div class="s" style="color:${b.velocityWeek + 0.05 < b.requiredWeek ? 'var(--warn)' : 'var(--muted)'}">${b.requiredWeek.toFixed(1)} ${esc(t('perWeek'))} ${esc(t('kRequired'))}</div></div>
+    <div class="kpi"><div class="k">${esc(t('kSpi'))}</div><div class="v" style="color:var(--${h.status === 'on' ? 'good' : h.status === 'risk' ? 'warn' : 'bad'})">${h.spi.toFixed(2)}</div><div class="s">${esc(t('kSpiS'))}</div></div>
+    <div class="kpi"><div class="k">${esc(t('kForecast'))}</div><div class="v" style="font-size:19px;${fcLate ? 'color:var(--bad)' : ''}">${b.forecast !== null ? esc(dLabel(b.forecast, true)) : esc(t('none'))}</div>
+      <div class="s">${b.forecast !== null ? `${slip > 0 ? '+' : ''}${slip} ${esc(t('d'))} · ` : esc(t('noVelocity')) + ' · '}${esc(t('kPlannedEnd'))} ${esc(dLabel(end))}</div></div>
+    <div class="kpi"><div class="k">${esc(t('kCritical'))}</div><div class="v">${cp.critical.size} <small>${esc(t('kTasks'))}</small></div>
+      <div class="s mono">${esc([...cp.critical].filter(id => !P.tasks.find(k => k.id === id).done).slice(0, 6).join(' → ') || t('none'))}</div></div>`;
+}
+
+/* ---------- burndown chart ---------- */
+function renderBurndown() {
+  const box = $('bdBox'), tip = $('bdTip');
+  box.querySelectorAll('svg').forEach(s => s.remove());
+  const b = C.burndown(P, todayT());
+  const s = C.parseDate(P.start), e = C.parseDate(P.end);
+  const xEnd = b.forecast !== null && b.forecast > e ? Math.min(b.forecast, C.addDays(e, 60)) : e;
+  const W = 820, H = 380, m = { l: 48, r: 20, t: 28, b: 52 };
+  const X = tm => m.l + (tm - s) / (xEnd - s) * (W - m.l - m.r);
+  const ymax = Math.max(1, b.total) * 1.06;
+  const Y = v => m.t + (1 - v / ymax) * (H - m.t - m.b);
+  const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500].find(x => ymax / x <= 6) || 1000;
+  let g = '';
+  for (let v = 0; v <= ymax; v += step) g += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${v}</text>`;
+  // weekly x ticks (Mondays)
+  let mon = s; while (new Date(mon).getUTCDay() !== 1) mon = C.addDays(mon, 1);
+  const wkStep = Math.ceil(((xEnd - s) / C.DAY / 7) / 12);
+  for (let tm = mon, i = 0; tm <= xEnd; tm = C.addDays(tm, 7), i++) {
+    if (i % wkStep) continue;
+    g += `<line x1="${X(tm)}" x2="${X(tm)}" y1="${H - m.b}" y2="${H - m.b + 5}" stroke="var(--line)"/><text x="${X(tm)}" y="${H - m.b + 18}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(dLabel(tm))}</text>`;
+  }
+  g += `<line x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}" stroke="var(--line)"/>`;
+  if (xEnd > e) g += `<rect x="${X(e)}" y="${m.t}" width="${X(xEnd) - X(e)}" height="${H - m.t - m.b}" fill="var(--bad-soft)"/>`;
+  // milestones on axis
+  P.milestones.forEach(ms => { const tm = C.parseDate(ms.date); if (tm < s || tm > xEnd) return;
+    g += `<path d="M${X(tm)} ${H - m.b + 26}l5 5l-5 5l-5 -5z" fill="var(--ink)"><title>${esc(ms.id + ' · ' + nm(ms) + ' · ' + dLabel(tm, true))}</title></path>`; });
+  // ideal
+  g += `<polyline fill="none" stroke="var(--ideal)" stroke-width="1.6" stroke-dasharray="5 4" points="${b.ideal.map(p => `${X(p.t).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ')}"/>`;
+  // actual (step) + area
+  if (b.actual.length) {
+    let d = `M${X(b.actual[0].t)} ${Y(b.actual[0].v)}`;
+    b.actual.forEach((p, i) => { if (i) d += `H${X(p.t).toFixed(1)}V${Y(p.v).toFixed(1)}`; });
+    const last = b.actual.at(-1);
+    g += `<path d="${d}V${H - m.b}H${X(b.actual[0].t)}Z" fill="var(--accent-soft)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round"/>`;
+    if (b.forecast !== null && b.remaining > 0) {
+      const fx = Math.min(b.forecast, xEnd), fv = b.remaining * (1 - (fx - last.t) / (b.forecast - last.t || 1));
+      g += `<line x1="${X(last.t)}" y1="${Y(last.v)}" x2="${X(fx)}" y2="${Y(fv)}" stroke="var(--${b.forecast > e ? 'bad' : 'good'})" stroke-width="1.8" stroke-dasharray="2 4" stroke-linecap="round"/>`;
+    }
+    g += `<circle cx="${X(last.t)}" cy="${Y(last.v)}" r="4.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.4"/>
+      <text x="${X(last.t) + 9}" y="${Y(last.v) - 9}" font-size="12" font-weight="600" fill="var(--ink)" font-family="var(--f-mono)">${Math.round(last.v)}</text>`;
+  }
+  // today
+  const nt = b.now;
+  if (nt >= s && nt <= xEnd) g += `<line x1="${X(nt)}" x2="${X(nt)}" y1="${m.t - 8}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".55"/><text x="${X(nt)}" y="${m.t - 12}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(t('today').toUpperCase())}</text>`;
+  g += `<rect id="bdHit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
+  g += `<line id="bdCursor" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" visibility="hidden"/>`;
+  box.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('bdTitle'))}">${g}</svg>`);
+  $('bdLegend').innerHTML = `<span><i class="sw" style="border-color:var(--accent);border-top-width:3px"></i>${esc(t('actual'))}</span><span><i class="sw" style="border-color:var(--ideal);border-top-style:dashed"></i>${esc(t('ideal'))}</span><span><i class="sw" style="border-color:var(--${b.forecast !== null && b.forecast > e ? 'bad' : 'good'});border-top-style:dotted"></i>${esc(t('forecastL'))}</span><span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
+  const svg = box.querySelector('svg'), hit = svg.querySelector('#bdHit'), cur = svg.querySelector('#bdCursor');
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W;
+    const tm = C.addDays(s, Math.round((sx - m.l) / (W - m.l - m.r) * (xEnd - s) / C.DAY));
+    if (tm < s || tm > xEnd) return;
+    const a = b.actual.find(p => p.t === tm);
+    cur.setAttribute('x1', X(tm)); cur.setAttribute('x2', X(tm)); cur.setAttribute('visibility', 'visible');
+    tip.hidden = false; tip.style.left = (X(tm) / W * r.width) + 'px'; tip.style.top = (m.t / H * r.height + 20) + 'px';
+    tip.textContent = `${dLabel(tm, true)} · ${t('ideal')} ${Math.round(C.idealAt(P, tm))}${a ? ` · ${t('actual')} ${a.v}` : ''}`;
+  };
+  hit.addEventListener('pointermove', move);
+  hit.addEventListener('pointerleave', () => { tip.hidden = true; cur.setAttribute('visibility', 'hidden'); });
+}
+
+function renderFocus() {
+  const now = nowT(), soon = C.addDays(now, 14);
+  const late = P.tasks.filter(k => taskStatus(k, now) === 'late');
+  const prog = P.tasks.filter(k => taskStatus(k, now) === 'inprog');
+  const next = P.tasks.filter(k => !k.done && C.parseDate(k.start) > now && C.parseDate(k.start) <= soon);
+  const li = (k, extra) => `<li><span class="tid">${esc(k.id)}</span><span>${esc(nm(k))}<br><span class="hint">${esc(k.owner || '')} · ${esc(dLabel(C.parseDate(k.start)))} → ${esc(dLabel(C.parseDate(k.end)))}</span></span>${extra}</li>`;
+  const block = (title, arr, fn) => `<p class="sec-t">${esc(title)} · ${arr.length}</p>${arr.length ? `<ul class="mini">${arr.map(fn).join('')}</ul>` : `<p class="hint">${esc(t('nothing'))}</p>`}`;
+  $('focus').innerHTML =
+    block(t('lateTasks'), late, k => li(k, `<span class="chip c-late">+${C.diffDays(C.parseDate(k.end), now)} ${esc(t('d'))}</span>`)) +
+    block(t('inProgress'), prog, k => li(k, `<span class="pbar" title="${k.progress}%"><i style="width:${k.progress}%;background:var(--accent)"></i></span>`)) +
+    block(t('nextUp'), next, k => li(k, `<span class="num hint">${k.points} ${esc(t('pts'))}</span>`));
+}
+
+/* ---------- gantt ---------- */
+function renderGantt() {
+  const now = nowT(), cp = C.criticalPath(P);
+  const allDates = [C.parseDate(P.start), C.parseDate(P.end), ...P.tasks.flatMap(k => [C.parseDate(k.start), C.parseDate(k.end)]), ...P.milestones.map(m => C.parseDate(m.date))];
+  let s = Math.min(...allDates), e = Math.max(...allDates);
+  while (new Date(s).getUTCDay() !== 1) s = C.addDays(s, -1);
+  e = C.addDays(e, 3);
+  const dw = UI.zoom, days = C.diffDays(s, e) + 1, W = days * dw, RH = 30, HEAD = 46;
+  const X = tm => C.diffDays(s, tm) * dw;
+  const rows = [];
+  rows.push({ kind: 'ms' });
+  if (UI.gMode === 'summary') C.phaseSpans(P).filter(p => p.start).forEach(p => rows.push({ kind: 'phase', p }));
+  else P.phases.forEach(ph => {
+    const sp = C.phaseSpans(P).find(x => x.id === ph.id);
+    if (!sp.start) return;
+    rows.push({ kind: 'phaseHead', p: sp });
+    P.tasks.filter(k => k.phase === ph.id).forEach(k => rows.push({ kind: 'task', k }));
+  });
+  const orphan = P.tasks.filter(k => !P.phases.some(p => p.id === k.phase));
+  if (UI.gMode === 'master') orphan.forEach(k => rows.push({ kind: 'task', k }));
+  const H = HEAD + rows.length * RH + 8;
+  const rowY = new Map();
+  let L = '', R = '';
+  // header: months + weeks
+  R += `<rect x="0" y="0" width="${W}" height="${HEAD}" fill="var(--sunk)"/>`;
+  for (let tm = s; tm <= e; tm = C.addDays(tm, 1)) {
+    const d = new Date(tm);
+    if (C.isWeekend(tm) && dw >= 8) R += `<rect x="${X(tm)}" y="${HEAD}" width="${dw}" height="${H - HEAD}" fill="var(--grid)" opacity=".55"/>`;
+    if (d.getUTCDate() === 1 || tm === s) {
+      R += `<line x1="${X(tm)}" x2="${X(tm)}" y1="0" y2="22" stroke="var(--line)"/><text x="${X(tm) + 6}" y="15" font-size="11.5" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(d.toLocaleDateString(UI.lang === 'fr' ? 'fr-FR' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).toUpperCase())}</text>`;
+    }
+    if (d.getUTCDay() === 1) {
+      R += `<line x1="${X(tm)}" x2="${X(tm)}" y1="22" y2="${H}" stroke="var(--line)" opacity=".7"/>`;
+      if (dw * 7 >= 44) R += `<text x="${X(tm) + 5}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${esc(t('week'))}${isoWeek(tm)} · ${esc(dLabel(tm))}</text>`;
+      else R += `<text x="${X(tm) + 3}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${isoWeek(tm)}</text>`;
+    }
+  }
+  R += `<line x1="0" x2="${W}" y1="22" y2="22" stroke="var(--line)"/><line x1="0" x2="${W}" y1="${HEAD}" y2="${HEAD}" stroke="var(--line)"/>`;
+  L += `<rect x="0" y="0" width="400" height="${HEAD}" fill="var(--sunk)"/><line x1="0" x2="400" y1="${HEAD}" y2="${HEAD}" stroke="var(--line)"/>
+    <text x="12" y="30" font-size="11.5" font-weight="600" fill="var(--muted)" font-family="var(--f-display)" letter-spacing=".08em">${esc((UI.gMode === 'summary' ? t('phase') : t('task')).toUpperCase())}</text>`;
+  rows.forEach((r, i) => {
+    const y = HEAD + i * RH, cy = y + RH / 2;
+    const zebra = r.kind === 'phaseHead' ? `<rect x="0" y="${y}" width="%W%" height="${RH}" fill="var(--sunk)"/>` : '';
+    R += zebra.replace('%W%', W); L += zebra.replace('%W%', 400);
+    R += `<line x1="0" x2="${W}" y1="${y + RH}" y2="${y + RH}" stroke="var(--grid)"/>`;
+    L += `<line x1="0" x2="400" y1="${y + RH}" y2="${y + RH}" stroke="var(--grid)"/>`;
+    if (r.kind === 'ms') {
+      L += `<text x="12" y="${cy + 4}" font-size="12.5" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(t('milestones'))}</text>`;
+      P.milestones.forEach(ms => { const x = X(C.parseDate(ms.date)) + dw / 2;
+        R += `<g><path d="M${x} ${cy - 8}l8 8l-8 8l-8 -8z" fill="var(--ink)"/><title>${esc(ms.id + ' · ' + nm(ms) + ' · ' + dLabel(C.parseDate(ms.date), true))}</title></g><text x="${x + 11}" y="${cy + 4}" font-size="10.5" font-weight="600" fill="var(--muted)" font-family="var(--f-mono)">${esc(ms.id)}</text>`; });
+      return;
+    }
+    if (r.kind === 'phase' || r.kind === 'phaseHead') {
+      const p = r.p, x1 = X(C.parseDate(p.start)), x2 = X(C.parseDate(p.end)) + dw, big = r.kind === 'phase';
+      L += `<rect x="10" y="${cy - 5}" width="10" height="10" rx="2" fill="${esc(p.color)}"/><text x="28" y="${cy + 4}" font-size="${big ? 13 : 12.5}" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(p.id + ' · ' + nm(p))}</text>`;
+      if (big) {
+        L += `<text x="392" y="${cy + 4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${Math.round(p.progress * 100)}%</text>`;
+        R += `<rect x="${x1}" y="${cy - 9}" width="${x2 - x1}" height="18" rx="4" fill="${esc(p.color)}" fill-opacity=".2" stroke="${esc(p.color)}"/><rect x="${x1}" y="${cy - 9}" width="${(x2 - x1) * p.progress}" height="18" rx="4" fill="${esc(p.color)}"/>
+          <text x="${x2 + 8}" y="${cy + 4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(dLabel(C.parseDate(p.start)))}–${esc(dLabel(C.parseDate(p.end)))} · ${p.points} ${esc(t('pts'))}</text>`;
+      } else {
+        R += `<path d="M${x1} ${cy + 6}V${cy - 4}H${x2}V${cy + 6}" fill="none" stroke="${esc(p.color)}" stroke-width="2"/><rect x="${x1}" y="${cy - 4}" width="${(x2 - x1) * p.progress}" height="4" fill="${esc(p.color)}"/>`;
+      }
+      return;
+    }
+    const k = r.k, ph = phaseOf(k.phase), x1 = X(C.parseDate(k.start)), x2 = X(C.parseDate(k.end)) + dw;
+    const st = taskStatus(k, now), crit = UI.crit && cp.critical.has(k.id);
+    rowY.set(k.id, { cy, x1, x2 });
+    L += `<text x="12" y="${cy + 4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(k.id)}</text><text x="52" y="${cy + 4}" font-size="12.5" fill="var(--ink)">${esc(nm(k).length > 38 ? nm(k).slice(0, 37) + '…' : nm(k))}<title>${esc(nm(k))}</title></text>`;
+    R += `<g><title>${esc(`${k.id} · ${nm(k)}\n${dLabel(C.parseDate(k.start), true)} → ${dLabel(C.parseDate(k.end), true)}\n${k.owner} · ${k.points} ${t('pts')} · ${k.progress}% · ${t(statusKey[st])}`)}</title>
+      <rect x="${x1}" y="${cy - 8}" width="${x2 - x1}" height="16" rx="3" fill="${esc(ph.color)}" fill-opacity=".22" stroke="${crit ? 'var(--bad)' : esc(ph.color)}" stroke-width="${crit ? 2 : 1}"/>
+      <rect x="${x1}" y="${cy - 8}" width="${(x2 - x1) * k.progress / 100}" height="16" rx="3" fill="${esc(ph.color)}"/></g>
+      <text x="${x2 + 6}" y="${cy + 4}" font-size="10.5" fill="${st === 'late' ? 'var(--bad)' : 'var(--muted)'}" font-family="var(--f-mono)">${esc(k.owner)}${k.owner ? ' · ' : ''}${k.points}${st === 'late' ? ' · !' : ''}</text>`;
+  });
+  if (UI.gMode === 'master' && UI.deps) {
+    let dp = '';
+    P.tasks.forEach(k => k.deps.forEach(d => {
+      const a = rowY.get(d), b2 = rowY.get(k.id); if (!a || !b2) return;
+      const crit = UI.crit && cp.critical.has(k.id) && cp.critical.has(d);
+      const midX = Math.max(a.x2 + 4, Math.min(b2.x1 - 6, a.x2 + 10));
+      dp += `<path d="M${a.x2} ${a.cy}H${midX}V${b2.cy}H${b2.x1 - 1}" fill="none" stroke="${crit ? 'var(--bad)' : 'var(--muted)'}" stroke-opacity="${crit ? .9 : .5}" stroke-width="1.1" marker-end="url(#arr${crit ? 'C' : ''})"/>`;
+    }));
+    R = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker><marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--bad)"/></marker></defs>` + R + dp;
+  }
+  if (now >= s && now <= e) R += `<line x1="${X(now) + dw / 2}" x2="${X(now) + dw / 2}" y1="${HEAD - 6}" y2="${H}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${X(now) + dw / 2 - 30}" y="${HEAD - 14}" width="60" height="14" rx="3" fill="var(--accent)"/><text x="${X(now) + dw / 2}" y="${HEAD - 4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="var(--f-display)" letter-spacing=".06em">${esc(t('today').toUpperCase())}</text>`;
+  $('gLeft').innerHTML = `<svg width="400" height="${H}" viewBox="0 0 400 ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${L}</svg>`;
+  $('gRight').innerHTML = `<svg width="${W + 140}" height="${H}" viewBox="0 0 ${W + 140} ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${R}</svg>`;
+  $('gLegend').innerHTML = P.phases.map(p => `<span><svg width="12" height="12" viewBox="0 0 12 12"><rect width="12" height="12" rx="2" fill="${esc(p.color)}"/></svg>${esc(p.id + ' ' + nm(p))}</span>`).join('') +
+    (UI.crit ? `<span><svg width="18" height="12" viewBox="0 0 18 12"><rect x="1" y="1" width="16" height="10" rx="2" fill="none" stroke="var(--bad)" stroke-width="2"/></svg>${esc(t('showCrit'))}</span>` : '') +
+    `<span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
+}
+
+/* ---------- tasks ---------- */
+function renderTasks() {
+  const now = nowT(), cp = C.criticalPath(P);
+  $('taskCount').textContent = `${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
+  $('tf-phase').innerHTML = P.phases.map(p => `<option value="${esc(p.id)}">${esc(p.id + ' · ' + nm(p))}</option>`).join('');
+  $('edTitle').textContent = editing ? `${t('editTask')} ${editing}` : t('addTask');
+  $('tfSave').textContent = editing ? t('saveTask') : t('addBtn');
+  $('tfCancel').hidden = !editing;
+  let rows = '';
+  const groups = [...P.phases.map(p => ({ p, ts: P.tasks.filter(k => k.phase === p.id) })), { p: null, ts: P.tasks.filter(k => !P.phases.some(p => p.id === k.phase)) }];
+  groups.forEach(({ p, ts }) => {
+    if (!ts.length) return;
+    if (p) rows += `<tr class="phase-row"><td colspan="9"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${esc(p.color)};margin-right:8px"></span>${esc(p.id + ' · ' + nm(p))}</td></tr>`;
+    ts.forEach(k => {
+      const st = taskStatus(k, now);
+      rows += `<tr><td class="tid">${esc(k.id)}${cp.critical.has(k.id) ? ' <span title="' + esc(t('showCrit')) + '" style="color:var(--bad)">●</span>' : ''}</td>
+        <td style="min-width:220px">${esc(nm(k))}${k.deps.length ? `<br><span class="hint mono">← ${esc(k.deps.join(', '))}</span>` : ''}</td>
+        <td>${esc(k.owner)}</td><td class="num">${esc(dLabel(C.parseDate(k.start)))}</td><td class="num">${esc(dLabel(C.parseDate(k.end)))}</td>
+        <td class="r num">${k.points}</td>
+        <td><span class="pbar"><i style="width:${k.progress}%;background:${esc(phaseOf(k.phase).color)}"></i></span> <span class="num hint">${k.progress}%</span></td>
+        <td><span class="chip c-${st}">${esc(t(statusKey[st]))}</span></td>
+        <td><div class="row-actions">${k.done ? '' : `<button class="btn sm" type="button" data-act="done" data-id="${esc(k.id)}">${esc(t('markDone'))}</button>`}
+          <button class="btn sm" type="button" data-act="edit" data-id="${esc(k.id)}">${esc(t('edit'))}</button>
+          <button class="btn sm danger" type="button" data-act="del" data-id="${esc(k.id)}">${esc(t('del'))}</button></div></td></tr>`;
+    });
+  });
+  $('taskTable').innerHTML = `<thead><tr><th>ID</th><th>${esc(t('task'))}</th><th>${esc(t('owner'))}</th><th>${esc(t('start'))}</th><th>${esc(t('end'))}</th><th class="r">${esc(t('points'))}</th><th>${esc(t('progress'))}</th><th>${esc(t('status'))}</th><th></th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+function fillForm(k) {
+  editing = k ? k.id : null;
+  $('tf-id').value = k ? k.id : nextId('T', P.tasks);
+  $('tf-id').readOnly = !!k;
+  $('tf-phase').value = k ? k.phase : (P.phases[0] ? P.phases[0].id : '');
+  $('tf-owner').value = k ? k.owner : '';
+  $('tf-points').value = k ? k.points : 3;
+  $('tf-fr').value = k ? k.fr : ''; $('tf-en').value = k ? k.en : '';
+  $('tf-start').value = k ? k.start : C.fmt(nowT()); $('tf-end').value = k ? k.end : C.fmt(C.addDays(nowT(), 4));
+  $('tf-progress').value = k ? k.progress : 0; $('tf-pv').textContent = $('tf-progress').value + '%';
+  $('tf-done').value = k ? k.done : ''; $('tf-deps').value = k ? k.deps.join(', ') : '';
+  $('tfErr').textContent = '';
+  renderTasks();
+}
+function nextId(prefix, list) { let n = list.length + 1; while (list.some(x => x.id === prefix + n)) n++; return prefix + n; }
+
+$('tf-progress').addEventListener('input', () => { $('tf-pv').textContent = $('tf-progress').value + '%'; });
+$('taskForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const err = m => { $('tfErr').textContent = m; $('tfErr').className = 'err'; };
+  const id = $('tf-id').value.trim();
+  if (!/^[A-Za-z0-9_-]{1,16}$/.test(id)) return err(t('eId'));
+  if (!editing && P.tasks.some(k => k.id === id)) return err(t('eIdTaken'));
+  if (!$('tf-fr').value.trim()) return err(t('eName'));
+  const s = C.parseDate($('tf-start').value), e = C.parseDate($('tf-end').value);
+  if (s === null || e === null || e < s) return err(t('eDates'));
+  const done = $('tf-done').value;
+  if (done && C.parseDate(done) === null) return err(t('eDoneDate'));
+  const deps = $('tf-deps').value.split(/[,;\s]+/).map(x => x.trim()).filter(Boolean);
+  const unknown = deps.filter(d => d === id || !P.tasks.some(k => k.id === d));
+  if (unknown.length) return err(t('eDeps') + unknown.join(', '));
+  if (C.createsCycle(P.tasks, id, deps)) return err(t('eCycle'));
+  const task = { id, phase: $('tf-phase').value, owner: $('tf-owner').value, points: $('tf-points').value,
+    fr: $('tf-fr').value, en: $('tf-en').value, start: $('tf-start').value, end: $('tf-end').value,
+    progress: done ? 100 : $('tf-progress').value, done, deps };
+  const list = editing ? P.tasks.map(k => k.id === editing ? task : k) : [...P.tasks, task];
+  const r = C.validateProject({ ...P, tasks: list });
+  if (!r.project || r.project.tasks.length !== list.length) return err(t('eInvalid') + r.errors.join(', '));
+  P = r.project;
+  const warn = deps.filter(d => C.parseDate(P.tasks.find(k => k.id === d).end) >= s);
+  commit();
+  fillForm(null);
+  if (warn.length) { $('tfErr').textContent = `${id} — ${t('fsWarn')}${warn.join(', ')}`; $('tfErr').className = 'err'; }
+  else { $('tfErr').textContent = t('saved'); $('tfErr').className = 'ok'; }
+});
+$('tfCancel').addEventListener('click', () => fillForm(null));
+let pendingDel = null;
+$('taskTable').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-act]'); if (!b) return;
+  const id = b.dataset.id, k = P.tasks.find(x => x.id === id); if (!k) return;
+  if (b.dataset.act === 'edit') { fillForm(k); $('taskForm').scrollIntoView?.({ behavior: 'smooth', block: 'start' }); }
+  if (b.dataset.act === 'done') { k.done = C.fmt(nowT()); k.progress = 100; commit(); }
+  if (b.dataset.act === 'del') {
+    if (pendingDel !== id) { pendingDel = id; b.textContent = t('confirmDel'); return; }
+    pendingDel = null;
+    P.tasks = P.tasks.filter(x => x.id !== id);
+    P.tasks.forEach(x => { x.deps = x.deps.filter(d => d !== id); });
+    if (editing === id) editing = null;
+    commit();
+  }
+});
+
+/* ---------- project settings ---------- */
+function renderProject() {
+  $('pf-name').value = P.name; $('pf-code').value = P.code; $('pf-start').value = P.start; $('pf-end').value = P.end;
+  $('pf-status').value = P.statusDate; $('pf-wd').checked = P.workingDays;
+  $('phaseRows').innerHTML = P.phases.map((p, i) => phaseRow(p, i)).join('');
+  $('msRows').innerHTML = P.milestones.map((m, i) => msRow(m, i)).join('');
+}
+const phaseRow = (p, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ph-id" value="${esc(p.id)}" maxlength="16"><input aria-label="FR" class="ph-fr" value="${esc(p.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ph-en" value="${esc(p.en)}" maxlength="80" placeholder="EN"><input aria-label="Color" class="ph-color" type="color" value="${esc(p.color)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
+const msRow = (m, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ms-id" value="${esc(m.id)}" maxlength="16"><input aria-label="FR" class="ms-fr" value="${esc(m.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ms-en" value="${esc(m.en)}" maxlength="80" placeholder="EN"><input aria-label="Date" class="ms-date" type="date" value="${esc(m.date)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
+['phaseRows', 'msRows'].forEach(id => $(id).addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) ev.target.closest('.edit-row').remove(); }));
+$('addPhase').addEventListener('click', () => $('phaseRows').insertAdjacentHTML('beforeend', phaseRow({ id: nextId('P', [...document.querySelectorAll('.ph-id')].map(x => ({ id: x.value }))), fr: '', en: '', color: '#4f6bed' }, 0)));
+$('addMs').addEventListener('click', () => $('msRows').insertAdjacentHTML('beforeend', msRow({ id: nextId('M', [...document.querySelectorAll('.ms-id')].map(x => ({ id: x.value }))), fr: '', en: '', date: C.fmt(nowT()) }, 0)));
+$('savePhases').addEventListener('click', () => {
+  const phases = [...document.querySelectorAll('#phaseRows .edit-row')].map(r => ({ id: r.querySelector('.ph-id').value.trim(), fr: r.querySelector('.ph-fr').value, en: r.querySelector('.ph-en').value, color: r.querySelector('.ph-color').value }));
+  const r = C.validateProject({ ...P, phases });
+  if (r.errors.some(x => x.startsWith('phase'))) { $('phErr').textContent = t('eRows'); $('phErr').className = 'err'; return; }
+  P = r.project; commit(); $('phErr').textContent = t('saved'); $('phErr').className = 'ok';
+});
+$('saveMs').addEventListener('click', () => {
+  const milestones = [...document.querySelectorAll('#msRows .edit-row')].map(r => ({ id: r.querySelector('.ms-id').value.trim(), fr: r.querySelector('.ms-fr').value, en: r.querySelector('.ms-en').value, date: r.querySelector('.ms-date').value }));
+  const r = C.validateProject({ ...P, milestones });
+  if (r.errors.some(x => x.startsWith('milestone'))) { $('msErr').textContent = t('eRows'); $('msErr').className = 'err'; return; }
+  P = r.project; commit(); $('msErr').textContent = t('saved'); $('msErr').className = 'ok';
+});
+$('projForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const r = C.validateProject({ ...P, name: $('pf-name').value, code: $('pf-code').value, start: $('pf-start').value, end: $('pf-end').value, statusDate: $('pf-status').value, workingDays: $('pf-wd').checked });
+  const bad = r.errors.filter(x => ['start', 'end', 'range', 'statusDate'].includes(x));
+  if (bad.length) { $('pfErr').textContent = bad.includes('range') ? t('eRange') : t('eDates'); $('pfErr').className = 'err'; return; }
+  P = r.project; commit(); $('pfErr').textContent = t('saved'); $('pfErr').className = 'ok';
+});
+
+/* ---------- import / export ---------- */
+const msg = (m, ok) => { $('dataMsg').textContent = m; $('dataMsg').className = ok ? 'ok' : 'err'; };
+$('btnExport').addEventListener('click', () => { $('jsonBox').value = JSON.stringify(P, null, 2); msg('', true); });
+$('btnCsv').addEventListener('click', () => { $('jsonBox').value = GanttIO.toCSV(P); msg('', true); });
+$('btnMermaid').addEventListener('click', () => { $('jsonBox').value = GanttIO.toMermaid(P, UI.lang, nowT()); msg('', true); });
+$('btnTemplate').addEventListener('click', () => { $('jsonBox').value = GanttIO.CSV_TEMPLATE; msg('', true); });
+$('gImport').addEventListener('click', () => { UI.tab = 'project'; persist(); renderChrome(); $('jsonBox').focus(); $('jsonBox').scrollIntoView?.({ behavior: 'smooth', block: 'center' }); });
+$('btnCopy').addEventListener('click', () => {
+  if (!$('jsonBox').value) $('jsonBox').value = JSON.stringify(P, null, 2);
+  const box = $('jsonBox');
+  const fallback = () => { box.focus(); box.select(); msg(t('copyFail'), false); };
+  try { navigator.clipboard.writeText(box.value).then(() => msg(t('copied'), true), fallback); } catch { fallback(); }
+});
+function importText(txt) {
+  if (txt.length > 2e6) return msg(t('eSize'), false);
+  const fmt = GanttIO.detect(txt);
+  let raw;
+  try {
+    if (fmt === 'json') raw = JSON.parse(txt);
+    else if (fmt === 'mermaid') raw = GanttIO.fromMermaid(txt);
+    else raw = GanttIO.fromCSV(txt);
+  } catch (e) {
+    const m = { 'csv-columns': 'eCsvCols', 'csv-empty': 'eCsvCols', 'no-tasks': 'eNoTasks', mermaid: 'eMermaid', size: 'eSize' }[e.message];
+    return msg(t(m || 'eBadJson'), false);
+  }
+  const r = C.validateProject(raw);
+  if (!r.project || (fmt === 'json' && !r.ok)) return msg(t('eInvalid') + r.errors.slice(0, 8).join(', '), false);
+  if (!r.project.tasks.length) return msg(t('eNoTasks'), false);
+  P = r.project; editing = null; UI.tab = 'gantt'; commit();
+  const skipped = (raw.tasks || []).length - P.tasks.length;
+  msg(`${t('importedN')}${t({ json: 'fmtJson', csv: 'fmtCsv', mermaid: 'fmtMermaid' }[fmt])} · ${P.tasks.length} ${t('kTasks')}${skipped > 0 ? ` (−${skipped})` : ''}${r.errors.includes('cycle') ? ' · ' + t('eCycle') : ''}`, true);
+}
+$('btnImport').addEventListener('click', () => importText($('jsonBox').value));
+$('fileIn').addEventListener('change', ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  if (f.size > 2e6) return msg(t('eSize'), false);
+  const rd = new FileReader(); rd.onload = () => { $('jsonBox').value = String(rd.result); importText(String(rd.result)); }; rd.readAsText(f);
+  ev.target.value = '';
+});
+let armed = null;
+const twoStep = (btn, fn) => btn.addEventListener('click', () => {
+  if (armed !== btn) { armed = btn; msg(t('sure'), false); setTimeout(() => { if (armed === btn) { armed = null; msg('', true); } }, 4000); return; }
+  armed = null; fn();
+});
+twoStep($('btnSample'), () => { P = C.validateProject(SAMPLE).project; editing = null; commit(); msg(t('imported'), true); });
+twoStep($('btnBlank'), () => {
+  const s = nowT();
+  P = C.validateProject({ name: t('blankName'), code: '', start: C.fmt(s), end: C.fmt(C.addDays(s, 56)), statusDate: '', workingDays: true,
+    phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#4f6bed' }], milestones: [], tasks: [] }).project;
+  editing = null; commit(); msg(t('saved'), true);
+});
+
+/* ---------- wiring ---------- */
+function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); if (!editing) fillFormSilent(); }
+function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
+function commit() { persist(); renderAll(); }
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
+$('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); });
+$('tabs').addEventListener('keydown', ev => {
+  if (!['ArrowRight', 'ArrowLeft'].includes(ev.key)) return;
+  const ids = ['burndown', 'gantt', 'tasks', 'project'], i = ids.indexOf(UI.tab);
+  UI.tab = ids[(i + (ev.key === 'ArrowRight' ? 1 : 3)) % 4]; persist(); renderChrome(); $('tb-' + UI.tab).focus();
+});
+$('gMode').addEventListener('click', ev => { const b = ev.target.closest('[data-mode]'); if (!b) return; UI.gMode = b.dataset.mode; persist(); renderChrome(); renderGantt(); });
+$('gZoom').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (!b) return; UI.zoom = +b.dataset.z; persist(); renderChrome(); renderGantt(); });
+$('optDeps').addEventListener('change', ev => { UI.deps = ev.target.checked; persist(); renderGantt(); });
+$('optCrit').addEventListener('change', ev => { UI.crit = ev.target.checked; persist(); renderGantt(); });
+const hash = (location.hash || '').slice(1);
+if (['burndown', 'gantt', 'tasks', 'project'].includes(hash)) UI.tab = hash;
+renderAll(); fillForm(null);
+})();
+</script>
+
+</body>
+</html>

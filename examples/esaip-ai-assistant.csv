@@ -1,0 +1,27 @@
+id,type,phase,name_fr,name_en,owner,start,end,points,progress,done,deps
+T1,task,Initialisation / Initiation,Lancement et entretiens,Kick-off and stakeholder interviews,PM,2026-09-28,2026-10-02,3,100,2026-10-02,
+T2,task,Initialisation / Initiation,Cahier des charges,Requirements specification,PM,2026-10-05,2026-10-09,5,100,2026-10-09,T1
+T3,task,Initialisation / Initiation,Registre des risques et RACI,Risk register and RACI,PM,2026-10-05,2026-10-08,2,100,2026-10-08,T1
+T4,task,Conception / Design,Architecture RAG et API,RAG and API architecture,ARCH,2026-10-12,2026-10-16,8,100,2026-10-16,T2
+T5,task,Conception / Design,Collecte base de connaissances,Knowledge-base data collection,DATA,2026-10-05,2026-10-20,8,100,2026-10-20,T1
+T6,task,Conception / Design,Maquettes UI bilingues,Bilingual UI wireframes,FE,2026-10-12,2026-10-23,5,60,,T2
+T7,task,Conception / Design,Conception sécurité et RGPD,Security and GDPR design,SEC,2026-10-19,2026-10-23,3,30,,T4
+T8,task,Développement / Build,Pipeline d’ingestion et embeddings,Ingestion pipeline and embeddings,DATA,2026-10-21,2026-11-03,8,0,,T4 T5
+T9,task,Développement / Build,Orchestration RAG et LLM,RAG retrieval and LLM orchestration,ARCH,2026-11-04,2026-11-20,13,0,,T8
+T10,task,Développement / Build,API back-end et limitation de débit,Back-end API and rate limiting,BE,2026-10-19,2026-11-06,8,15,,T4
+T11,task,Développement / Build,Interface de chat FR/EN,FR/EN chat interface,FE,2026-10-26,2026-11-20,8,0,,T6
+T12,task,Développement / Build,Détection de langue et i18n,Language detection and i18n,FE,2026-11-09,2026-11-18,3,0,,T6
+T13,task,Développement / Build,Panneau d’administration,Admin panel,BE,2026-11-23,2026-12-02,5,0,,T10
+T14,task,Tests et recette / Test and UAT,Tests unitaires et d’intégration,Unit and integration tests,QA,2026-11-23,2026-12-02,5,0,,T9 T11
+T15,task,Tests et recette / Test and UAT,"Tests de sécurité (OWASP, injection)","Security testing (OWASP, injection)",SEC,2026-11-23,2026-12-04,5,0,,T7 T9 T10
+T16,task,Tests et recette / Test and UAT,Évaluation qualité des réponses,Answer-quality evaluation,QA,2026-11-23,2026-12-03,5,0,,T9
+T17,task,Tests et recette / Test and UAT,Recette utilisateurs,User acceptance testing,QA,2026-12-03,2026-12-08,3,0,,T14
+T18,task,Déploiement / Deployment,"Déploiement, CI/CD, monitoring","Deployment, CI/CD, monitoring",BE,2026-12-07,2026-12-11,5,0,,T15 T16
+T19,task,Déploiement / Deployment,Formation et guides,Training and user guides,PM,2026-12-09,2026-12-11,2,0,,T17
+T20,task,Clôture / Closure,Rapport final et soutenance,Final report and defence,PM,2026-12-14,2026-12-18,5,0,,T18 T19
+M1,milestone,,Cahier des charges validé,Spec signed off,,2026-10-09,2026-10-09,0,,,
+M2,milestone,,Gel de la conception,Design freeze,,2026-10-23,2026-10-23,0,,,
+M3,milestone,,MVP,MVP,,2026-11-20,2026-11-20,0,,,
+M4,milestone,,Recette validée,UAT passed,,2026-12-08,2026-12-08,0,,,
+M5,milestone,,Mise en production,Go-live,,2026-12-11,2026-12-11,0,,,
+M6,milestone,,Soutenance,Defence,,2026-12-18,2026-12-18,0,,,

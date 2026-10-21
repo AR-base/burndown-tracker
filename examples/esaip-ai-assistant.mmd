@@ -1,0 +1,37 @@
+gantt
+  title ESAIP AI Assistant
+  dateFormat YYYY-MM-DD
+  axisFormat %d/%m
+  section P1 Initialisation
+  T1 Lancement et entretiens :crit, done, T1, 2026-09-28, 2026-10-03
+  T2 Cahier des charges :crit, done, T2, 2026-10-05, 2026-10-10
+  T3 Registre des risques et RACI :done, T3, 2026-10-05, 2026-10-09
+  section P2 Conception
+  T4 Architecture RAG et API :done, T4, 2026-10-12, 2026-10-17
+  T5 Collecte base de connaissances :crit, done, T5, 2026-10-05, 2026-10-21
+  T6 Maquettes UI bilingues :crit, active, T6, 2026-10-12, 2026-10-24
+  T7 Conception sécurité et RGPD :active, T7, 2026-10-19, 2026-10-24
+  section P3 Développement
+  T8 Pipeline d’ingestion et embeddings :crit, active, T8, 2026-10-21, 2026-11-04
+  T9 Orchestration RAG et LLM :crit, T9, 2026-11-04, 2026-11-21
+  T10 API back-end et limitation de débit :active, T10, 2026-10-19, 2026-11-07
+  T11 Interface de chat FR/EN :crit, T11, 2026-10-26, 2026-11-21
+  T12 Détection de langue et i18n :T12, 2026-11-09, 2026-11-19
+  T13 Panneau d’administration :T13, 2026-11-23, 2026-12-03
+  section P4 Tests et recette
+  T14 Tests unitaires et d’intégration :crit, T14, 2026-11-23, 2026-12-03
+  T15 Tests de sécurité (OWASP, injection) :crit, T15, 2026-11-23, 2026-12-05
+  T16 Évaluation qualité des réponses :T16, 2026-11-23, 2026-12-04
+  T17 Recette utilisateurs :crit, T17, 2026-12-03, 2026-12-09
+  section P5 Déploiement
+  T18 Déploiement, CI/CD, monitoring :crit, T18, 2026-12-07, 2026-12-12
+  T19 Formation et guides :crit, T19, 2026-12-09, 2026-12-12
+  section P6 Clôture
+  T20 Rapport final et soutenance :crit, T20, 2026-12-14, 2026-12-19
+  section Jalons
+  M1 Cahier des charges validé :milestone, M1, 2026-10-09, 0d
+  M2 Gel de la conception :milestone, M2, 2026-10-23, 0d
+  M3 MVP :milestone, M3, 2026-11-20, 0d
+  M4 Recette validée :milestone, M4, 2026-12-08, 0d
+  M5 Mise en production :milestone, M5, 2026-12-11, 0d
+  M6 Soutenance :milestone, M6, 2026-12-18, 0d

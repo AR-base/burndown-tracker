@@ -1,0 +1,489 @@
+(() => {
+'use strict';
+const C = Core, $ = id => document.getElementById(id);
+const STORE = 'burndown-tracker-v1';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const I18N = {
+  fr: {
+    eyebrow: 'Suivi de projet', tabBurndown: 'Burndown', tabGantt: 'Gantt', tabTasks: 'Tâches', tabProject: 'Projet',
+    on: 'Dans les temps', risk: 'À risque', late: 'En retard',
+    kRemaining: 'Reste à faire', kDone: 'pts terminés sur', kEarned: 'Avancement acquis', kPlanned: 'prévu', kVelocity: 'Vélocité',
+    kRequired: 'requise', kSpi: 'SPI (délai)', kSpiS: 'valeur acquise ÷ planifiée', kForecast: 'Fin prévue', kPlannedEnd: 'fin planifiée', kCritical: 'Chemin critique', kTasks: 'tâches',
+    perWeek: 'pts/sem', none: '—', noVelocity: 'pas encore de vélocité',
+    bdTitle: 'Burndown (points restants)', ideal: 'Idéal', actual: 'Réel', forecastL: 'Projection', today: "Aujourd'hui", milestone: 'Jalon',
+    focus: 'À surveiller', lateTasks: 'En retard', inProgress: 'En cours', nextUp: 'À venir (14 jours)', nothing: 'Rien à signaler',
+    summary: 'Gantt synthétique', master: 'Gantt maître', showDeps: 'Dépendances', showCrit: 'Chemin critique',
+    milestones: 'Jalons', phase: 'Phase', owner: 'Responsable', points: 'Points', nameFr: 'Nom (FR)', nameEn: 'Nom (EN)',
+    start: 'Début', end: 'Fin', progress: 'Avancement', doneDate: 'Terminée le', deps: 'Dépend de (IDs séparés par des virgules)',
+    addTask: 'Ajouter une tâche', editTask: 'Modifier', saveTask: 'Enregistrer la tâche', addBtn: 'Ajouter', cancel: 'Annuler',
+    edHint: 'Fin-à-début : une tâche commence après ses prédécesseurs.', taskList: 'Tâches', status: 'Statut', task: 'Tâche',
+    sDone: 'Terminée', sLate: 'En retard', sInprog: 'En cours', sTodo: 'À faire', markDone: 'Terminer', edit: 'Modifier', del: 'Supprimer', confirmDel: 'Confirmer ?',
+    projSettings: 'Paramètres du projet', savedLocal: 'Enregistré dans ce navigateur', projName: 'Nom du projet', projCode: 'Code',
+    statusDate: "Date d'état (vide = aujourd'hui)", workingDays: 'Ligne idéale sur jours ouvrés (week-ends exclus)', save: 'Enregistrer',
+    phases: 'Phases', addPhase: 'Ajouter une phase', addMs: 'Ajouter un jalon', remove: 'Retirer',
+    dataTitle: 'Importer un Gantt / exporter', dataHint: "Chargez n'importe quel projet : collez ou choisissez un Gantt en CSV (Excel, Google Sheets, MS Project, GanttProject — séparateur ; ou , et dates JJ/MM/AAAA acceptés), un Gantt Mermaid, ou un JSON exporté ici. Le format est détecté automatiquement.",
+    boxLabel: 'Gantt à importer (CSV, Mermaid ou JSON)', template: 'Modèle CSV', exportAs: 'Exporter :', importGantt: 'Importer un Gantt',
+    eCsvCols: 'CSV : colonnes obligatoires introuvables (nom de tâche, début, fin).', eNoTasks: 'Aucune tâche lisible dans ce Gantt.', eMermaid: 'Gantt Mermaid illisible : la première ligne doit être « gantt ».', eSize: 'Fichier trop volumineux (2 Mo max).',
+    importedN: 'Importé : ', fmtJson: 'JSON', fmtCsv: 'CSV', fmtMermaid: 'Mermaid',
+    copy: 'Copier', import: 'Importer', importFile: 'Choisir un fichier…', loadSample: 'Charger l’exemple ESAIP', newBlank: 'Nouveau projet vide',
+    copied: 'Copié.', copyFail: 'Copie refusée : le texte est sélectionné, utilisez Ctrl+C.', imported: 'Projet importé.', saved: 'Enregistré.',
+    sure: 'Cliquez encore pour confirmer', week: 'S',
+    eBadJson: 'JSON illisible : vérifiez les accolades et les guillemets.', eInvalid: 'Projet refusé, champs invalides : ',
+    eId: 'ID : lettres, chiffres, _ ou -, 16 caractères max.', eIdTaken: 'Cet ID existe déjà.', eName: 'Le nom (FR) est obligatoire.',
+    eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
+    eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
+    fsWarn: 'Attention : commence avant la fin de ', blankName: 'Nouveau projet', pts: 'pts', d: 'j',
+  },
+  en: {
+    eyebrow: 'Project tracking', tabBurndown: 'Burndown', tabGantt: 'Gantt', tabTasks: 'Tasks', tabProject: 'Project',
+    on: 'On track', risk: 'At risk', late: 'Late',
+    kRemaining: 'Remaining', kDone: 'pts done of', kEarned: 'Earned progress', kPlanned: 'planned', kVelocity: 'Velocity',
+    kRequired: 'required', kSpi: 'SPI (schedule)', kSpiS: 'earned ÷ planned value', kForecast: 'Forecast finish', kPlannedEnd: 'planned end', kCritical: 'Critical path', kTasks: 'tasks',
+    perWeek: 'pts/wk', none: '—', noVelocity: 'no velocity yet',
+    bdTitle: 'Burndown (points remaining)', ideal: 'Ideal', actual: 'Actual', forecastL: 'Projection', today: 'Today', milestone: 'Milestone',
+    focus: 'Watch list', lateTasks: 'Late', inProgress: 'In progress', nextUp: 'Starting soon (14 days)', nothing: 'Nothing to flag',
+    summary: 'Summary Gantt', master: 'Master Gantt', showDeps: 'Dependencies', showCrit: 'Critical path',
+    milestones: 'Milestones', phase: 'Phase', owner: 'Owner', points: 'Points', nameFr: 'Name (FR)', nameEn: 'Name (EN)',
+    start: 'Start', end: 'End', progress: 'Progress', doneDate: 'Completed on', deps: 'Depends on (comma-separated IDs)',
+    addTask: 'Add a task', editTask: 'Edit', saveTask: 'Save task', addBtn: 'Add', cancel: 'Cancel',
+    edHint: 'Finish-to-start: a task starts after its predecessors end.', taskList: 'Tasks', status: 'Status', task: 'Task',
+    sDone: 'Done', sLate: 'Late', sInprog: 'In progress', sTodo: 'To do', markDone: 'Complete', edit: 'Edit', del: 'Delete', confirmDel: 'Confirm?',
+    projSettings: 'Project settings', savedLocal: 'Saved in this browser', projName: 'Project name', projCode: 'Code',
+    statusDate: 'Status date (blank = today)', workingDays: 'Ideal line on working days (weekends excluded)', save: 'Save',
+    phases: 'Phases', addPhase: 'Add a phase', addMs: 'Add a milestone', remove: 'Remove',
+    dataTitle: 'Import a Gantt / export', dataHint: 'Load any project: paste or pick a Gantt as CSV (Excel, Google Sheets, MS Project, GanttProject; ; or , separators and DD/MM/YYYY dates accepted), a Mermaid gantt, or a JSON exported from here. The format is detected automatically.',
+    boxLabel: 'Gantt to import (CSV, Mermaid or JSON)', template: 'CSV template', exportAs: 'Export:', importGantt: 'Import a Gantt',
+    eCsvCols: 'CSV: required columns not found (task name, start, end).', eNoTasks: 'No readable tasks in this Gantt.', eMermaid: 'Unreadable Mermaid gantt: the first line must be "gantt".', eSize: 'File too large (2 MB max).',
+    importedN: 'Imported: ', fmtJson: 'JSON', fmtCsv: 'CSV', fmtMermaid: 'Mermaid',
+    copy: 'Copy', import: 'Import', importFile: 'Choose a file…', loadSample: 'Load the ESAIP sample', newBlank: 'New blank project',
+    copied: 'Copied.', copyFail: 'Copy blocked: the text is selected, press Ctrl+C.', imported: 'Project imported.', saved: 'Saved.',
+    sure: 'Click again to confirm', week: 'W',
+    eBadJson: 'Unreadable JSON: check braces and quotes.', eInvalid: 'Project rejected, invalid fields: ',
+    eId: 'ID: letters, digits, _ or -, 16 characters max.', eIdTaken: 'That ID already exists.', eName: 'Name (FR) is required.',
+    eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
+    eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
+    fsWarn: 'Warning: starts before the end of ', blankName: 'New project', pts: 'pts', d: 'd',
+  }
+};
+
+/* ---------- state ---------- */
+const load = () => { try { return JSON.parse(localStorage.getItem(STORE) || 'null'); } catch { return null; } };
+const persist = () => { try { localStorage.setItem(STORE, JSON.stringify({ project: P, ui: UI })); } catch { /* storage unavailable: session-only */ } };
+const saved = load();
+let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
+const UI = Object.assign({ lang: 'fr', tab: 'burndown', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
+let editing = null;
+const t = k => I18N[UI.lang][k] ?? k;
+const nm = o => (UI.lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
+const todayT = () => { const d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); };
+const nowT = () => C.statusTime(P, todayT());
+const dLabel = (tm, long) => new Date(tm).toLocaleDateString(UI.lang === 'fr' ? 'fr-FR' : 'en-GB', long ? { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' } : { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+const isoWeek = tm => { const d = new Date(tm); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day + 3); const f = new Date(Date.UTC(d.getUTCFullYear(), 0, 4)); return 1 + Math.round(((d - f) / C.DAY - 3 + ((f.getUTCDay() + 6) % 7)) / 7); };
+const phaseOf = id => P.phases.find(p => p.id === id) || { id: '', fr: '—', en: '—', color: '#8f9bb0' };
+function taskStatus(k, now) {
+  if (k.done) return 'done';
+  if (C.parseDate(k.end) < now) return 'late';
+  if (C.parseDate(k.start) <= now) return 'inprog';
+  return 'todo';
+}
+const statusKey = { done: 'sDone', late: 'sLate', inprog: 'sInprog', todo: 'sTodo' };
+
+/* ---------- chrome ---------- */
+function renderChrome() {
+  document.documentElement.lang = UI.lang;
+  document.querySelectorAll('[data-i]').forEach(el => { el.textContent = t(el.dataset.i); });
+  $('eyebrow').textContent = t('eyebrow') + (P.code ? ' · ' + P.code : '');
+  $('pName').textContent = P.name;
+  $('pMeta').textContent = `${dLabel(C.parseDate(P.start), true)} → ${dLabel(C.parseDate(P.end), true)} · ${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
+  ['fr', 'en'].forEach(l => $('lang-' + l).setAttribute('aria-pressed', UI.lang === l));
+  const tabs = [['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['project', 'tabProject']];
+  $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
+  tabs.forEach(([id]) => { $('tab-' + id).hidden = UI.tab !== id; });
+  $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
+  $('g-summary').setAttribute('aria-pressed', UI.gMode === 'summary'); $('g-master').setAttribute('aria-pressed', UI.gMode === 'master');
+  document.querySelectorAll('#gZoom button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.z === UI.zoom));
+  $('optDeps').checked = UI.deps; $('optCrit').checked = UI.crit;
+}
+
+function renderKpis() {
+  const b = C.burndown(P, todayT()), h = C.health(P, todayT()), cp = C.criticalPath(P);
+  const end = C.parseDate(P.end);
+  const st = $('pStatus'); st.className = 'pill st-' + h.status; st.textContent = t(h.status);
+  const fcLate = b.forecast !== null && b.forecast > end;
+  const slip = b.forecast !== null ? C.diffDays(end, b.forecast) : null;
+  const pct = x => Math.round(x * 100) + '%';
+  $('kpis').innerHTML = `
+    <div class="kpi"><div class="k">${esc(t('kRemaining'))}</div><div class="v">${Math.round(b.remaining)} <small>${esc(t('pts'))}</small></div>
+      <div class="s">${b.done} ${esc(t('kDone'))} ${b.total}</div><div class="meter"><i style="width:${b.total ? b.done / b.total * 100 : 0}%"></i></div></div>
+    <div class="kpi"><div class="k">${esc(t('kEarned'))}</div><div class="v">${pct(h.pctEarned)}</div>
+      <div class="s">${pct(h.pctPlanned)} ${esc(t('kPlanned'))}</div><div class="meter"><i style="width:${h.pctEarned * 100}%"></i></div></div>
+    <div class="kpi"><div class="k">${esc(t('kVelocity'))}</div><div class="v">${b.velocityWeek.toFixed(1)} <small>${esc(t('perWeek'))}</small></div>
+      <div class="s" style="color:${b.velocityWeek + 0.05 < b.requiredWeek ? 'var(--warn)' : 'var(--muted)'}">${b.requiredWeek.toFixed(1)} ${esc(t('perWeek'))} ${esc(t('kRequired'))}</div></div>
+    <div class="kpi"><div class="k">${esc(t('kSpi'))}</div><div class="v" style="color:var(--${h.status === 'on' ? 'good' : h.status === 'risk' ? 'warn' : 'bad'})">${h.spi.toFixed(2)}</div><div class="s">${esc(t('kSpiS'))}</div></div>
+    <div class="kpi"><div class="k">${esc(t('kForecast'))}</div><div class="v" style="font-size:19px;${fcLate ? 'color:var(--bad)' : ''}">${b.forecast !== null ? esc(dLabel(b.forecast, true)) : esc(t('none'))}</div>
+      <div class="s">${b.forecast !== null ? `${slip > 0 ? '+' : ''}${slip} ${esc(t('d'))} · ` : esc(t('noVelocity')) + ' · '}${esc(t('kPlannedEnd'))} ${esc(dLabel(end))}</div></div>
+    <div class="kpi"><div class="k">${esc(t('kCritical'))}</div><div class="v">${cp.critical.size} <small>${esc(t('kTasks'))}</small></div>
+      <div class="s mono">${esc([...cp.critical].filter(id => !P.tasks.find(k => k.id === id).done).slice(0, 6).join(' → ') || t('none'))}</div></div>`;
+}
+
+/* ---------- burndown chart ---------- */
+function renderBurndown() {
+  const box = $('bdBox'), tip = $('bdTip');
+  box.querySelectorAll('svg').forEach(s => s.remove());
+  const b = C.burndown(P, todayT());
+  const s = C.parseDate(P.start), e = C.parseDate(P.end);
+  const xEnd = b.forecast !== null && b.forecast > e ? Math.min(b.forecast, C.addDays(e, 60)) : e;
+  const W = 820, H = 380, m = { l: 48, r: 20, t: 28, b: 52 };
+  const X = tm => m.l + (tm - s) / (xEnd - s) * (W - m.l - m.r);
+  const ymax = Math.max(1, b.total) * 1.06;
+  const Y = v => m.t + (1 - v / ymax) * (H - m.t - m.b);
+  const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500].find(x => ymax / x <= 6) || 1000;
+  let g = '';
+  for (let v = 0; v <= ymax; v += step) g += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${v}</text>`;
+  // weekly x ticks (Mondays)
+  let mon = s; while (new Date(mon).getUTCDay() !== 1) mon = C.addDays(mon, 1);
+  const wkStep = Math.ceil(((xEnd - s) / C.DAY / 7) / 12);
+  for (let tm = mon, i = 0; tm <= xEnd; tm = C.addDays(tm, 7), i++) {
+    if (i % wkStep) continue;
+    g += `<line x1="${X(tm)}" x2="${X(tm)}" y1="${H - m.b}" y2="${H - m.b + 5}" stroke="var(--line)"/><text x="${X(tm)}" y="${H - m.b + 18}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(dLabel(tm))}</text>`;
+  }
+  g += `<line x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}" stroke="var(--line)"/>`;
+  if (xEnd > e) g += `<rect x="${X(e)}" y="${m.t}" width="${X(xEnd) - X(e)}" height="${H - m.t - m.b}" fill="var(--bad-soft)"/>`;
+  // milestones on axis
+  P.milestones.forEach(ms => { const tm = C.parseDate(ms.date); if (tm < s || tm > xEnd) return;
+    g += `<path d="M${X(tm)} ${H - m.b + 26}l5 5l-5 5l-5 -5z" fill="var(--ink)"><title>${esc(ms.id + ' · ' + nm(ms) + ' · ' + dLabel(tm, true))}</title></path>`; });
+  // ideal
+  g += `<polyline fill="none" stroke="var(--ideal)" stroke-width="1.6" stroke-dasharray="5 4" points="${b.ideal.map(p => `${X(p.t).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ')}"/>`;
+  // actual (step) + area
+  if (b.actual.length) {
+    let d = `M${X(b.actual[0].t)} ${Y(b.actual[0].v)}`;
+    b.actual.forEach((p, i) => { if (i) d += `H${X(p.t).toFixed(1)}V${Y(p.v).toFixed(1)}`; });
+    const last = b.actual.at(-1);
+    g += `<path d="${d}V${H - m.b}H${X(b.actual[0].t)}Z" fill="var(--accent-soft)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round"/>`;
+    if (b.forecast !== null && b.remaining > 0) {
+      const fx = Math.min(b.forecast, xEnd), fv = b.remaining * (1 - (fx - last.t) / (b.forecast - last.t || 1));
+      g += `<line x1="${X(last.t)}" y1="${Y(last.v)}" x2="${X(fx)}" y2="${Y(fv)}" stroke="var(--${b.forecast > e ? 'bad' : 'good'})" stroke-width="1.8" stroke-dasharray="2 4" stroke-linecap="round"/>`;
+    }
+    g += `<circle cx="${X(last.t)}" cy="${Y(last.v)}" r="4.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.4"/>
+      <text x="${X(last.t) + 9}" y="${Y(last.v) - 9}" font-size="12" font-weight="600" fill="var(--ink)" font-family="var(--f-mono)">${Math.round(last.v)}</text>`;
+  }
+  // today
+  const nt = b.now;
+  if (nt >= s && nt <= xEnd) g += `<line x1="${X(nt)}" x2="${X(nt)}" y1="${m.t - 8}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".55"/><text x="${X(nt)}" y="${m.t - 12}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(t('today').toUpperCase())}</text>`;
+  g += `<rect id="bdHit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
+  g += `<line id="bdCursor" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" visibility="hidden"/>`;
+  box.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('bdTitle'))}">${g}</svg>`);
+  $('bdLegend').innerHTML = `<span><i class="sw" style="border-color:var(--accent);border-top-width:3px"></i>${esc(t('actual'))}</span><span><i class="sw" style="border-color:var(--ideal);border-top-style:dashed"></i>${esc(t('ideal'))}</span><span><i class="sw" style="border-color:var(--${b.forecast !== null && b.forecast > e ? 'bad' : 'good'});border-top-style:dotted"></i>${esc(t('forecastL'))}</span><span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
+  const svg = box.querySelector('svg'), hit = svg.querySelector('#bdHit'), cur = svg.querySelector('#bdCursor');
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W;
+    const tm = C.addDays(s, Math.round((sx - m.l) / (W - m.l - m.r) * (xEnd - s) / C.DAY));
+    if (tm < s || tm > xEnd) return;
+    const a = b.actual.find(p => p.t === tm);
+    cur.setAttribute('x1', X(tm)); cur.setAttribute('x2', X(tm)); cur.setAttribute('visibility', 'visible');
+    tip.hidden = false; tip.style.left = (X(tm) / W * r.width) + 'px'; tip.style.top = (m.t / H * r.height + 20) + 'px';
+    tip.textContent = `${dLabel(tm, true)} · ${t('ideal')} ${Math.round(C.idealAt(P, tm))}${a ? ` · ${t('actual')} ${a.v}` : ''}`;
+  };
+  hit.addEventListener('pointermove', move);
+  hit.addEventListener('pointerleave', () => { tip.hidden = true; cur.setAttribute('visibility', 'hidden'); });
+}
+
+function renderFocus() {
+  const now = nowT(), soon = C.addDays(now, 14);
+  const late = P.tasks.filter(k => taskStatus(k, now) === 'late');
+  const prog = P.tasks.filter(k => taskStatus(k, now) === 'inprog');
+  const next = P.tasks.filter(k => !k.done && C.parseDate(k.start) > now && C.parseDate(k.start) <= soon);
+  const li = (k, extra) => `<li><span class="tid">${esc(k.id)}</span><span>${esc(nm(k))}<br><span class="hint">${esc(k.owner || '')} · ${esc(dLabel(C.parseDate(k.start)))} → ${esc(dLabel(C.parseDate(k.end)))}</span></span>${extra}</li>`;
+  const block = (title, arr, fn) => `<p class="sec-t">${esc(title)} · ${arr.length}</p>${arr.length ? `<ul class="mini">${arr.map(fn).join('')}</ul>` : `<p class="hint">${esc(t('nothing'))}</p>`}`;
+  $('focus').innerHTML =
+    block(t('lateTasks'), late, k => li(k, `<span class="chip c-late">+${C.diffDays(C.parseDate(k.end), now)} ${esc(t('d'))}</span>`)) +
+    block(t('inProgress'), prog, k => li(k, `<span class="pbar" title="${k.progress}%"><i style="width:${k.progress}%;background:var(--accent)"></i></span>`)) +
+    block(t('nextUp'), next, k => li(k, `<span class="num hint">${k.points} ${esc(t('pts'))}</span>`));
+}
+
+/* ---------- gantt ---------- */
+function renderGantt() {
+  const now = nowT(), cp = C.criticalPath(P);
+  const allDates = [C.parseDate(P.start), C.parseDate(P.end), ...P.tasks.flatMap(k => [C.parseDate(k.start), C.parseDate(k.end)]), ...P.milestones.map(m => C.parseDate(m.date))];
+  let s = Math.min(...allDates), e = Math.max(...allDates);
+  while (new Date(s).getUTCDay() !== 1) s = C.addDays(s, -1);
+  e = C.addDays(e, 3);
+  const dw = UI.zoom, days = C.diffDays(s, e) + 1, W = days * dw, RH = 30, HEAD = 46;
+  const X = tm => C.diffDays(s, tm) * dw;
+  const rows = [];
+  rows.push({ kind: 'ms' });
+  if (UI.gMode === 'summary') C.phaseSpans(P).filter(p => p.start).forEach(p => rows.push({ kind: 'phase', p }));
+  else P.phases.forEach(ph => {
+    const sp = C.phaseSpans(P).find(x => x.id === ph.id);
+    if (!sp.start) return;
+    rows.push({ kind: 'phaseHead', p: sp });
+    P.tasks.filter(k => k.phase === ph.id).forEach(k => rows.push({ kind: 'task', k }));
+  });
+  const orphan = P.tasks.filter(k => !P.phases.some(p => p.id === k.phase));
+  if (UI.gMode === 'master') orphan.forEach(k => rows.push({ kind: 'task', k }));
+  const H = HEAD + rows.length * RH + 8;
+  const rowY = new Map();
+  let L = '', R = '';
+  // header: months + weeks
+  R += `<rect x="0" y="0" width="${W}" height="${HEAD}" fill="var(--sunk)"/>`;
+  for (let tm = s; tm <= e; tm = C.addDays(tm, 1)) {
+    const d = new Date(tm);
+    if (C.isWeekend(tm) && dw >= 8) R += `<rect x="${X(tm)}" y="${HEAD}" width="${dw}" height="${H - HEAD}" fill="var(--grid)" opacity=".55"/>`;
+    if (d.getUTCDate() === 1 || tm === s) {
+      R += `<line x1="${X(tm)}" x2="${X(tm)}" y1="0" y2="22" stroke="var(--line)"/><text x="${X(tm) + 6}" y="15" font-size="11.5" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(d.toLocaleDateString(UI.lang === 'fr' ? 'fr-FR' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).toUpperCase())}</text>`;
+    }
+    if (d.getUTCDay() === 1) {
+      R += `<line x1="${X(tm)}" x2="${X(tm)}" y1="22" y2="${H}" stroke="var(--line)" opacity=".7"/>`;
+      if (dw * 7 >= 44) R += `<text x="${X(tm) + 5}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${esc(t('week'))}${isoWeek(tm)} · ${esc(dLabel(tm))}</text>`;
+      else R += `<text x="${X(tm) + 3}" y="38" font-size="10.5" fill="var(--muted)" font-family="var(--f-mono)">${isoWeek(tm)}</text>`;
+    }
+  }
+  R += `<line x1="0" x2="${W}" y1="22" y2="22" stroke="var(--line)"/><line x1="0" x2="${W}" y1="${HEAD}" y2="${HEAD}" stroke="var(--line)"/>`;
+  L += `<rect x="0" y="0" width="400" height="${HEAD}" fill="var(--sunk)"/><line x1="0" x2="400" y1="${HEAD}" y2="${HEAD}" stroke="var(--line)"/>
+    <text x="12" y="30" font-size="11.5" font-weight="600" fill="var(--muted)" font-family="var(--f-display)" letter-spacing=".08em">${esc((UI.gMode === 'summary' ? t('phase') : t('task')).toUpperCase())}</text>`;
+  rows.forEach((r, i) => {
+    const y = HEAD + i * RH, cy = y + RH / 2;
+    const zebra = r.kind === 'phaseHead' ? `<rect x="0" y="${y}" width="%W%" height="${RH}" fill="var(--sunk)"/>` : '';
+    R += zebra.replace('%W%', W); L += zebra.replace('%W%', 400);
+    R += `<line x1="0" x2="${W}" y1="${y + RH}" y2="${y + RH}" stroke="var(--grid)"/>`;
+    L += `<line x1="0" x2="400" y1="${y + RH}" y2="${y + RH}" stroke="var(--grid)"/>`;
+    if (r.kind === 'ms') {
+      L += `<text x="12" y="${cy + 4}" font-size="12.5" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(t('milestones'))}</text>`;
+      P.milestones.forEach(ms => { const x = X(C.parseDate(ms.date)) + dw / 2;
+        R += `<g><path d="M${x} ${cy - 8}l8 8l-8 8l-8 -8z" fill="var(--ink)"/><title>${esc(ms.id + ' · ' + nm(ms) + ' · ' + dLabel(C.parseDate(ms.date), true))}</title></g><text x="${x + 11}" y="${cy + 4}" font-size="10.5" font-weight="600" fill="var(--muted)" font-family="var(--f-mono)">${esc(ms.id)}</text>`; });
+      return;
+    }
+    if (r.kind === 'phase' || r.kind === 'phaseHead') {
+      const p = r.p, x1 = X(C.parseDate(p.start)), x2 = X(C.parseDate(p.end)) + dw, big = r.kind === 'phase';
+      L += `<rect x="10" y="${cy - 5}" width="10" height="10" rx="2" fill="${esc(p.color)}"/><text x="28" y="${cy + 4}" font-size="${big ? 13 : 12.5}" font-weight="600" fill="var(--ink)" font-family="var(--f-display)">${esc(p.id + ' · ' + nm(p))}</text>`;
+      if (big) {
+        L += `<text x="392" y="${cy + 4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${Math.round(p.progress * 100)}%</text>`;
+        R += `<rect x="${x1}" y="${cy - 9}" width="${x2 - x1}" height="18" rx="4" fill="${esc(p.color)}" fill-opacity=".2" stroke="${esc(p.color)}"/><rect x="${x1}" y="${cy - 9}" width="${(x2 - x1) * p.progress}" height="18" rx="4" fill="${esc(p.color)}"/>
+          <text x="${x2 + 8}" y="${cy + 4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(dLabel(C.parseDate(p.start)))}–${esc(dLabel(C.parseDate(p.end)))} · ${p.points} ${esc(t('pts'))}</text>`;
+      } else {
+        R += `<path d="M${x1} ${cy + 6}V${cy - 4}H${x2}V${cy + 6}" fill="none" stroke="${esc(p.color)}" stroke-width="2"/><rect x="${x1}" y="${cy - 4}" width="${(x2 - x1) * p.progress}" height="4" fill="${esc(p.color)}"/>`;
+      }
+      return;
+    }
+    const k = r.k, ph = phaseOf(k.phase), x1 = X(C.parseDate(k.start)), x2 = X(C.parseDate(k.end)) + dw;
+    const st = taskStatus(k, now), crit = UI.crit && cp.critical.has(k.id);
+    rowY.set(k.id, { cy, x1, x2 });
+    L += `<text x="12" y="${cy + 4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(k.id)}</text><text x="52" y="${cy + 4}" font-size="12.5" fill="var(--ink)">${esc(nm(k).length > 38 ? nm(k).slice(0, 37) + '…' : nm(k))}<title>${esc(nm(k))}</title></text>`;
+    R += `<g><title>${esc(`${k.id} · ${nm(k)}\n${dLabel(C.parseDate(k.start), true)} → ${dLabel(C.parseDate(k.end), true)}\n${k.owner} · ${k.points} ${t('pts')} · ${k.progress}% · ${t(statusKey[st])}`)}</title>
+      <rect x="${x1}" y="${cy - 8}" width="${x2 - x1}" height="16" rx="3" fill="${esc(ph.color)}" fill-opacity=".22" stroke="${crit ? 'var(--bad)' : esc(ph.color)}" stroke-width="${crit ? 2 : 1}"/>
+      <rect x="${x1}" y="${cy - 8}" width="${(x2 - x1) * k.progress / 100}" height="16" rx="3" fill="${esc(ph.color)}"/></g>
+      <text x="${x2 + 6}" y="${cy + 4}" font-size="10.5" fill="${st === 'late' ? 'var(--bad)' : 'var(--muted)'}" font-family="var(--f-mono)">${esc(k.owner)}${k.owner ? ' · ' : ''}${k.points}${st === 'late' ? ' · !' : ''}</text>`;
+  });
+  if (UI.gMode === 'master' && UI.deps) {
+    let dp = '';
+    P.tasks.forEach(k => k.deps.forEach(d => {
+      const a = rowY.get(d), b2 = rowY.get(k.id); if (!a || !b2) return;
+      const crit = UI.crit && cp.critical.has(k.id) && cp.critical.has(d);
+      const midX = Math.max(a.x2 + 4, Math.min(b2.x1 - 6, a.x2 + 10));
+      dp += `<path d="M${a.x2} ${a.cy}H${midX}V${b2.cy}H${b2.x1 - 1}" fill="none" stroke="${crit ? 'var(--bad)' : 'var(--muted)'}" stroke-opacity="${crit ? .9 : .5}" stroke-width="1.1" marker-end="url(#arr${crit ? 'C' : ''})"/>`;
+    }));
+    R = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker><marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--bad)"/></marker></defs>` + R + dp;
+  }
+  if (now >= s && now <= e) R += `<line x1="${X(now) + dw / 2}" x2="${X(now) + dw / 2}" y1="${HEAD - 6}" y2="${H}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${X(now) + dw / 2 - 30}" y="${HEAD - 14}" width="60" height="14" rx="3" fill="var(--accent)"/><text x="${X(now) + dw / 2}" y="${HEAD - 4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff" font-family="var(--f-display)" letter-spacing=".06em">${esc(t('today').toUpperCase())}</text>`;
+  $('gLeft').innerHTML = `<svg width="400" height="${H}" viewBox="0 0 400 ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${L}</svg>`;
+  $('gRight').innerHTML = `<svg width="${W + 140}" height="${H}" viewBox="0 0 ${W + 140} ${H}" role="img" aria-label="${esc(t(UI.gMode))}">${R}</svg>`;
+  $('gLegend').innerHTML = P.phases.map(p => `<span><svg width="12" height="12" viewBox="0 0 12 12"><rect width="12" height="12" rx="2" fill="${esc(p.color)}"/></svg>${esc(p.id + ' ' + nm(p))}</span>`).join('') +
+    (UI.crit ? `<span><svg width="18" height="12" viewBox="0 0 18 12"><rect x="1" y="1" width="16" height="10" rx="2" fill="none" stroke="var(--bad)" stroke-width="2"/></svg>${esc(t('showCrit'))}</span>` : '') +
+    `<span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l5 5l-5 5l-5-5z" fill="var(--ink)"/></svg>${esc(t('milestone'))}</span>`;
+}
+
+/* ---------- tasks ---------- */
+function renderTasks() {
+  const now = nowT(), cp = C.criticalPath(P);
+  $('taskCount').textContent = `${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
+  $('tf-phase').innerHTML = P.phases.map(p => `<option value="${esc(p.id)}">${esc(p.id + ' · ' + nm(p))}</option>`).join('');
+  $('edTitle').textContent = editing ? `${t('editTask')} ${editing}` : t('addTask');
+  $('tfSave').textContent = editing ? t('saveTask') : t('addBtn');
+  $('tfCancel').hidden = !editing;
+  let rows = '';
+  const groups = [...P.phases.map(p => ({ p, ts: P.tasks.filter(k => k.phase === p.id) })), { p: null, ts: P.tasks.filter(k => !P.phases.some(p => p.id === k.phase)) }];
+  groups.forEach(({ p, ts }) => {
+    if (!ts.length) return;
+    if (p) rows += `<tr class="phase-row"><td colspan="9"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${esc(p.color)};margin-right:8px"></span>${esc(p.id + ' · ' + nm(p))}</td></tr>`;
+    ts.forEach(k => {
+      const st = taskStatus(k, now);
+      rows += `<tr><td class="tid">${esc(k.id)}${cp.critical.has(k.id) ? ' <span title="' + esc(t('showCrit')) + '" style="color:var(--bad)">●</span>' : ''}</td>
+        <td style="min-width:220px">${esc(nm(k))}${k.deps.length ? `<br><span class="hint mono">← ${esc(k.deps.join(', '))}</span>` : ''}</td>
+        <td>${esc(k.owner)}</td><td class="num">${esc(dLabel(C.parseDate(k.start)))}</td><td class="num">${esc(dLabel(C.parseDate(k.end)))}</td>
+        <td class="r num">${k.points}</td>
+        <td><span class="pbar"><i style="width:${k.progress}%;background:${esc(phaseOf(k.phase).color)}"></i></span> <span class="num hint">${k.progress}%</span></td>
+        <td><span class="chip c-${st}">${esc(t(statusKey[st]))}</span></td>
+        <td><div class="row-actions">${k.done ? '' : `<button class="btn sm" type="button" data-act="done" data-id="${esc(k.id)}">${esc(t('markDone'))}</button>`}
+          <button class="btn sm" type="button" data-act="edit" data-id="${esc(k.id)}">${esc(t('edit'))}</button>
+          <button class="btn sm danger" type="button" data-act="del" data-id="${esc(k.id)}">${esc(t('del'))}</button></div></td></tr>`;
+    });
+  });
+  $('taskTable').innerHTML = `<thead><tr><th>ID</th><th>${esc(t('task'))}</th><th>${esc(t('owner'))}</th><th>${esc(t('start'))}</th><th>${esc(t('end'))}</th><th class="r">${esc(t('points'))}</th><th>${esc(t('progress'))}</th><th>${esc(t('status'))}</th><th></th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+function fillForm(k) {
+  editing = k ? k.id : null;
+  $('tf-id').value = k ? k.id : nextId('T', P.tasks);
+  $('tf-id').readOnly = !!k;
+  $('tf-phase').value = k ? k.phase : (P.phases[0] ? P.phases[0].id : '');
+  $('tf-owner').value = k ? k.owner : '';
+  $('tf-points').value = k ? k.points : 3;
+  $('tf-fr').value = k ? k.fr : ''; $('tf-en').value = k ? k.en : '';
+  $('tf-start').value = k ? k.start : C.fmt(nowT()); $('tf-end').value = k ? k.end : C.fmt(C.addDays(nowT(), 4));
+  $('tf-progress').value = k ? k.progress : 0; $('tf-pv').textContent = $('tf-progress').value + '%';
+  $('tf-done').value = k ? k.done : ''; $('tf-deps').value = k ? k.deps.join(', ') : '';
+  $('tfErr').textContent = '';
+  renderTasks();
+}
+function nextId(prefix, list) { let n = list.length + 1; while (list.some(x => x.id === prefix + n)) n++; return prefix + n; }
+
+$('tf-progress').addEventListener('input', () => { $('tf-pv').textContent = $('tf-progress').value + '%'; });
+$('taskForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const err = m => { $('tfErr').textContent = m; $('tfErr').className = 'err'; };
+  const id = $('tf-id').value.trim();
+  if (!/^[A-Za-z0-9_-]{1,16}$/.test(id)) return err(t('eId'));
+  if (!editing && P.tasks.some(k => k.id === id)) return err(t('eIdTaken'));
+  if (!$('tf-fr').value.trim()) return err(t('eName'));
+  const s = C.parseDate($('tf-start').value), e = C.parseDate($('tf-end').value);
+  if (s === null || e === null || e < s) return err(t('eDates'));
+  const done = $('tf-done').value;
+  if (done && C.parseDate(done) === null) return err(t('eDoneDate'));
+  const deps = $('tf-deps').value.split(/[,;\s]+/).map(x => x.trim()).filter(Boolean);
+  const unknown = deps.filter(d => d === id || !P.tasks.some(k => k.id === d));
+  if (unknown.length) return err(t('eDeps') + unknown.join(', '));
+  if (C.createsCycle(P.tasks, id, deps)) return err(t('eCycle'));
+  const task = { id, phase: $('tf-phase').value, owner: $('tf-owner').value, points: $('tf-points').value,
+    fr: $('tf-fr').value, en: $('tf-en').value, start: $('tf-start').value, end: $('tf-end').value,
+    progress: done ? 100 : $('tf-progress').value, done, deps };
+  const list = editing ? P.tasks.map(k => k.id === editing ? task : k) : [...P.tasks, task];
+  const r = C.validateProject({ ...P, tasks: list });
+  if (!r.project || r.project.tasks.length !== list.length) return err(t('eInvalid') + r.errors.join(', '));
+  P = r.project;
+  const warn = deps.filter(d => C.parseDate(P.tasks.find(k => k.id === d).end) >= s);
+  commit();
+  fillForm(null);
+  if (warn.length) { $('tfErr').textContent = `${id} — ${t('fsWarn')}${warn.join(', ')}`; $('tfErr').className = 'err'; }
+  else { $('tfErr').textContent = t('saved'); $('tfErr').className = 'ok'; }
+});
+$('tfCancel').addEventListener('click', () => fillForm(null));
+let pendingDel = null;
+$('taskTable').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-act]'); if (!b) return;
+  const id = b.dataset.id, k = P.tasks.find(x => x.id === id); if (!k) return;
+  if (b.dataset.act === 'edit') { fillForm(k); $('taskForm').scrollIntoView?.({ behavior: 'smooth', block: 'start' }); }
+  if (b.dataset.act === 'done') { k.done = C.fmt(nowT()); k.progress = 100; commit(); }
+  if (b.dataset.act === 'del') {
+    if (pendingDel !== id) { pendingDel = id; b.textContent = t('confirmDel'); return; }
+    pendingDel = null;
+    P.tasks = P.tasks.filter(x => x.id !== id);
+    P.tasks.forEach(x => { x.deps = x.deps.filter(d => d !== id); });
+    if (editing === id) editing = null;
+    commit();
+  }
+});
+
+/* ---------- project settings ---------- */
+function renderProject() {
+  $('pf-name').value = P.name; $('pf-code').value = P.code; $('pf-start').value = P.start; $('pf-end').value = P.end;
+  $('pf-status').value = P.statusDate; $('pf-wd').checked = P.workingDays;
+  $('phaseRows').innerHTML = P.phases.map((p, i) => phaseRow(p, i)).join('');
+  $('msRows').innerHTML = P.milestones.map((m, i) => msRow(m, i)).join('');
+}
+const phaseRow = (p, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ph-id" value="${esc(p.id)}" maxlength="16"><input aria-label="FR" class="ph-fr" value="${esc(p.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ph-en" value="${esc(p.en)}" maxlength="80" placeholder="EN"><input aria-label="Color" class="ph-color" type="color" value="${esc(p.color)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
+const msRow = (m, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ms-id" value="${esc(m.id)}" maxlength="16"><input aria-label="FR" class="ms-fr" value="${esc(m.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ms-en" value="${esc(m.en)}" maxlength="80" placeholder="EN"><input aria-label="Date" class="ms-date" type="date" value="${esc(m.date)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
+['phaseRows', 'msRows'].forEach(id => $(id).addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) ev.target.closest('.edit-row').remove(); }));
+$('addPhase').addEventListener('click', () => $('phaseRows').insertAdjacentHTML('beforeend', phaseRow({ id: nextId('P', [...document.querySelectorAll('.ph-id')].map(x => ({ id: x.value }))), fr: '', en: '', color: '#4f6bed' }, 0)));
+$('addMs').addEventListener('click', () => $('msRows').insertAdjacentHTML('beforeend', msRow({ id: nextId('M', [...document.querySelectorAll('.ms-id')].map(x => ({ id: x.value }))), fr: '', en: '', date: C.fmt(nowT()) }, 0)));
+$('savePhases').addEventListener('click', () => {
+  const phases = [...document.querySelectorAll('#phaseRows .edit-row')].map(r => ({ id: r.querySelector('.ph-id').value.trim(), fr: r.querySelector('.ph-fr').value, en: r.querySelector('.ph-en').value, color: r.querySelector('.ph-color').value }));
+  const r = C.validateProject({ ...P, phases });
+  if (r.errors.some(x => x.startsWith('phase'))) { $('phErr').textContent = t('eRows'); $('phErr').className = 'err'; return; }
+  P = r.project; commit(); $('phErr').textContent = t('saved'); $('phErr').className = 'ok';
+});
+$('saveMs').addEventListener('click', () => {
+  const milestones = [...document.querySelectorAll('#msRows .edit-row')].map(r => ({ id: r.querySelector('.ms-id').value.trim(), fr: r.querySelector('.ms-fr').value, en: r.querySelector('.ms-en').value, date: r.querySelector('.ms-date').value }));
+  const r = C.validateProject({ ...P, milestones });
+  if (r.errors.some(x => x.startsWith('milestone'))) { $('msErr').textContent = t('eRows'); $('msErr').className = 'err'; return; }
+  P = r.project; commit(); $('msErr').textContent = t('saved'); $('msErr').className = 'ok';
+});
+$('projForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const r = C.validateProject({ ...P, name: $('pf-name').value, code: $('pf-code').value, start: $('pf-start').value, end: $('pf-end').value, statusDate: $('pf-status').value, workingDays: $('pf-wd').checked });
+  const bad = r.errors.filter(x => ['start', 'end', 'range', 'statusDate'].includes(x));
+  if (bad.length) { $('pfErr').textContent = bad.includes('range') ? t('eRange') : t('eDates'); $('pfErr').className = 'err'; return; }
+  P = r.project; commit(); $('pfErr').textContent = t('saved'); $('pfErr').className = 'ok';
+});
+
+/* ---------- import / export ---------- */
+const msg = (m, ok) => { $('dataMsg').textContent = m; $('dataMsg').className = ok ? 'ok' : 'err'; };
+$('btnExport').addEventListener('click', () => { $('jsonBox').value = JSON.stringify(P, null, 2); msg('', true); });
+$('btnCsv').addEventListener('click', () => { $('jsonBox').value = GanttIO.toCSV(P); msg('', true); });
+$('btnMermaid').addEventListener('click', () => { $('jsonBox').value = GanttIO.toMermaid(P, UI.lang, nowT()); msg('', true); });
+$('btnTemplate').addEventListener('click', () => { $('jsonBox').value = GanttIO.CSV_TEMPLATE; msg('', true); });
+$('gImport').addEventListener('click', () => { UI.tab = 'project'; persist(); renderChrome(); $('jsonBox').focus(); $('jsonBox').scrollIntoView?.({ behavior: 'smooth', block: 'center' }); });
+$('btnCopy').addEventListener('click', () => {
+  if (!$('jsonBox').value) $('jsonBox').value = JSON.stringify(P, null, 2);
+  const box = $('jsonBox');
+  const fallback = () => { box.focus(); box.select(); msg(t('copyFail'), false); };
+  try { navigator.clipboard.writeText(box.value).then(() => msg(t('copied'), true), fallback); } catch { fallback(); }
+});
+function importText(txt) {
+  if (txt.length > 2e6) return msg(t('eSize'), false);
+  const fmt = GanttIO.detect(txt);
+  let raw;
+  try {
+    if (fmt === 'json') raw = JSON.parse(txt);
+    else if (fmt === 'mermaid') raw = GanttIO.fromMermaid(txt);
+    else raw = GanttIO.fromCSV(txt);
+  } catch (e) {
+    const m = { 'csv-columns': 'eCsvCols', 'csv-empty': 'eCsvCols', 'no-tasks': 'eNoTasks', mermaid: 'eMermaid', size: 'eSize' }[e.message];
+    return msg(t(m || 'eBadJson'), false);
+  }
+  const r = C.validateProject(raw);
+  if (!r.project || (fmt === 'json' && !r.ok)) return msg(t('eInvalid') + r.errors.slice(0, 8).join(', '), false);
+  if (!r.project.tasks.length) return msg(t('eNoTasks'), false);
+  P = r.project; editing = null; UI.tab = 'gantt'; commit();
+  const skipped = (raw.tasks || []).length - P.tasks.length;
+  msg(`${t('importedN')}${t({ json: 'fmtJson', csv: 'fmtCsv', mermaid: 'fmtMermaid' }[fmt])} · ${P.tasks.length} ${t('kTasks')}${skipped > 0 ? ` (−${skipped})` : ''}${r.errors.includes('cycle') ? ' · ' + t('eCycle') : ''}`, true);
+}
+$('btnImport').addEventListener('click', () => importText($('jsonBox').value));
+$('fileIn').addEventListener('change', ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  if (f.size > 2e6) return msg(t('eSize'), false);
+  const rd = new FileReader(); rd.onload = () => { $('jsonBox').value = String(rd.result); importText(String(rd.result)); }; rd.readAsText(f);
+  ev.target.value = '';
+});
+let armed = null;
+const twoStep = (btn, fn) => btn.addEventListener('click', () => {
+  if (armed !== btn) { armed = btn; msg(t('sure'), false); setTimeout(() => { if (armed === btn) { armed = null; msg('', true); } }, 4000); return; }
+  armed = null; fn();
+});
+twoStep($('btnSample'), () => { P = C.validateProject(SAMPLE).project; editing = null; commit(); msg(t('imported'), true); });
+twoStep($('btnBlank'), () => {
+  const s = nowT();
+  P = C.validateProject({ name: t('blankName'), code: '', start: C.fmt(s), end: C.fmt(C.addDays(s, 56)), statusDate: '', workingDays: true,
+    phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#4f6bed' }], milestones: [], tasks: [] }).project;
+  editing = null; commit(); msg(t('saved'), true);
+});
+
+/* ---------- wiring ---------- */
+function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); if (!editing) fillFormSilent(); }
+function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
+function commit() { persist(); renderAll(); }
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
+$('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); });
+$('tabs').addEventListener('keydown', ev => {
+  if (!['ArrowRight', 'ArrowLeft'].includes(ev.key)) return;
+  const ids = ['burndown', 'gantt', 'tasks', 'project'], i = ids.indexOf(UI.tab);
+  UI.tab = ids[(i + (ev.key === 'ArrowRight' ? 1 : 3)) % 4]; persist(); renderChrome(); $('tb-' + UI.tab).focus();
+});
+$('gMode').addEventListener('click', ev => { const b = ev.target.closest('[data-mode]'); if (!b) return; UI.gMode = b.dataset.mode; persist(); renderChrome(); renderGantt(); });
+$('gZoom').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (!b) return; UI.zoom = +b.dataset.z; persist(); renderChrome(); renderGantt(); });
+$('optDeps').addEventListener('change', ev => { UI.deps = ev.target.checked; persist(); renderGantt(); });
+$('optCrit').addEventListener('change', ev => { UI.crit = ev.target.checked; persist(); renderGantt(); });
+const hash = (location.hash || '').slice(1);
+if (['burndown', 'gantt', 'tasks', 'project'].includes(hash)) UI.tab = hash;
+renderAll(); fillForm(null);
+})();

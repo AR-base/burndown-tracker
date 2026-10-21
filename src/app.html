@@ -1,0 +1,280 @@
+<title>Project Burndown Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: planning-office console — sticky command bar, KPI strip, tabbed work surface (charts scroll inside their own frames) */
+:root{
+  --bg:#f2f4f8; --surface:#ffffff; --sunk:#f7f8fb; --ink:#142033; --muted:#596579; --line:#d7dde6; --grid:#e9edf3;
+  --accent:#1f56f0; --accent-soft:rgba(31,86,240,.10); --ideal:#8f9bb0;
+  --good:#16865a; --warn:#b86e00; --bad:#c42f3a; --good-soft:rgba(22,134,90,.12); --warn-soft:rgba(184,110,0,.13); --bad-soft:rgba(196,47,58,.12);
+  --f-display:'IBM Plex Sans Condensed','Arial Narrow',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d131c; --surface:#141c28; --sunk:#111823; --ink:#e5ebf4; --muted:#93a0b4; --line:#2a3546; --grid:#1d2734;
+  --accent:#7097ff; --accent-soft:rgba(112,151,255,.14); --ideal:#6c7a91;
+  --good:#3cc489; --warn:#eaa53b; --bad:#f2636f; --good-soft:rgba(60,196,137,.14); --warn-soft:rgba(234,165,59,.15); --bad-soft:rgba(242,99,111,.15);
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0d131c; --surface:#141c28; --sunk:#111823; --ink:#e5ebf4; --muted:#93a0b4; --line:#2a3546; --grid:#1d2734;
+  --accent:#7097ff; --accent-soft:rgba(112,151,255,.14); --ideal:#6c7a91;
+  --good:#3cc489; --warn:#eaa53b; --bad:#f2636f; --good-soft:rgba(60,196,137,.14); --warn-soft:rgba(234,165,59,.15); --bad-soft:rgba(242,99,111,.15);
+  color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--f-body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* command bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:12px}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1 1 280px}
+.eyebrow{font:600 11px/1.2 var(--f-display);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.brand h1{font:700 22px/1.15 var(--f-display);margin:2px 0 0;text-wrap:balance;overflow-wrap:anywhere}
+.brand .meta{font-size:12.5px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--sunk)}
+.seg button{border:0;background:none;padding:6px 12px;cursor:pointer;font:600 12.5px/1 var(--f-display);letter-spacing:.04em;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font:600 12px/1.2 var(--f-display);letter-spacing:.04em;text-transform:uppercase}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.st-on{color:var(--good);background:var(--good-soft)} .st-risk{color:var(--warn);background:var(--warn-soft)} .st-late{color:var(--bad);background:var(--bad-soft)}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:16px}
+.kpi{background:var(--surface);padding:12px 14px;min-width:0}
+.kpi .k{font:600 11px/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font:500 24px/1.2 var(--f-mono);margin-top:6px;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:13px;color:var(--muted)}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
+.meter{height:4px;background:var(--grid);border-radius:2px;margin-top:8px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+
+/* tabs */
+.tabs{display:flex;gap:4px;margin-top:20px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 14px;cursor:pointer;font:600 14px/1 var(--f-display);letter-spacing:.03em;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.panel{padding-block:16px 40px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.card-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.card-h h2{font:700 16px/1.2 var(--f-display);margin:0;letter-spacing:.01em}
+.card-b{padding:14px}
+.hint{font-size:12.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+
+/* chart */
+.chart-box{position:relative}
+.chart-box svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:0;border-top:2px solid}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font:12px/1.4 var(--f-mono);padding:6px 8px;border-radius:4px;white-space:nowrap;transform:translate(-50%,-110%)}
+.tip[hidden]{display:none!important}
+
+/* lists */
+.mini{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.mini li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--grid)}
+.mini li:last-child{border-bottom:0}
+.tid{font:500 12px var(--f-mono);color:var(--muted)}
+.chip{display:inline-block;padding:2px 8px;border-radius:4px;font:600 11.5px/1.4 var(--f-display);letter-spacing:.03em;white-space:nowrap}
+.c-done{background:var(--good-soft);color:var(--good)} .c-late{background:var(--bad-soft);color:var(--bad)}
+.c-inprog{background:var(--accent-soft);color:var(--accent)} .c-todo{background:var(--grid);color:var(--muted)}
+.sec-t{font:600 12px/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 4px}
+.sec-t:first-child{margin-top:0}
+
+/* gantt */
+.g-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.g-tools label{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer}
+.gantt{display:grid;grid-template-columns:minmax(150px,var(--lw,300px)) minmax(0,1fr)}
+.g-left{border-right:1px solid var(--line);overflow:hidden}
+.g-right{overflow-x:auto}
+.g-left svg,.g-right svg{display:block}
+@media (max-width:640px){.gantt{--lw:150px}}
+
+/* table */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font:600 11.5px/1.2 var(--f-display);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--sunk)}
+td{padding:8px;border-bottom:1px solid var(--grid);vertical-align:middle}
+tr.phase-row td{background:var(--sunk);font:600 13px var(--f-display);letter-spacing:.03em}
+td.r,th.r{text-align:right}
+.pbar{width:80px;height:6px;background:var(--grid);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.pbar i{display:block;height:100%}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:6px 12px;cursor:pointer;font:600 13px/1.2 var(--f-display);letter-spacing:.03em}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.row-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* forms */
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label{font:600 11.5px/1.2 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.f input,.f select,.f textarea{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:7px 9px;min-width:0;width:100%}
+.f.wide{grid-column:1/-1}
+.f textarea{font:12px/1.5 var(--f-mono);min-height:160px;resize:vertical}
+.err{color:var(--bad);font-size:12.5px;min-height:1em}
+.ok{color:var(--good);font-size:12.5px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.stack{display:flex;flex-direction:column;gap:16px}
+.edit-rows{display:flex;flex-direction:column;gap:8px}
+.edit-row{display:grid;grid-template-columns:70px minmax(0,1fr) minmax(0,1fr) 120px auto;gap:8px;align-items:center}
+.edit-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
+.edit-row input[type=color]{padding:2px;height:32px}
+@media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:no-preference){.meter i,.pbar i{transition:width .4s ease}}
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">
+      <span class="eyebrow" id="eyebrow"></span>
+      <h1 id="pName"></h1>
+      <span class="meta" id="pMeta"></span>
+    </div>
+    <span class="pill" id="pStatus"></span>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-fr" data-lang="fr">FR</button>
+      <button type="button" id="lang-en" data-lang="en">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="kpis" id="kpis" aria-live="polite"></section>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <section class="panel" id="tab-burndown" role="tabpanel">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><h2 data-i="bdTitle"></h2><div class="legend" id="bdLegend"></div></div>
+        <div class="card-b chart-box" id="bdBox"><div class="tip" id="bdTip" hidden></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="focus"></h2></div>
+        <div class="card-b" id="focus"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-gantt" role="tabpanel" hidden>
+    <div class="card">
+      <div class="card-h">
+        <div class="seg" role="group" id="gMode">
+          <button type="button" id="g-summary" data-mode="summary"></button>
+          <button type="button" id="g-master" data-mode="master"></button>
+        </div>
+        <div class="g-tools">
+          <div class="seg" role="group" id="gZoom">
+            <button type="button" id="z-s" data-z="8">S</button>
+            <button type="button" id="z-m" data-z="14">M</button>
+            <button type="button" id="z-l" data-z="26">L</button>
+          </div>
+          <label><input type="checkbox" id="optDeps" checked> <span data-i="showDeps"></span></label>
+          <label><input type="checkbox" id="optCrit" checked> <span data-i="showCrit"></span></label>
+          <button class="btn sm" type="button" id="gImport" data-i="importGantt"></button>
+        </div>
+      </div>
+      <div class="gantt" id="gantt"><div class="g-left" id="gLeft"></div><div class="g-right" id="gRight"></div></div>
+      <div class="card-b"><div class="legend" id="gLegend"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-tasks" role="tabpanel" hidden>
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h2 id="edTitle"></h2><span class="hint" data-i="edHint"></span></div>
+        <form class="card-b" id="taskForm" novalidate>
+          <div class="form">
+            <div class="f"><label for="tf-id">ID</label><input id="tf-id" maxlength="16" required></div>
+            <div class="f"><label for="tf-phase" data-i="phase"></label><select id="tf-phase"></select></div>
+            <div class="f"><label for="tf-owner" data-i="owner"></label><input id="tf-owner" maxlength="24"></div>
+            <div class="f"><label for="tf-points" data-i="points"></label><input id="tf-points" type="number" min="0" max="999" step="1" value="3"></div>
+            <div class="f wide"><label for="tf-fr" data-i="nameFr"></label><input id="tf-fr" maxlength="120" required></div>
+            <div class="f wide"><label for="tf-en" data-i="nameEn"></label><input id="tf-en" maxlength="120"></div>
+            <div class="f"><label for="tf-start" data-i="start"></label><input id="tf-start" type="date" required></div>
+            <div class="f"><label for="tf-end" data-i="end"></label><input id="tf-end" type="date" required></div>
+            <div class="f"><label for="tf-progress"><span data-i="progress"></span> <span id="tf-pv" class="num"></span></label><input id="tf-progress" type="range" min="0" max="100" step="5" value="0"></div>
+            <div class="f"><label for="tf-done" data-i="doneDate"></label><input id="tf-done" type="date"></div>
+            <div class="f wide"><label for="tf-deps" data-i="deps"></label><input id="tf-deps" maxlength="200" placeholder="T1, T4"></div>
+          </div>
+          <div class="actions">
+            <button class="btn pri" type="submit" id="tfSave"></button>
+            <button class="btn" type="button" id="tfCancel" data-i="cancel"></button>
+            <span class="err" id="tfErr" role="alert"></span>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="taskList"></h2><span class="hint" id="taskCount"></span></div>
+        <div class="tbl-wrap"><table id="taskTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-project" role="tabpanel" hidden>
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h2 data-i="projSettings"></h2><span class="hint" data-i="savedLocal"></span></div>
+        <form class="card-b" id="projForm" novalidate>
+          <div class="form">
+            <div class="f wide"><label for="pf-name" data-i="projName"></label><input id="pf-name" maxlength="120"></div>
+            <div class="f"><label for="pf-code" data-i="projCode"></label><input id="pf-code" maxlength="24"></div>
+            <div class="f"><label for="pf-start" data-i="start"></label><input id="pf-start" type="date"></div>
+            <div class="f"><label for="pf-end" data-i="end"></label><input id="pf-end" type="date"></div>
+            <div class="f"><label for="pf-status" data-i="statusDate"></label><input id="pf-status" type="date"></div>
+            <div class="f wide"><label><input type="checkbox" id="pf-wd"> <span data-i="workingDays"></span></label></div>
+          </div>
+          <div class="actions"><button class="btn pri" type="submit" data-i="save"></button><span class="err" id="pfErr" role="alert"></span></div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="phases"></h2><button class="btn sm" type="button" id="addPhase" data-i="addPhase"></button></div>
+        <div class="card-b"><div class="edit-rows" id="phaseRows"></div>
+          <div class="actions"><button class="btn pri" type="button" id="savePhases" data-i="save"></button><span class="err" id="phErr" role="alert"></span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="milestones"></h2><button class="btn sm" type="button" id="addMs" data-i="addMs"></button></div>
+        <div class="card-b"><div class="edit-rows" id="msRows"></div>
+          <div class="actions"><button class="btn pri" type="button" id="saveMs" data-i="save"></button><span class="err" id="msErr" role="alert"></span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i="dataTitle"></h2></div>
+        <div class="card-b">
+          <p class="hint" data-i="dataHint"></p>
+          <div class="f wide"><label for="jsonBox" data-i="boxLabel"></label><textarea id="jsonBox" spellcheck="false"></textarea></div>
+          <div class="actions">
+            <button class="btn pri" type="button" id="btnImport" data-i="import"></button>
+            <label class="btn" for="fileIn"><span data-i="importFile"></span></label>
+            <input type="file" id="fileIn" accept=".json,.csv,.txt,.mmd,.md,application/json,text/csv,text/plain" hidden>
+            <button class="btn" type="button" id="btnTemplate" data-i="template"></button>
+            <span id="dataMsg" role="status"></span>
+          </div>
+          <div class="actions">
+            <span class="hint" data-i="exportAs"></span>
+            <button class="btn" type="button" id="btnExport">JSON</button>
+            <button class="btn" type="button" id="btnCsv">CSV (Excel)</button>
+            <button class="btn" type="button" id="btnMermaid">Mermaid Gantt</button>
+            <button class="btn" type="button" id="btnCopy" data-i="copy"></button>
+          </div>
+          <div class="actions">
+            <button class="btn" type="button" id="btnSample" data-i="loadSample"></button>
+            <button class="btn danger" type="button" id="btnBlank" data-i="newBlank"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>/*CORE*/</script>
+<script>/*IO*/</script>
+<script>/*SAMPLE*/</script>
+<script>/*APP*/</script>
