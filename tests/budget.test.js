@@ -15,7 +15,7 @@ ok('person-days = working days of each task, cost = days × rate', () => {
   assert.strictEqual(s[0].cost, 4000);
 });
 ok('budget totals: labour + extras + contingency', () => {
-  const p = { ...P, budget: { contingency: 0.1, extras: [{ fr: 'Hébergement', en: 'Hosting', amount: 1000 }] } };
+  const p = { ...P, budget: { contMode: 'manual', contingency: 0.1, extras: [{ fr: 'Hébergement', en: 'Hosting', amount: 1000, per: 'once' }] } };
   const b = B.compute(p, today);
   assert.strictEqual(b.subtotal, b.labour + 1000);
   assert.strictEqual(b.contingency, Math.round(b.subtotal * 0.1));
@@ -32,6 +32,25 @@ ok('hostile team / budget input is cleaned', () => {
   const c = B.clean([{ id: '<x>', rate: 1e9 }, { id: 'PM', rate: -5 }, { id: 'PM', rate: 9 }, 'junk'], { contingency: 7, extras: [{ fr: 'a'.repeat(500), amount: 'NaN' }, { amount: 5 }] });
   assert.deepStrictEqual(c.team.map(r => [r.id, r.rate]), [['X', 10000], ['PM', 0]]);
   assert.strictEqual(c.budget.contingency, 1);
-  assert.strictEqual(c.budget.extras.length, 1); assert.strictEqual(c.budget.extras[0].fr.length, 120); assert.strictEqual(c.budget.extras[0].amount, 0);
+  assert.strictEqual(c.budget.extras.length, 2); assert.strictEqual(c.budget.extras[0].fr.length, 120); assert.strictEqual(c.budget.extras[0].amount, 0); assert.strictEqual(c.budget.extras[1].amount, 5); assert.strictEqual(c.budget.extras[1].per, 'once');
+});
+ok('fixed costs follow the plan: per month × months, per person × team', () => {
+  const base = { ...P, budget: { contMode: 'manual', contingency: 0, extras: [{ fr: 'Host', en: 'Host', amount: 100, per: 'month' }, { fr: 'Tool', en: 'Tool', amount: 10, per: 'personMonth' }] } };
+  const b1 = B.compute(base, today);
+  assert.strictEqual(b1.extras[0].total, 100 * b1.months);
+  assert.strictEqual(b1.extras[1].total, 10 * b1.people * b1.months);
+  const longer = { ...base, end: '2027-03-31' };
+  assert.ok(B.compute(longer, today).extrasTotal > b1.extrasTotal, 'a longer project costs more to host');
+});
+ok('automatic contingency reacts to schedule risk and is explained', () => {
+  const p = { ...P, budget: { contMode: 'auto', extras: [] } };
+  const b = B.compute(p, today);
+  assert.strictEqual(b.contMode, 'auto');
+  assert.ok(b.contingencyRate > 0.10 && b.contingencyRate <= 0.30);
+  assert.strictEqual(Math.round(b.autoContingency.parts.reduce((a, x) => a + x.rate, 0) * 100) / 100, b.contingencyRate);
+  // finishing the critical work lowers the risk part
+  const doneAll = { ...p, tasks: p.tasks.map(k => ({ ...k, done: k.end, progress: 100 })) };
+  assert.ok(B.compute(doneAll, today).contingencyRate <= b.contingencyRate);
+  console.log('   auto contingency', b.contingencyRate, b.autoContingency.parts.map(x => x.en + ' ' + x.rate).join(', '));
 });
 console.log(`\n${n} tests passed`);

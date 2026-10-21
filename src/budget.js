@@ -49,9 +49,15 @@ const Budget = (() => {
     const taskCost = k => workDaysOf(k) * (roles.get(roleOf(k.owner)) || { rate: FALLBACK_RATE }).rate;
     const staff = staffing(p);
     const labour = staff.reduce((a, r) => a + r.cost, 0);
-    const extras = (Array.isArray(cfg.extras) ? cfg.extras : []).filter(x => x.amount > 0);
-    const extrasTotal = extras.reduce((a, x) => a + x.amount, 0);
-    const contingencyRate = Number.isFinite(cfg.contingency) ? cfg.contingency : 0.15;
+    // Fixed costs follow the plan: monthly items × project months, per-person items × team size.
+    const months = Math.max(1, Math.ceil((C.diffDays(C.parseDate(p.start), C.parseDate(p.end)) + 1) / 30.44));
+    const people = staff.reduce((a, r) => a + r.people, 0);
+    const qtyOf = per => per === 'month' ? months : per === 'person' ? people : per === 'personMonth' ? people * months : 1;
+    const extras = (Array.isArray(cfg.extras) ? cfg.extras : []).filter(x => x.amount > 0).map(x => ({ ...x, per: x.per || 'once', qty: qtyOf(x.per), total: x.amount * qtyOf(x.per) }));
+    const extrasTotal = extras.reduce((a, x) => a + x.total, 0);
+    // Contingency: automatic from schedule risk, or a fixed rate chosen by the user.
+    const auto = autoContingency(p, todayT, months);
+    const contingencyRate = cfg.contMode === 'manual' && Number.isFinite(cfg.contingency) ? cfg.contingency : auto.rate;
     const subtotal = labour + extrasTotal, contingency = Math.round(subtotal * contingencyRate);
     const byPhase = p.phases.map(ph => ({ id: ph.id, fr: ph.fr, en: ph.en, color: ph.color, cost: p.tasks.filter(k => k.phase === ph.id).reduce((a, k) => a + taskCost(k), 0) })).filter(x => x.cost > 0);
     const now = C.statusTime(p, todayT);
@@ -63,9 +69,24 @@ const Budget = (() => {
     }, 0);
     return {
       currency: 'EUR', staff, labour, extras, extrasTotal, contingencyRate, contingency, subtotal, total: subtotal + contingency, byPhase,
-      people: staff.reduce((a, r) => a + r.people, 0), personDays: staff.reduce((a, r) => a + r.personDays, 0),
+      months, contMode: cfg.contMode === 'manual' ? 'manual' : 'auto', autoContingency: auto,
+      people, personDays: staff.reduce((a, r) => a + r.personDays, 0),
       earnedValue: Math.round(ev), plannedValue: Math.round(pv)
     };
+  }
+
+  /* Automatic contingency: 10 % base, more when the schedule is at risk, when much of the plan is
+     critical (no slack) and when the project is long. Each part is listed so the figure can be explained. */
+  function autoContingency(p, todayT, months) {
+    const parts = [{ fr: 'Base', en: 'Base', rate: 0.10 }];
+    const h = C.health(p, todayT);
+    if (h.status === 'risk') parts.push({ fr: 'Planning à risque (SPI < 0,95)', en: 'Schedule at risk (SPI < 0.95)', rate: 0.05 });
+    if (h.status === 'late') parts.push({ fr: 'Planning en retard (SPI < 0,80)', en: 'Schedule late (SPI < 0.80)', rate: 0.10 });
+    const cp = C.criticalPath(p), share = p.tasks.length ? cp.critical.size / p.tasks.length : 0;
+    const crit = Math.round(Math.min(0.05, share * 0.08) * 100) / 100;
+    if (crit > 0) parts.push({ fr: `Tâches sans marge (${Math.round(share * 100)} % du plan)`, en: `Tasks with no slack (${Math.round(share * 100)} % of the plan)`, rate: crit });
+    if (months > 4) parts.push({ fr: 'Projet long (plus de 4 mois)', en: 'Long project (over 4 months)', rate: 0.02 });
+    return { rate: Math.round(parts.reduce((a, x) => a + x.rate, 0) * 100) / 100, parts };
   }
 
   /* Validate untrusted team / budget settings (used by Core.validateProject through the app). */
@@ -76,10 +97,11 @@ const Budget = (() => {
     const t = (Array.isArray(rawTeam) ? rawTeam : []).slice(0, 40).map(r => r && ({ id: str(r.id, 16).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), fr: str(r.fr, 60), en: str(r.en, 60), rate: Math.round(num(r.rate, 0, 10000, FALLBACK_RATE)) }))
       .filter(r => r && r.id && !seen.has(r.id) && seen.add(r.id)).map(r => ({ ...r, fr: r.fr || r.id, en: r.en || r.fr || r.id }));
     const b = rawBudget && typeof rawBudget === 'object' ? rawBudget : {};
-    const extras = (Array.isArray(b.extras) ? b.extras : []).slice(0, 40).map(x => x && ({ fr: str(x.fr, 120), en: str(x.en, 120), amount: Math.round(num(x.amount, 0, 1e8, 0)) }))
-      .filter(x => x && (x.fr || x.en)).map(x => ({ ...x, fr: x.fr || x.en, en: x.en || x.fr }));
-    return { team: t.length ? t : DEFAULT_TEAM.map(r => ({ ...r })), budget: { contingency: num(b.contingency, 0, 1, 0.15), extras } };
+    const extras = (Array.isArray(b.extras) ? b.extras : []).slice(0, 40).map(x => x && ({ fr: str(x.fr, 120), en: str(x.en, 120), amount: Math.round(num(x.amount, 0, 1e8, 0)),
+      per: ['once', 'month', 'person', 'personMonth'].includes(x.per) ? x.per : 'once' }))
+      .filter(x => x && (x.fr || x.en || x.amount > 0)).map(x => ({ ...x, fr: x.fr || x.en, en: x.en || x.fr }));
+    return { team: t.length ? t : DEFAULT_TEAM.map(r => ({ ...r })), budget: { contMode: b.contMode === 'manual' ? 'manual' : 'auto', contingency: num(b.contingency, 0, 1, 0.15), extras } };
   }
-  return { DEFAULT_TEAM, roleOf, staffing, compute, clean };
+  return { DEFAULT_TEAM, roleOf, staffing, compute, clean, autoContingency };
 })();
 if (typeof module !== 'undefined') module.exports = Budget;

@@ -97,7 +97,8 @@ const Generator = (() => {
     const project = {
       name, code: `${tp.code}-${new Date(s0).getUTCFullYear()}`, start: C.fmt(s0), end: endOf([close]), statusDate: '', workingDays: true,
       phases: PHASES.map(([id, fr, en, color]) => ({ id, fr, en, color })), milestones, tasks,
-      budget: { contingency: 0.15, extras: (tp.costs || []).map(([fr, en, amount]) => ({ fr, en, amount })) },
+      budget: { contMode: 'auto', contingency: 0.15, extras: [...(tp.costs || []).map(([fr, en, amount, per]) => ({ fr, en, amount, per })),
+        { fr: 'Outils collaboratifs et licences de développement', en: 'Collaboration tools and developer licences', amount: 15, per: 'personMonth' }] },
       docs: { fr: docs({ description, client, author, lang: 'fr', tp, feats, tasks, milestones, name, size }),
               en: docs({ description, client, author, lang: 'en', tp, feats, tasks, milestones, name, size }) }
     };

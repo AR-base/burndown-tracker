@@ -27,7 +27,8 @@ Dans l'aperçu Claude, l'option **Adapter avec l'IA de Claude** personnalise les
 
 Onglet **Budget et équipe** : calculé à partir du Gantt. Chaque tâche compte une personne de son rôle (PM, DEV, QA…) à temps plein sur ses jours ouvrés.
 - **Équipe nécessaire** : jours-homme par rôle, nombre de personnes (jours répartis sur la période d'activité du rôle), charge, taux journalier modifiable, coût.
-- **Coût par phase**, **coûts fixes** (hébergement, licences, matériel… proposés selon le type de projet), **marge pour imprévus** (15 % par défaut).
+- **Coût par phase** ; **coûts fixes** facturés une fois, par mois (× durée du projet), par personne ou par personne et par mois (× équipe) : ils suivent automatiquement les dates et l’équipe ; **marge pour imprévus** automatique selon le risque du planning (base 10 %, + retard, + tâches sans marge, + projet long) ou taux fixe.
+- Chaque modification s’applique aussitôt (sans bouton) : indicateurs, onglets et documents suivent.
 - **Valeur acquise / planifiée en €** pour le suivi.
 - Section **Budget et ressources** dans le cahier des charges, le dossier technique et le rapport.
 
@@ -140,7 +141,7 @@ Les fichiers .docx sont générés dans le navigateur (aucun serveur) et s'ouvre
 ```bash
 npm install        # jsdom pour les tests DOM / for DOM tests
 npm run build      # src/ → index.html + hachages CSP dans vercel.json et _headers
-npm test           # 12 logique + 8 import/export + 14 .docx + 19 assistant + 6 budget + 43 interface = 102 tests
+npm test           # 12 logique + 8 import/export + 14 .docx + 19 assistant + 8 budget + 49 interface = 110 tests
 ```
 
 Structure : `src/core.js` (calculs purs), `src/io.js` (CSV/Mermaid), `src/docgen.js` (générateur .docx sans dépendance), `src/kb.js` + `src/generator.js` (assistant de projet), `src/budget.js` (équipe et budget), `src/app.js` (interface), `src/app.html` (gabarit + CSS), `src/sample.js` (projet exemple ESAIP AI Assistant).

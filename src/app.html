@@ -136,10 +136,13 @@ td.r,th.r{text-align:right}
 .rate-in{width:90px;border:1px solid var(--line);background:var(--sunk);border-radius:4px;padding:4px 6px;text-align:right;font:500 13px var(--f-mono)}
 .pc-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(0,2fr) auto;gap:10px;align-items:center;padding:6px 0;font-size:13px}
 .pc-bar{height:10px;background:var(--grid);border-radius:5px;overflow:hidden}.pc-bar i{display:block;height:100%}
-.extra-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 130px auto;gap:8px;align-items:center}
+.extra-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.4fr) 90px minmax(0,1fr) 90px auto;gap:8px;align-items:center}
+.extra-row select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
+.ex-tot{text-align:right;font-size:13px}
+.cont-why{margin:10px 0 0;font-size:13px;color:var(--muted)}.cont-why b{color:var(--ink)}
 .extra-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 @media (max-width:640px){.extra-row{grid-template-columns:1fr 1fr}}
-.bud-form{margin-top:12px;max-width:260px}
+.bud-form{margin-top:12px;max-width:560px}
 tr.total-row td{font-weight:600;border-top:2px solid var(--line)}
 
 /* doc language note */
@@ -367,11 +370,14 @@ tr.total-row td{font-weight:600;border-top:2px solid var(--line)}
         <div class="card-h"><h2 data-i="fixedT"></h2><button class="btn sm" type="button" id="addExtra" data-i="addExtra"></button></div>
         <div class="card-b">
           <div class="edit-rows" id="extraRows"></div>
+          <p class="hint" id="fixedSum"></p>
           <div class="form bud-form">
+            <div class="f"><label for="bud-mode" data-i="contModeL"></label><select id="bud-mode"></select></div>
             <div class="f"><label for="bud-cont" data-i="contingencyL"></label><input id="bud-cont" type="number" min="0" max="100" step="1"></div>
           </div>
+          <p class="cont-why" id="contWhy"></p>
           <div class="actions"><button class="btn pri" type="button" id="saveBudget" data-i="saveBudget"></button><span id="budMsg" role="status"></span></div>
-          <p class="hint" data-i="budNote"></p>
+          <p class="hint" data-i="budLive"></p><p class="hint" data-i="budNote"></p>
         </div>
       </div>
     </div>

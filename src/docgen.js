@@ -155,7 +155,7 @@ const DocGen = (() => {
       conclusion: 'Conclusion et prochaines étapes', noVel: 'pas encore de vélocité', fig: 'Figure',
       budgetT: 'Budget et ressources', teamT: 'Équipe nécessaire', role: 'Rôle', people: 'Personnes', pdays: 'Jours-homme', period: 'Période', load: 'Charge', rate: 'Taux / jour', cost: 'Coût',
       costPhase: 'Coût par phase', fixed: 'Coûts fixes (première année)', item: 'Poste', amount: 'Montant', labour: 'Main-d’œuvre', fixedT: 'Coûts fixes', contingencyL: 'Marge pour imprévus',
-      totalB: 'Budget total estimé', summaryB: 'Synthèse du budget', evL: 'Valeur acquise à date', pvL: 'Valeur planifiée à date', share: 'Part',
+      totalB: 'Budget total estimé', basisL: 'Calcul', monthsU: 'mois', personsU: 'pers.', onceU: 'Une fois', autoU: 'automatique', contWhy: 'Marge calculée selon le risque', summaryB: 'Synthèse du budget', evL: 'Valeur acquise à date', pvL: 'Valeur planifiée à date', share: 'Part',
       budgetNote: 'Taux journaliers indicatifs (marché français), modifiables dans l’onglet Budget. Chaque tâche compte une personne à temps plein sur ses jours ouvrés ; le nombre de personnes répartit ces jours sur la période d’activité du rôle.',
       budgetLine: (tot, pd, pp) => `Budget estimé : **${tot}** pour ${pd} jours-homme, avec une équipe de ${pp} personnes.` },
     en: { card: 'Project card', field: 'Field', value: 'Value', name: 'Project', code: 'Code', period: 'Period', effort: 'Effort', tasks: 'tasks', pts: 'points', phases: 'phases', ms: 'milestones',
@@ -168,7 +168,7 @@ const DocGen = (() => {
       conclusion: 'Conclusion and next steps', noVel: 'no velocity yet', fig: 'Figure',
       budgetT: 'Budget and resources', teamT: 'Required team', role: 'Role', people: 'People', pdays: 'Person-days', period: 'Period', load: 'Load', rate: 'Day rate', cost: 'Cost',
       costPhase: 'Cost by phase', fixed: 'Fixed costs (first year)', item: 'Item', amount: 'Amount', labour: 'Labour', fixedT: 'Fixed costs', contingencyL: 'Contingency',
-      totalB: 'Estimated total budget', summaryB: 'Budget summary', evL: 'Earned value to date', pvL: 'Planned value to date', share: 'Share',
+      totalB: 'Estimated total budget', basisL: 'Basis', monthsU: 'months', personsU: 'people', onceU: 'One-off', autoU: 'automatic', contWhy: 'Risk-based contingency', summaryB: 'Budget summary', evL: 'Earned value to date', pvL: 'Planned value to date', share: 'Share',
       budgetNote: 'Indicative day rates (French market), editable in the Budget tab. Each task counts one full-time person on its working days; headcount spreads those days over the role’s active period.',
       budgetLine: (tot, pd, pp) => `Estimated budget: **${tot}** for ${pd} person-days, with a team of ${pp} people.` }
   };
@@ -217,10 +217,12 @@ const DocGen = (() => {
       out.push({ k: 'h2', t: T.costPhase });
       out.push({ k: 'table', rows: [[T.phase, T.cost, T.share], ...BB.byPhase.map(x => [`${x.id} · ${nm(x)}`, eur(x.cost), BB.labour ? Math.round(x.cost / BB.labour * 100) + ' %' : '—'])] });
     }
-    if (BB.extras.length) { out.push({ k: 'h2', t: T.fixed }); out.push({ k: 'table', rows: [[T.item, T.amount], ...BB.extras.map(x => [nm(x), eur(x.amount)])] }); }
+    const basis = x => x.per === 'month' ? `${eur(x.amount)} × ${x.qty} ${T.monthsU}` : x.per === 'person' ? `${eur(x.amount)} × ${x.qty} ${T.personsU}` : x.per === 'personMonth' ? `${eur(x.amount)} × ${BB.people} ${T.personsU} × ${BB.months} ${T.monthsU}` : T.onceU;
+    if (BB.extras.length) { out.push({ k: 'h2', t: T.fixed }); out.push({ k: 'table', rows: [[T.item, T.basisL, T.amount], ...BB.extras.map(x => [nm(x), basis(x), eur(x.total)])] }); }
     out.push({ k: 'h2', t: T.summaryB });
-    out.push({ k: 'table', rows: [[T.item, T.amount], [T.labour, eur(BB.labour)], [T.fixedT, eur(BB.extrasTotal)], [`${T.contingencyL} (${Math.round(BB.contingencyRate * 100)} %)`, eur(BB.contingency)], [`**${T.totalB}**`, `**${eur(BB.total)}**`],
+    out.push({ k: 'table', rows: [[T.item, T.amount], [T.labour, eur(BB.labour)], [T.fixedT, eur(BB.extrasTotal)], [`${T.contingencyL} (${Math.round(BB.contingencyRate * 100)} %${BB.contMode === 'auto' ? ', ' + T.autoU : ''})`, eur(BB.contingency)], [`**${T.totalB}**`, `**${eur(BB.total)}**`],
       ...(spec.status ? [[T.pvL, eur(BB.plannedValue)], [T.evL, eur(BB.earnedValue)]] : [])] });
+    if (BB.contMode === 'auto') out.push({ k: 'p', t: `**${T.contWhy} :** ${BB.autoContingency.parts.map(x => `${nm(x)} ${Math.round(x.rate * 100)} %`).join(' + ')} = ${Math.round(BB.contingencyRate * 100)} %` });
     out.push({ k: 'note', t: T.budgetNote });
     // schedule
     H1(T.schedule);

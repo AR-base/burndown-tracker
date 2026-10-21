@@ -145,10 +145,13 @@ td.r,th.r{text-align:right}
 .rate-in{width:90px;border:1px solid var(--line);background:var(--sunk);border-radius:4px;padding:4px 6px;text-align:right;font:500 13px var(--f-mono)}
 .pc-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(0,2fr) auto;gap:10px;align-items:center;padding:6px 0;font-size:13px}
 .pc-bar{height:10px;background:var(--grid);border-radius:5px;overflow:hidden}.pc-bar i{display:block;height:100%}
-.extra-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 130px auto;gap:8px;align-items:center}
+.extra-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.4fr) 90px minmax(0,1fr) 90px auto;gap:8px;align-items:center}
+.extra-row select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
+.ex-tot{text-align:right;font-size:13px}
+.cont-why{margin:10px 0 0;font-size:13px;color:var(--muted)}.cont-why b{color:var(--ink)}
 .extra-row input{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:6px 8px;min-width:0;width:100%}
 @media (max-width:640px){.extra-row{grid-template-columns:1fr 1fr}}
-.bud-form{margin-top:12px;max-width:260px}
+.bud-form{margin-top:12px;max-width:560px}
 tr.total-row td{font-weight:600;border-top:2px solid var(--line)}
 
 /* doc language note */
@@ -376,11 +379,14 @@ tr.total-row td{font-weight:600;border-top:2px solid var(--line)}
         <div class="card-h"><h2 data-i="fixedT"></h2><button class="btn sm" type="button" id="addExtra" data-i="addExtra"></button></div>
         <div class="card-b">
           <div class="edit-rows" id="extraRows"></div>
+          <p class="hint" id="fixedSum"></p>
           <div class="form bud-form">
+            <div class="f"><label for="bud-mode" data-i="contModeL"></label><select id="bud-mode"></select></div>
             <div class="f"><label for="bud-cont" data-i="contingencyL"></label><input id="bud-cont" type="number" min="0" max="100" step="1"></div>
           </div>
+          <p class="cont-why" id="contWhy"></p>
           <div class="actions"><button class="btn pri" type="button" id="saveBudget" data-i="saveBudget"></button><span id="budMsg" role="status"></span></div>
-          <p class="hint" data-i="budNote"></p>
+          <p class="hint" data-i="budLive"></p><p class="hint" data-i="budNote"></p>
         </div>
       </div>
     </div>
@@ -1055,7 +1061,7 @@ const DocGen = (() => {
       conclusion: 'Conclusion et prochaines étapes', noVel: 'pas encore de vélocité', fig: 'Figure',
       budgetT: 'Budget et ressources', teamT: 'Équipe nécessaire', role: 'Rôle', people: 'Personnes', pdays: 'Jours-homme', period: 'Période', load: 'Charge', rate: 'Taux / jour', cost: 'Coût',
       costPhase: 'Coût par phase', fixed: 'Coûts fixes (première année)', item: 'Poste', amount: 'Montant', labour: 'Main-d’œuvre', fixedT: 'Coûts fixes', contingencyL: 'Marge pour imprévus',
-      totalB: 'Budget total estimé', summaryB: 'Synthèse du budget', evL: 'Valeur acquise à date', pvL: 'Valeur planifiée à date', share: 'Part',
+      totalB: 'Budget total estimé', basisL: 'Calcul', monthsU: 'mois', personsU: 'pers.', onceU: 'Une fois', autoU: 'automatique', contWhy: 'Marge calculée selon le risque', summaryB: 'Synthèse du budget', evL: 'Valeur acquise à date', pvL: 'Valeur planifiée à date', share: 'Part',
       budgetNote: 'Taux journaliers indicatifs (marché français), modifiables dans l’onglet Budget. Chaque tâche compte une personne à temps plein sur ses jours ouvrés ; le nombre de personnes répartit ces jours sur la période d’activité du rôle.',
       budgetLine: (tot, pd, pp) => `Budget estimé : **${tot}** pour ${pd} jours-homme, avec une équipe de ${pp} personnes.` },
     en: { card: 'Project card', field: 'Field', value: 'Value', name: 'Project', code: 'Code', period: 'Period', effort: 'Effort', tasks: 'tasks', pts: 'points', phases: 'phases', ms: 'milestones',
@@ -1068,7 +1074,7 @@ const DocGen = (() => {
       conclusion: 'Conclusion and next steps', noVel: 'no velocity yet', fig: 'Figure',
       budgetT: 'Budget and resources', teamT: 'Required team', role: 'Role', people: 'People', pdays: 'Person-days', period: 'Period', load: 'Load', rate: 'Day rate', cost: 'Cost',
       costPhase: 'Cost by phase', fixed: 'Fixed costs (first year)', item: 'Item', amount: 'Amount', labour: 'Labour', fixedT: 'Fixed costs', contingencyL: 'Contingency',
-      totalB: 'Estimated total budget', summaryB: 'Budget summary', evL: 'Earned value to date', pvL: 'Planned value to date', share: 'Share',
+      totalB: 'Estimated total budget', basisL: 'Basis', monthsU: 'months', personsU: 'people', onceU: 'One-off', autoU: 'automatic', contWhy: 'Risk-based contingency', summaryB: 'Budget summary', evL: 'Earned value to date', pvL: 'Planned value to date', share: 'Share',
       budgetNote: 'Indicative day rates (French market), editable in the Budget tab. Each task counts one full-time person on its working days; headcount spreads those days over the role’s active period.',
       budgetLine: (tot, pd, pp) => `Estimated budget: **${tot}** for ${pd} person-days, with a team of ${pp} people.` }
   };
@@ -1117,10 +1123,12 @@ const DocGen = (() => {
       out.push({ k: 'h2', t: T.costPhase });
       out.push({ k: 'table', rows: [[T.phase, T.cost, T.share], ...BB.byPhase.map(x => [`${x.id} · ${nm(x)}`, eur(x.cost), BB.labour ? Math.round(x.cost / BB.labour * 100) + ' %' : '—'])] });
     }
-    if (BB.extras.length) { out.push({ k: 'h2', t: T.fixed }); out.push({ k: 'table', rows: [[T.item, T.amount], ...BB.extras.map(x => [nm(x), eur(x.amount)])] }); }
+    const basis = x => x.per === 'month' ? `${eur(x.amount)} × ${x.qty} ${T.monthsU}` : x.per === 'person' ? `${eur(x.amount)} × ${x.qty} ${T.personsU}` : x.per === 'personMonth' ? `${eur(x.amount)} × ${BB.people} ${T.personsU} × ${BB.months} ${T.monthsU}` : T.onceU;
+    if (BB.extras.length) { out.push({ k: 'h2', t: T.fixed }); out.push({ k: 'table', rows: [[T.item, T.basisL, T.amount], ...BB.extras.map(x => [nm(x), basis(x), eur(x.total)])] }); }
     out.push({ k: 'h2', t: T.summaryB });
-    out.push({ k: 'table', rows: [[T.item, T.amount], [T.labour, eur(BB.labour)], [T.fixedT, eur(BB.extrasTotal)], [`${T.contingencyL} (${Math.round(BB.contingencyRate * 100)} %)`, eur(BB.contingency)], [`**${T.totalB}**`, `**${eur(BB.total)}**`],
+    out.push({ k: 'table', rows: [[T.item, T.amount], [T.labour, eur(BB.labour)], [T.fixedT, eur(BB.extrasTotal)], [`${T.contingencyL} (${Math.round(BB.contingencyRate * 100)} %${BB.contMode === 'auto' ? ', ' + T.autoU : ''})`, eur(BB.contingency)], [`**${T.totalB}**`, `**${eur(BB.total)}**`],
       ...(spec.status ? [[T.pvL, eur(BB.plannedValue)], [T.evL, eur(BB.earnedValue)]] : [])] });
+    if (BB.contMode === 'auto') out.push({ k: 'p', t: `**${T.contWhy} :** ${BB.autoContingency.parts.map(x => `${nm(x)} ${Math.round(x.rate * 100)} %`).join(' + ')} = ${Math.round(BB.contingencyRate * 100)} %` });
     out.push({ k: 'note', t: T.budgetNote });
     // schedule
     H1(T.schedule);
@@ -1217,9 +1225,15 @@ const Budget = (() => {
     const taskCost = k => workDaysOf(k) * (roles.get(roleOf(k.owner)) || { rate: FALLBACK_RATE }).rate;
     const staff = staffing(p);
     const labour = staff.reduce((a, r) => a + r.cost, 0);
-    const extras = (Array.isArray(cfg.extras) ? cfg.extras : []).filter(x => x.amount > 0);
-    const extrasTotal = extras.reduce((a, x) => a + x.amount, 0);
-    const contingencyRate = Number.isFinite(cfg.contingency) ? cfg.contingency : 0.15;
+    // Fixed costs follow the plan: monthly items × project months, per-person items × team size.
+    const months = Math.max(1, Math.ceil((C.diffDays(C.parseDate(p.start), C.parseDate(p.end)) + 1) / 30.44));
+    const people = staff.reduce((a, r) => a + r.people, 0);
+    const qtyOf = per => per === 'month' ? months : per === 'person' ? people : per === 'personMonth' ? people * months : 1;
+    const extras = (Array.isArray(cfg.extras) ? cfg.extras : []).filter(x => x.amount > 0).map(x => ({ ...x, per: x.per || 'once', qty: qtyOf(x.per), total: x.amount * qtyOf(x.per) }));
+    const extrasTotal = extras.reduce((a, x) => a + x.total, 0);
+    // Contingency: automatic from schedule risk, or a fixed rate chosen by the user.
+    const auto = autoContingency(p, todayT, months);
+    const contingencyRate = cfg.contMode === 'manual' && Number.isFinite(cfg.contingency) ? cfg.contingency : auto.rate;
     const subtotal = labour + extrasTotal, contingency = Math.round(subtotal * contingencyRate);
     const byPhase = p.phases.map(ph => ({ id: ph.id, fr: ph.fr, en: ph.en, color: ph.color, cost: p.tasks.filter(k => k.phase === ph.id).reduce((a, k) => a + taskCost(k), 0) })).filter(x => x.cost > 0);
     const now = C.statusTime(p, todayT);
@@ -1231,9 +1245,24 @@ const Budget = (() => {
     }, 0);
     return {
       currency: 'EUR', staff, labour, extras, extrasTotal, contingencyRate, contingency, subtotal, total: subtotal + contingency, byPhase,
-      people: staff.reduce((a, r) => a + r.people, 0), personDays: staff.reduce((a, r) => a + r.personDays, 0),
+      months, contMode: cfg.contMode === 'manual' ? 'manual' : 'auto', autoContingency: auto,
+      people, personDays: staff.reduce((a, r) => a + r.personDays, 0),
       earnedValue: Math.round(ev), plannedValue: Math.round(pv)
     };
+  }
+
+  /* Automatic contingency: 10 % base, more when the schedule is at risk, when much of the plan is
+     critical (no slack) and when the project is long. Each part is listed so the figure can be explained. */
+  function autoContingency(p, todayT, months) {
+    const parts = [{ fr: 'Base', en: 'Base', rate: 0.10 }];
+    const h = C.health(p, todayT);
+    if (h.status === 'risk') parts.push({ fr: 'Planning à risque (SPI < 0,95)', en: 'Schedule at risk (SPI < 0.95)', rate: 0.05 });
+    if (h.status === 'late') parts.push({ fr: 'Planning en retard (SPI < 0,80)', en: 'Schedule late (SPI < 0.80)', rate: 0.10 });
+    const cp = C.criticalPath(p), share = p.tasks.length ? cp.critical.size / p.tasks.length : 0;
+    const crit = Math.round(Math.min(0.05, share * 0.08) * 100) / 100;
+    if (crit > 0) parts.push({ fr: `Tâches sans marge (${Math.round(share * 100)} % du plan)`, en: `Tasks with no slack (${Math.round(share * 100)} % of the plan)`, rate: crit });
+    if (months > 4) parts.push({ fr: 'Projet long (plus de 4 mois)', en: 'Long project (over 4 months)', rate: 0.02 });
+    return { rate: Math.round(parts.reduce((a, x) => a + x.rate, 0) * 100) / 100, parts };
   }
 
   /* Validate untrusted team / budget settings (used by Core.validateProject through the app). */
@@ -1244,22 +1273,24 @@ const Budget = (() => {
     const t = (Array.isArray(rawTeam) ? rawTeam : []).slice(0, 40).map(r => r && ({ id: str(r.id, 16).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), fr: str(r.fr, 60), en: str(r.en, 60), rate: Math.round(num(r.rate, 0, 10000, FALLBACK_RATE)) }))
       .filter(r => r && r.id && !seen.has(r.id) && seen.add(r.id)).map(r => ({ ...r, fr: r.fr || r.id, en: r.en || r.fr || r.id }));
     const b = rawBudget && typeof rawBudget === 'object' ? rawBudget : {};
-    const extras = (Array.isArray(b.extras) ? b.extras : []).slice(0, 40).map(x => x && ({ fr: str(x.fr, 120), en: str(x.en, 120), amount: Math.round(num(x.amount, 0, 1e8, 0)) }))
-      .filter(x => x && (x.fr || x.en)).map(x => ({ ...x, fr: x.fr || x.en, en: x.en || x.fr }));
-    return { team: t.length ? t : DEFAULT_TEAM.map(r => ({ ...r })), budget: { contingency: num(b.contingency, 0, 1, 0.15), extras } };
+    const extras = (Array.isArray(b.extras) ? b.extras : []).slice(0, 40).map(x => x && ({ fr: str(x.fr, 120), en: str(x.en, 120), amount: Math.round(num(x.amount, 0, 1e8, 0)),
+      per: ['once', 'month', 'person', 'personMonth'].includes(x.per) ? x.per : 'once' }))
+      .filter(x => x && (x.fr || x.en || x.amount > 0)).map(x => ({ ...x, fr: x.fr || x.en, en: x.en || x.fr }));
+    return { team: t.length ? t : DEFAULT_TEAM.map(r => ({ ...r })), budget: { contMode: b.contMode === 'manual' ? 'manual' : 'auto', contingency: num(b.contingency, 0, 1, 0.15), extras } };
   }
-  return { DEFAULT_TEAM, roleOf, staffing, compute, clean };
+  return { DEFAULT_TEAM, roleOf, staffing, compute, clean, autoContingency };
 })();
 if (typeof module !== 'undefined') module.exports = Budget;
 </script>
-<script>/* Project knowledge base: one entry per kind of project a client may describe in plain words.
+<script>/* costs row: [labelFr, labelEn, amount €, basis once|month|person|personMonth]
+   Project knowledge base: one entry per kind of project a client may describe in plain words.
    feature tuple: [nameFr, nameEn, plainDescFr, plainDescEn, days(medium), points, priority M|S|C]
    stack row: [layer, choice, whyFr, whyEn] · comp: [name, roleFr, roleEn] · objective: [fr, en, kpiFr, kpiEn, target]
    nfr: [category, fr, en] · threat: [fr, en, controlFr, controlEn] · risk: [fr, en, P, I, responseFr, responseEn] */
 const KB = [
   {
     id: 'ecommerce', fr: 'Site e-commerce', en: 'E-commerce website', code: 'ECOM',
-    costs: [['Hébergement boutique et base de données (12 mois)', 'Shop and database hosting (12 months)', 600], ['Nom de domaine et e-mails professionnels (1 an)', 'Domain name and business e-mail (1 year)', 90], ['Moteur de recherche hébergé (12 mois)', 'Hosted search engine (12 months)', 360], ['Thème graphique et photos libres de droits', 'Design theme and stock photos', 300]],
+    costs: [['Hébergement de la boutique et de la base de données', 'Shop and database hosting', 50, 'month'], ['Nom de domaine et e-mails professionnels', 'Domain name and business e-mail', 90, 'once'], ['Moteur de recherche hébergé', 'Hosted search engine', 30, 'month'], ['Thème graphique et photos libres de droits', 'Design theme and stock photos', 300, 'once']],
     kw: ['e-commerce', 'ecommerce', 'e commerce', 'boutique en ligne', 'online store', 'online shop', 'shop', 'boutique', 'vente en ligne', 'vendre', 'vente', 'sell', 'selling', 'acheter', 'buy', 'panier', 'cart', 'checkout', 'paiement', 'payment', 'produits', 'products', 'catalogue', 'commande', 'orders', 'magasin', 'marketplace', 'dropshipping', 'shopify', 'woocommerce', 'vetements', 'clothes', 'bijoux', 'jewelry'],
     users: ['Acheteurs en ligne', 'Online shoppers'], owner: ['Marchand', 'Merchant'],
     features: [
@@ -1284,7 +1315,7 @@ const KB = [
   },
   {
     id: 'website', fr: 'Site web vitrine', en: 'Showcase website', code: 'WEB',
-    costs: [['Nom de domaine et hébergement (1 an)', 'Domain name and hosting (1 year)', 120], ['Photos et icônes libres de droits', 'Stock photos and icons', 200], ['Formulaires et anti-spam (1 an)', 'Forms and anti-spam (1 year)', 100]],
+    costs: [['Nom de domaine et hébergement', 'Domain name and hosting', 10, 'month'], ['Photos et icônes libres de droits', 'Stock photos and icons', 200, 'once'], ['Formulaires et anti-spam', 'Forms and anti-spam', 8, 'month']],
     kw: ['site vitrine', 'site web', 'site internet', 'website', 'web site', 'landing', 'landing page', 'portfolio', 'blog', 'wordpress', 'page web', 'presentation', 'présenter', 'presenter', 'association', 'restaurant', 'entreprise', 'company website', 'cv en ligne', 'agence'],
     users: ['Visiteurs et prospects', 'Visitors and prospects'], owner: ['Entreprise cliente', 'Client company'],
     features: [
@@ -1307,7 +1338,7 @@ const KB = [
   },
   {
     id: 'mobile', fr: 'Application mobile', en: 'Mobile app', code: 'APP',
-    costs: [['Comptes développeur Apple et Google', 'Apple and Google developer accounts', 125], ['Hébergement API et base (12 mois)', 'API and database hosting (12 months)', 600], ['Téléphones de test (Android + iPhone)', 'Test phones (Android + iPhone)', 900]],
+    costs: [['Comptes développeur Apple et Google', 'Apple and Google developer accounts', 125, 'once'], ['Hébergement de l’API et de la base', 'API and database hosting', 50, 'month'], ['Téléphones de test (Android + iPhone)', 'Test phones (Android + iPhone)', 900, 'once']],
     kw: ['application mobile', 'app mobile', 'mobile app', 'appli', 'android', 'ios', 'iphone', 'smartphone', 'flutter', 'react native', 'play store', 'app store', 'application telephone', 'phone app', 'notifications push'],
     users: ['Utilisateurs sur smartphone', 'Smartphone users'], owner: ['Porteur du projet', 'Product owner'],
     features: [
@@ -1330,7 +1361,7 @@ const KB = [
   },
   {
     id: 'chatbot', fr: 'Assistant IA / chatbot', en: 'AI assistant / chatbot', code: 'BOT',
-    costs: [['Consommation de l’API d’IA (12 mois, estimation)', 'AI API usage (12 months, estimate)', 1200], ['Hébergement API et base vectorielle (12 mois)', 'API and vector database hosting (12 months)', 600]],
+    costs: [['Consommation de l’API d’IA', 'AI API usage', 100, 'month'], ['Hébergement de l’API et de la base vectorielle', 'API and vector database hosting', 50, 'month']],
     kw: ['chatbot', 'chat bot', 'assistant ia', 'assistant ai', 'ai assistant', 'agent ia', 'ai agent', 'intelligence artificielle', 'artificial intelligence', 'llm', 'gpt', 'chatgpt', 'rag', 'claude', 'repond aux questions', 'answer questions', 'faq', 'support client', 'customer support', 'conversationnel'],
     users: ['Utilisateurs qui posent des questions', 'People asking questions'], owner: ['Service client / organisation', 'Support team / organisation'],
     features: [
@@ -1354,7 +1385,7 @@ const KB = [
   },
   {
     id: 'dashboard', fr: 'Tableau de bord / BI', en: 'Dashboard / BI', code: 'BI',
-    costs: [['Licences outil de visualisation (10 utilisateurs, 12 mois)', 'Visualisation tool licences (10 users, 12 months)', 1700], ['Serveur entrepôt de données (12 mois)', 'Data warehouse server (12 months)', 600]],
+    costs: [['Licences de l’outil de visualisation', 'Visualisation tool licences', 14, 'personMonth'], ['Serveur de l’entrepôt de données', 'Data warehouse server', 50, 'month']],
     kw: ['dashboard', 'tableau de bord', 'reporting', 'rapport automatique', 'bi', 'business intelligence', 'power bi', 'tableau', 'kpi', 'indicateurs', 'statistiques', 'visualisation', 'visualization', 'data viz', 'analyse des ventes', 'sales analysis', 'graphiques', 'charts', 'excel'],
     users: ['Direction et managers', 'Management and managers'], owner: ['Direction', 'Management'],
     features: [
@@ -1377,7 +1408,7 @@ const KB = [
   },
   {
     id: 'ml', fr: 'Modèle d’IA / Machine learning', en: 'Machine learning model', code: 'ML',
-    costs: [['Calcul GPU dans le cloud pour l’entraînement', 'Cloud GPU compute for training', 800], ['Hébergement de l’API de prédiction (12 mois)', 'Prediction API hosting (12 months)', 600], ['Annotation de données', 'Data labelling', 500]],
+    costs: [['Calcul GPU dans le cloud pour l’entraînement', 'Cloud GPU compute for training', 800, 'once'], ['Hébergement de l’API de prédiction', 'Prediction API hosting', 50, 'month'], ['Annotation de données', 'Data labelling', 500, 'once']],
     kw: ['machine learning', 'apprentissage automatique', 'deep learning', 'prediction', 'prédiction', 'predict', 'prevoir', 'forecast', 'prevision', 'classification', 'detection', 'détection', 'reconnaissance', 'recognition', 'computer vision', 'vision par ordinateur', 'modele ia', 'ai model', 'neural', 'reseau de neurones', 'scoring', 'anomalie', 'anomaly', 'recommandation', 'recommendation'],
     users: ['Équipes métier qui utilisent les prédictions', 'Business teams using predictions'], owner: ['Direction métier', 'Business owner'],
     features: [
@@ -1401,7 +1432,7 @@ const KB = [
   },
   {
     id: 'booking', fr: 'Plateforme de réservation', en: 'Booking platform', code: 'RSV',
-    costs: [['Hébergement application et base (12 mois)', 'App and database hosting (12 months)', 600], ['Rappels SMS (environ 3 000 SMS)', 'SMS reminders (about 3,000 SMS)', 300], ['Nom de domaine (1 an)', 'Domain name (1 year)', 30]],
+    costs: [['Hébergement de l’application et de la base', 'App and database hosting', 50, 'month'], ['Rappels par SMS', 'SMS reminders', 25, 'month'], ['Nom de domaine', 'Domain name', 30, 'once']],
     kw: ['reservation', 'réservation', 'booking', 'book', 'reserver', 'rendez-vous', 'rdv', 'appointment', 'agenda', 'calendrier', 'calendar', 'creneau', 'slot', 'location', 'rental', 'salle', 'room', 'hotel', 'table', 'planning', 'prise de rendez-vous', 'doctolib'],
     users: ['Clients qui réservent', 'Customers booking'], owner: ['Prestataire', 'Service provider'],
     features: [
@@ -1424,7 +1455,7 @@ const KB = [
   },
   {
     id: 'business', fr: 'Application de gestion (CRM / ERP / SaaS)', en: 'Business application (CRM / ERP / SaaS)', code: 'APPW',
-    costs: [['Hébergement cloud européen (12 mois)', 'European cloud hosting (12 months)', 1200], ['Sauvegardes externalisées (12 mois)', 'Off-site backups (12 months)', 240], ['Outil de connexion unique (SSO)', 'Single sign-on tool (SSO)', 0]],
+    costs: [['Hébergement cloud européen', 'European cloud hosting', 100, 'month'], ['Sauvegardes externalisées', 'Off-site backups', 20, 'month']],
     kw: ['crm', 'erp', 'saas', 'gestion', 'management', 'logiciel de gestion', 'plateforme', 'platform', 'intranet', 'portail', 'portal', 'clients', 'stock', 'inventaire', 'inventory', 'facturation', 'invoicing', 'ressources humaines', 'hr', 'rh', 'tickets', 'suivi', 'tracking', 'workflow', 'back office', 'administration'],
     users: ['Employés de l’entreprise', 'Company staff'], owner: ['Direction de l’entreprise', 'Company management'],
     features: [
@@ -1447,7 +1478,7 @@ const KB = [
   },
   {
     id: 'elearning', fr: 'Plateforme e-learning', en: 'E-learning platform', code: 'LMS',
-    costs: [['Hébergement des vidéos (12 mois)', 'Video hosting (12 months)', 600], ['Hébergement de la plateforme (12 mois)', 'Platform hosting (12 months)', 600]],
+    costs: [['Hébergement des vidéos', 'Video hosting', 50, 'month'], ['Hébergement de la plateforme', 'Platform hosting', 50, 'month']],
     kw: ['e-learning', 'elearning', 'lms', 'formation en ligne', 'online course', 'cours en ligne', 'courses', 'cours', 'training platform', 'apprendre', 'learning', 'quiz', 'eleves', 'students', 'etudiants', 'ecole', 'school', 'moodle', 'mooc', 'education'],
     users: ['Apprenants', 'Learners'], owner: ['Organisme de formation', 'Training organisation'],
     features: [
@@ -1469,7 +1500,7 @@ const KB = [
   },
   {
     id: 'security', fr: 'Audit et sécurisation (cybersécurité)', en: 'Security audit and hardening', code: 'SEC',
-    costs: [['Licence scanner de vulnérabilités (1 an)', 'Vulnerability scanner licence (1 year)', 3600], ['Serveur de supervision SIEM (12 mois)', 'SIEM monitoring server (12 months)', 1200], ['Plateforme de simulation d’hameçonnage', 'Phishing simulation platform', 500]],
+    costs: [['Licence du scanner de vulnérabilités', 'Vulnerability scanner licence', 300, 'month'], ['Serveur de supervision SIEM', 'SIEM monitoring server', 100, 'month'], ['Plateforme de simulation d’hameçonnage', 'Phishing simulation platform', 500, 'once']],
     kw: ['cybersecurite', 'cybersécurité', 'cybersecurity', 'securite', 'sécurité', 'security', 'audit', 'pentest', 'test d intrusion', 'penetration', 'soc', 'siem', 'iso 27001', 'nis2', 'conformite', 'compliance', 'vulnerabilite', 'vulnerability', 'piratage', 'hack', 'ransomware', 'phishing', 'firewall', 'pare-feu'],
     users: ['Utilisateurs et équipes IT', 'Users and IT teams'], owner: ['Direction / RSSI', 'Management / CISO'],
     features: [
@@ -1494,7 +1525,7 @@ const KB = [
   },
   {
     id: 'iot', fr: 'Objets connectés (IoT)', en: 'Connected devices (IoT)', code: 'IOT',
-    costs: [['Matériel de prototypage (10 capteurs)', 'Prototype hardware (10 sensors)', 1500], ['Plateforme IoT et hébergement (12 mois)', 'IoT platform and hosting (12 months)', 600], ['Abonnements réseau (LoRa / SIM)', 'Network subscriptions (LoRa / SIM)', 300]],
+    costs: [['Matériel de prototypage (10 capteurs)', 'Prototype hardware (10 sensors)', 1500, 'once'], ['Plateforme IoT et hébergement', 'IoT platform and hosting', 50, 'month'], ['Abonnements réseau (LoRa / SIM)', 'Network subscriptions (LoRa / SIM)', 25, 'month']],
     kw: ['iot', 'objets connectes', 'objet connecte', 'connected device', 'capteur', 'capteurs', 'sensor', 'sensors', 'arduino', 'raspberry', 'esp32', 'domotique', 'smart home', 'maison connectee', 'temperature', 'mesure', 'telemetrie', 'telemetry', 'industrie 4.0', 'machine', 'robot'],
     users: ['Opérateurs et techniciens', 'Operators and technicians'], owner: ['Exploitant', 'Operator'],
     features: [
@@ -1516,7 +1547,7 @@ const KB = [
   },
   {
     id: 'software', fr: 'Application web sur mesure', en: 'Custom web application', code: 'PRJ',
-    costs: [['Hébergement application et base (12 mois)', 'App and database hosting (12 months)', 600], ['Nom de domaine et e-mails (1 an)', 'Domain name and e-mail (1 year)', 60]],
+    costs: [['Hébergement de l’application et de la base', 'App and database hosting', 50, 'month'], ['Nom de domaine et e-mails', 'Domain name and e-mail', 60, 'once']],
     kw: [],
     users: ['Utilisateurs finaux', 'End users'], owner: ['Client', 'Client'],
     features: [
@@ -1638,7 +1669,8 @@ const Generator = (() => {
     const project = {
       name, code: `${tp.code}-${new Date(s0).getUTCFullYear()}`, start: C.fmt(s0), end: endOf([close]), statusDate: '', workingDays: true,
       phases: PHASES.map(([id, fr, en, color]) => ({ id, fr, en, color })), milestones, tasks,
-      budget: { contingency: 0.15, extras: (tp.costs || []).map(([fr, en, amount]) => ({ fr, en, amount })) },
+      budget: { contMode: 'auto', contingency: 0.15, extras: [...(tp.costs || []).map(([fr, en, amount, per]) => ({ fr, en, amount, per })),
+        { fr: 'Outils collaboratifs et licences de développement', en: 'Collaboration tools and developer licences', amount: 15, per: 'personMonth' }] },
       docs: { fr: docs({ description, client, author, lang: 'fr', tp, feats, tasks, milestones, name, size }),
               en: docs({ description, client, author, lang: 'en', tp, feats, tasks, milestones, name, size }) }
     };
@@ -1756,10 +1788,11 @@ if (typeof module !== 'undefined') module.exports = Generator;
 <script>const SAMPLE = {
   name: 'ESAIP AI Assistant', code: 'EAA-2026',
   start: '2026-09-28', end: '2026-12-18', statusDate: '', workingDays: true,
-  budget: { contingency: 0.15, extras: [
-    { fr: 'Consommation de l’API d’IA (12 mois, estimation)', en: 'AI API usage (12 months, estimate)', amount: 1200 },
-    { fr: 'Base de données hébergée (12 mois)', en: 'Hosted database (12 months)', amount: 300 },
-    { fr: 'Nom de domaine (1 an)', en: 'Domain name (1 year)', amount: 30 }
+  budget: { contMode: 'auto', contingency: 0.15, extras: [
+    { fr: 'Consommation de l’API d’IA', en: 'AI API usage', amount: 100, per: 'month' },
+    { fr: 'Base de données hébergée', en: 'Hosted database', amount: 25, per: 'month' },
+    { fr: 'Nom de domaine', en: 'Domain name', amount: 30, per: 'once' },
+    { fr: 'Outils collaboratifs et licences de développement', en: 'Collaboration tools and developer licences', amount: 15, per: 'personMonth' }
   ] },
   docs: {
     fr: {
@@ -2010,6 +2043,9 @@ const I18N = {
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
     tabAssistant: 'Assistant', newProject: 'Nouveau projet', tabBudget: 'Budget et équipe',
+    per_once: 'Une fois', per_month: 'Par mois', per_person: 'Par personne', per_personMonth: 'Par personne et par mois', basisL: 'Calcul', monthsU: 'mois',
+    contAuto: 'Automatique, selon le risque du planning', contManual: 'Taux fixe choisi', contModeL: 'Marge pour imprévus', contWhy: 'Calcul :',
+    budLive: 'Chaque modification s’applique aussitôt : budget, indicateurs et documents suivent.',
     kBudget: 'Budget estimé', kTeam: 'équipe', bTotal: 'Budget total', bLabour: 'Main-d’œuvre', bFixed: 'Coûts fixes', bCont: 'Marge pour imprévus', bTeam: 'Équipe', bPd: 'jours-homme', persons: 'personnes',
     bEV: 'Valeur acquise', bPV: 'Valeur planifiée', teamT: 'Équipe nécessaire', teamHint: 'Modifiez un taux journalier, puis enregistrez.', role: 'Rôle', people: 'Pers.', pdays: 'Jours-homme', period: 'Période', load: 'Charge', rate: 'Taux / jour', cost: 'Coût', total: 'Total',
     costPhase: 'Coût par phase', fixedT: 'Coûts fixes et marge', addExtra: 'Ajouter un coût', contingencyL: 'Marge pour imprévus (%)', saveBudget: 'Enregistrer le budget', amountL: 'Montant (€)', labelFr: 'Libellé (FR)', labelEn: 'Libellé (EN)',
@@ -2065,6 +2101,9 @@ const I18N = {
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
     tabAssistant: 'Assistant', newProject: 'New project', tabBudget: 'Budget & team',
+    per_once: 'One-off', per_month: 'Per month', per_person: 'Per person', per_personMonth: 'Per person per month', basisL: 'Basis', monthsU: 'months',
+    contAuto: 'Automatic, from schedule risk', contManual: 'Fixed rate', contModeL: 'Contingency', contWhy: 'How:',
+    budLive: 'Every change applies at once: budget, indicators and documents follow.',
     kBudget: 'Estimated budget', kTeam: 'team', bTotal: 'Total budget', bLabour: 'Labour', bFixed: 'Fixed costs', bCont: 'Contingency', bTeam: 'Team', bPd: 'person-days', persons: 'people',
     bEV: 'Earned value', bPV: 'Planned value', teamT: 'Required team', teamHint: 'Change a day rate, then save.', role: 'Role', people: 'People', pdays: 'Person-days', period: 'Period', load: 'Load', rate: 'Day rate', cost: 'Cost', total: 'Total',
     costPhase: 'Cost by phase', fixedT: 'Fixed costs and contingency', addExtra: 'Add a cost', contingencyL: 'Contingency (%)', saveBudget: 'Save budget', amountL: 'Amount (€)', labelFr: 'Label (FR)', labelEn: 'Label (EN)',
@@ -2172,21 +2211,36 @@ function renderBudget() {
     `<tr class="total-row"><td>${esc(t('total'))}</td><td class="r num">${B.people}</td><td class="r num">${B.personDays}</td><td></td><td></td><td></td><td class="r num">${esc(eurF(B.labour))}</td></tr></tbody>`;
   const max = Math.max(1, ...B.byPhase.map(x => x.cost));
   $('phaseCost').innerHTML = B.byPhase.map(x => `<div class="pc-row"><span>${esc(x.id + ' · ' + nm(x))}</span><span class="pc-bar"><i style="width:${x.cost / max * 100}%;background:${esc(x.color)}"></i></span><span class="num">${esc(eurF(x.cost))}</span></div>`).join('');
-  $('extraRows').innerHTML = (P.budget.extras || []).map(extraRow).join('');
-  $('bud-cont').value = Math.round((P.budget.contingency ?? 0.15) * 100);
+  const totals = new Map(B.extras.map(x => [x, x.total]));
+  $('extraRows').innerHTML = (P.budget.extras || []).map((x, i) => { const hit = B.extras.find(y => y.fr === x.fr && y.en === x.en && y.amount === x.amount && (y.per || 'once') === (x.per || 'once')); return extraRow({ ...x, total: hit ? hit.total : 0 }, i); }).join('');
+  $('bud-mode').innerHTML = `<option value="auto">${esc(t('contAuto'))}</option><option value="manual">${esc(t('contManual'))}</option>`;
+  $('bud-mode').value = B.contMode;
+  $('bud-cont').value = Math.round(B.contingencyRate * 100);
+  $('bud-cont').disabled = B.contMode === 'auto';
+  $('contWhy').innerHTML = B.contMode === 'auto' ? `<b>${esc(t('contWhy'))}</b> ${B.autoContingency.parts.map(x => `${esc(nm(x))} <span class="num">${Math.round(x.rate * 100)} %</span>`).join(' + ')} = <b class="num">${Math.round(B.contingencyRate * 100)} %</b>` : '';
+  $('fixedSum').textContent = `${t('bFixed')} : ${eurF(B.extrasTotal)} · ${B.months} ${t('monthsU')} · ${B.people} ${t('persons')}`;
 }
-const extraRow = x => `<div class="extra-row"><input class="ex-fr" maxlength="120" value="${esc(x.fr)}" placeholder="${esc(t('labelFr'))}" aria-label="${esc(t('labelFr'))}"><input class="ex-en" maxlength="120" value="${esc(x.en)}" placeholder="${esc(t('labelEn'))}" aria-label="${esc(t('labelEn'))}"><input class="ex-amt" type="number" min="0" step="10" value="${x.amount}" aria-label="${esc(t('amountL'))}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
-$('extraRows').addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) ev.target.closest('.extra-row').remove(); });
-$('addExtra').addEventListener('click', () => $('extraRows').insertAdjacentHTML('beforeend', extraRow({ fr: '', en: '', amount: 0 })));
-$('saveBudget').addEventListener('click', () => {
+const PERS = ['once', 'month', 'person', 'personMonth'];
+const extraRow = (x, i) => `<div class="extra-row" data-idx="${i}"><input class="ex-fr" id="ex-fr-${i}" maxlength="120" value="${esc(x.fr)}" placeholder="${esc(t('labelFr'))}" aria-label="${esc(t('labelFr'))}"><input class="ex-en" id="ex-en-${i}" maxlength="120" value="${esc(x.en)}" placeholder="${esc(t('labelEn'))}" aria-label="${esc(t('labelEn'))}">
+  <input class="ex-amt" id="ex-amt-${i}" type="number" min="0" step="1" value="${x.amount}" aria-label="${esc(t('amountL'))}">
+  <select class="ex-per" id="ex-per-${i}" aria-label="${esc(t('basisL'))}">${PERS.map(p => `<option value="${p}"${(x.per || 'once') === p ? ' selected' : ''}>${esc(t('per_' + p))}</option>`).join('')}</select>
+  <span class="ex-tot num">${x.total != null ? esc(eurF(x.total)) : ''}</span><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
+$('extraRows').addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) { ev.target.closest('.extra-row').remove(); applyBudget(false); } });
+$('addExtra').addEventListener('click', () => { const i = document.querySelectorAll('#extraRows .extra-row').length; $('extraRows').insertAdjacentHTML('beforeend', extraRow({ fr: '', en: '', amount: 0, per: 'once' }, i)); $('ex-fr-' + i).focus(); });
+function applyBudget(showMsg) {
   const rates = new Map([...document.querySelectorAll('#teamTable .rate-in')].map(i => [i.dataset.role, Number(i.value)]));
   const known = new Set(P.team.map(r => r.id));
   const team = [...P.team.map(r => rates.has(r.id) ? { ...r, rate: rates.get(r.id) } : r),
     ...Budget.staffing(P).filter(r => !known.has(r.id)).map(r => ({ id: r.id, fr: r.fr, en: r.en, rate: rates.has(r.id) ? rates.get(r.id) : r.rate }))];
-  const extras = [...document.querySelectorAll('#extraRows .extra-row')].map(r => ({ fr: r.querySelector('.ex-fr').value, en: r.querySelector('.ex-en').value, amount: Number(r.querySelector('.ex-amt').value) }));
-  P = C.validateProject({ ...P, team, budget: { contingency: Number($('bud-cont').value) / 100, extras } }).project; commit();
-  $('budMsg').textContent = t('saved'); $('budMsg').className = 'ok';
-});
+  const extras = [...document.querySelectorAll('#extraRows .extra-row')].map(r => ({ fr: r.querySelector('.ex-fr').value, en: r.querySelector('.ex-en').value, amount: Number(r.querySelector('.ex-amt').value), per: r.querySelector('.ex-per').value }));
+  P = C.validateProject({ ...P, team, budget: { contMode: $('bud-mode').value, contingency: Number($('bud-cont').value) / 100, extras } }).project; commit();
+  if (showMsg) { $('budMsg').textContent = t('saved'); $('budMsg').className = 'ok'; }
+}
+$('saveBudget').addEventListener('click', () => applyBudget(true));
+// every edit in the budget tab applies by itself (short pause while typing), so all screens and documents follow
+let budTimer = null;
+$('tab-budget').addEventListener('input', ev => { if (!ev.target.matches('input, select')) return; clearTimeout(budTimer); budTimer = setTimeout(() => applyBudget(false), 450); });
+$('tab-budget').addEventListener('change', ev => { if (ev.target.matches('select')) { clearTimeout(budTimer); applyBudget(false); } });
 
 /* ---------- burndown chart ---------- */
 function renderBurndown() {
@@ -2691,7 +2745,12 @@ $('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); ren
 $('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); });
 
 /* ---------- wiring ---------- */
-function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); }
+function renderAll() {
+  const fa = document.activeElement, fid = fa && fa.id, sel = fa && typeof fa.selectionStart === 'number' ? [fa.selectionStart, fa.selectionEnd] : null;
+  renderAllInner();
+  if (fid && document.activeElement !== $(fid) && $(fid)) { const el = $(fid); el.focus({ preventScroll: true }); if (sel && typeof el.setSelectionRange === 'function') try { el.setSelectionRange(sel[0], sel[1]); } catch { /* number inputs */ } }
+}
+function renderAllInner() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() { P.history = C.recordHistory(P, nowT()); persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));

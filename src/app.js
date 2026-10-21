@@ -34,6 +34,9 @@ const I18N = {
     eDates: 'Dates invalides : la fin doit être le même jour ou après le début.', eDeps: 'Dépendance inconnue : ', eCycle: 'Ces dépendances créent une boucle.',
     eRange: 'La date de fin du projet doit être après le début.', eRows: 'Ligne invalide : vérifiez ID et date.', eDoneDate: 'Date de fin réelle invalide.',
     tabAssistant: 'Assistant', newProject: 'Nouveau projet', tabBudget: 'Budget et équipe',
+    per_once: 'Une fois', per_month: 'Par mois', per_person: 'Par personne', per_personMonth: 'Par personne et par mois', basisL: 'Calcul', monthsU: 'mois',
+    contAuto: 'Automatique, selon le risque du planning', contManual: 'Taux fixe choisi', contModeL: 'Marge pour imprévus', contWhy: 'Calcul :',
+    budLive: 'Chaque modification s’applique aussitôt : budget, indicateurs et documents suivent.',
     kBudget: 'Budget estimé', kTeam: 'équipe', bTotal: 'Budget total', bLabour: 'Main-d’œuvre', bFixed: 'Coûts fixes', bCont: 'Marge pour imprévus', bTeam: 'Équipe', bPd: 'jours-homme', persons: 'personnes',
     bEV: 'Valeur acquise', bPV: 'Valeur planifiée', teamT: 'Équipe nécessaire', teamHint: 'Modifiez un taux journalier, puis enregistrez.', role: 'Rôle', people: 'Pers.', pdays: 'Jours-homme', period: 'Période', load: 'Charge', rate: 'Taux / jour', cost: 'Coût', total: 'Total',
     costPhase: 'Coût par phase', fixedT: 'Coûts fixes et marge', addExtra: 'Ajouter un coût', contingencyL: 'Marge pour imprévus (%)', saveBudget: 'Enregistrer le budget', amountL: 'Montant (€)', labelFr: 'Libellé (FR)', labelEn: 'Libellé (EN)',
@@ -89,6 +92,9 @@ const I18N = {
     eDates: 'Invalid dates: the end must be on or after the start.', eDeps: 'Unknown dependency: ', eCycle: 'These dependencies create a loop.',
     eRange: 'The project end date must be after the start.', eRows: 'Invalid row: check ID and date.', eDoneDate: 'Invalid completion date.',
     tabAssistant: 'Assistant', newProject: 'New project', tabBudget: 'Budget & team',
+    per_once: 'One-off', per_month: 'Per month', per_person: 'Per person', per_personMonth: 'Per person per month', basisL: 'Basis', monthsU: 'months',
+    contAuto: 'Automatic, from schedule risk', contManual: 'Fixed rate', contModeL: 'Contingency', contWhy: 'How:',
+    budLive: 'Every change applies at once: budget, indicators and documents follow.',
     kBudget: 'Estimated budget', kTeam: 'team', bTotal: 'Total budget', bLabour: 'Labour', bFixed: 'Fixed costs', bCont: 'Contingency', bTeam: 'Team', bPd: 'person-days', persons: 'people',
     bEV: 'Earned value', bPV: 'Planned value', teamT: 'Required team', teamHint: 'Change a day rate, then save.', role: 'Role', people: 'People', pdays: 'Person-days', period: 'Period', load: 'Load', rate: 'Day rate', cost: 'Cost', total: 'Total',
     costPhase: 'Cost by phase', fixedT: 'Fixed costs and contingency', addExtra: 'Add a cost', contingencyL: 'Contingency (%)', saveBudget: 'Save budget', amountL: 'Amount (€)', labelFr: 'Label (FR)', labelEn: 'Label (EN)',
@@ -196,21 +202,36 @@ function renderBudget() {
     `<tr class="total-row"><td>${esc(t('total'))}</td><td class="r num">${B.people}</td><td class="r num">${B.personDays}</td><td></td><td></td><td></td><td class="r num">${esc(eurF(B.labour))}</td></tr></tbody>`;
   const max = Math.max(1, ...B.byPhase.map(x => x.cost));
   $('phaseCost').innerHTML = B.byPhase.map(x => `<div class="pc-row"><span>${esc(x.id + ' · ' + nm(x))}</span><span class="pc-bar"><i style="width:${x.cost / max * 100}%;background:${esc(x.color)}"></i></span><span class="num">${esc(eurF(x.cost))}</span></div>`).join('');
-  $('extraRows').innerHTML = (P.budget.extras || []).map(extraRow).join('');
-  $('bud-cont').value = Math.round((P.budget.contingency ?? 0.15) * 100);
+  const totals = new Map(B.extras.map(x => [x, x.total]));
+  $('extraRows').innerHTML = (P.budget.extras || []).map((x, i) => { const hit = B.extras.find(y => y.fr === x.fr && y.en === x.en && y.amount === x.amount && (y.per || 'once') === (x.per || 'once')); return extraRow({ ...x, total: hit ? hit.total : 0 }, i); }).join('');
+  $('bud-mode').innerHTML = `<option value="auto">${esc(t('contAuto'))}</option><option value="manual">${esc(t('contManual'))}</option>`;
+  $('bud-mode').value = B.contMode;
+  $('bud-cont').value = Math.round(B.contingencyRate * 100);
+  $('bud-cont').disabled = B.contMode === 'auto';
+  $('contWhy').innerHTML = B.contMode === 'auto' ? `<b>${esc(t('contWhy'))}</b> ${B.autoContingency.parts.map(x => `${esc(nm(x))} <span class="num">${Math.round(x.rate * 100)} %</span>`).join(' + ')} = <b class="num">${Math.round(B.contingencyRate * 100)} %</b>` : '';
+  $('fixedSum').textContent = `${t('bFixed')} : ${eurF(B.extrasTotal)} · ${B.months} ${t('monthsU')} · ${B.people} ${t('persons')}`;
 }
-const extraRow = x => `<div class="extra-row"><input class="ex-fr" maxlength="120" value="${esc(x.fr)}" placeholder="${esc(t('labelFr'))}" aria-label="${esc(t('labelFr'))}"><input class="ex-en" maxlength="120" value="${esc(x.en)}" placeholder="${esc(t('labelEn'))}" aria-label="${esc(t('labelEn'))}"><input class="ex-amt" type="number" min="0" step="10" value="${x.amount}" aria-label="${esc(t('amountL'))}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
-$('extraRows').addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) ev.target.closest('.extra-row').remove(); });
-$('addExtra').addEventListener('click', () => $('extraRows').insertAdjacentHTML('beforeend', extraRow({ fr: '', en: '', amount: 0 })));
-$('saveBudget').addEventListener('click', () => {
+const PERS = ['once', 'month', 'person', 'personMonth'];
+const extraRow = (x, i) => `<div class="extra-row" data-idx="${i}"><input class="ex-fr" id="ex-fr-${i}" maxlength="120" value="${esc(x.fr)}" placeholder="${esc(t('labelFr'))}" aria-label="${esc(t('labelFr'))}"><input class="ex-en" id="ex-en-${i}" maxlength="120" value="${esc(x.en)}" placeholder="${esc(t('labelEn'))}" aria-label="${esc(t('labelEn'))}">
+  <input class="ex-amt" id="ex-amt-${i}" type="number" min="0" step="1" value="${x.amount}" aria-label="${esc(t('amountL'))}">
+  <select class="ex-per" id="ex-per-${i}" aria-label="${esc(t('basisL'))}">${PERS.map(p => `<option value="${p}"${(x.per || 'once') === p ? ' selected' : ''}>${esc(t('per_' + p))}</option>`).join('')}</select>
+  <span class="ex-tot num">${x.total != null ? esc(eurF(x.total)) : ''}</span><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
+$('extraRows').addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) { ev.target.closest('.extra-row').remove(); applyBudget(false); } });
+$('addExtra').addEventListener('click', () => { const i = document.querySelectorAll('#extraRows .extra-row').length; $('extraRows').insertAdjacentHTML('beforeend', extraRow({ fr: '', en: '', amount: 0, per: 'once' }, i)); $('ex-fr-' + i).focus(); });
+function applyBudget(showMsg) {
   const rates = new Map([...document.querySelectorAll('#teamTable .rate-in')].map(i => [i.dataset.role, Number(i.value)]));
   const known = new Set(P.team.map(r => r.id));
   const team = [...P.team.map(r => rates.has(r.id) ? { ...r, rate: rates.get(r.id) } : r),
     ...Budget.staffing(P).filter(r => !known.has(r.id)).map(r => ({ id: r.id, fr: r.fr, en: r.en, rate: rates.has(r.id) ? rates.get(r.id) : r.rate }))];
-  const extras = [...document.querySelectorAll('#extraRows .extra-row')].map(r => ({ fr: r.querySelector('.ex-fr').value, en: r.querySelector('.ex-en').value, amount: Number(r.querySelector('.ex-amt').value) }));
-  P = C.validateProject({ ...P, team, budget: { contingency: Number($('bud-cont').value) / 100, extras } }).project; commit();
-  $('budMsg').textContent = t('saved'); $('budMsg').className = 'ok';
-});
+  const extras = [...document.querySelectorAll('#extraRows .extra-row')].map(r => ({ fr: r.querySelector('.ex-fr').value, en: r.querySelector('.ex-en').value, amount: Number(r.querySelector('.ex-amt').value), per: r.querySelector('.ex-per').value }));
+  P = C.validateProject({ ...P, team, budget: { contMode: $('bud-mode').value, contingency: Number($('bud-cont').value) / 100, extras } }).project; commit();
+  if (showMsg) { $('budMsg').textContent = t('saved'); $('budMsg').className = 'ok'; }
+}
+$('saveBudget').addEventListener('click', () => applyBudget(true));
+// every edit in the budget tab applies by itself (short pause while typing), so all screens and documents follow
+let budTimer = null;
+$('tab-budget').addEventListener('input', ev => { if (!ev.target.matches('input, select')) return; clearTimeout(budTimer); budTimer = setTimeout(() => applyBudget(false), 450); });
+$('tab-budget').addEventListener('change', ev => { if (ev.target.matches('select')) { clearTimeout(budTimer); applyBudget(false); } });
 
 /* ---------- burndown chart ---------- */
 function renderBurndown() {
@@ -715,7 +736,12 @@ $('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); ren
 $('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); });
 
 /* ---------- wiring ---------- */
-function renderAll() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); }
+function renderAll() {
+  const fa = document.activeElement, fid = fa && fa.id, sel = fa && typeof fa.selectionStart === 'number' ? [fa.selectionStart, fa.selectionEnd] : null;
+  renderAllInner();
+  if (fid && document.activeElement !== $(fid) && $(fid)) { const el = $(fid); el.focus({ preventScroll: true }); if (sel && typeof el.setSelectionRange === 'function') try { el.setSelectionRange(sel[0], sel[1]); } catch { /* number inputs */ } }
+}
+function renderAllInner() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() { P.history = C.recordHistory(P, nowT()); persist(); renderAll(); }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));

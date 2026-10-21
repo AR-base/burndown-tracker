@@ -1,10 +1,11 @@
 const SAMPLE = {
   name: 'ESAIP AI Assistant', code: 'EAA-2026',
   start: '2026-09-28', end: '2026-12-18', statusDate: '', workingDays: true,
-  budget: { contingency: 0.15, extras: [
-    { fr: 'Consommation de l’API d’IA (12 mois, estimation)', en: 'AI API usage (12 months, estimate)', amount: 1200 },
-    { fr: 'Base de données hébergée (12 mois)', en: 'Hosted database (12 months)', amount: 300 },
-    { fr: 'Nom de domaine (1 an)', en: 'Domain name (1 year)', amount: 30 }
+  budget: { contMode: 'auto', contingency: 0.15, extras: [
+    { fr: 'Consommation de l’API d’IA', en: 'AI API usage', amount: 100, per: 'month' },
+    { fr: 'Base de données hébergée', en: 'Hosted database', amount: 25, per: 'month' },
+    { fr: 'Nom de domaine', en: 'Domain name', amount: 30, per: 'once' },
+    { fr: 'Outils collaboratifs et licences de développement', en: 'Collaboration tools and developer licences', amount: 15, per: 'personMonth' }
   ] },
   docs: {
     fr: {

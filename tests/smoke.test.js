@@ -122,4 +122,23 @@ check('budget settings saved with the project', sv.budget.extras.some(x => x.fr 
 check('budget text is escaped', !$('extraRows').querySelector('b'));
 check('no runtime errors in budget', errors.length === 0);
 if (errors.length) console.log(errors);
+// budget follows every edit, without pressing save
+click(d.querySelector('[data-tab="project"]')); click($('btnSample')); click($('btnSample'));
+click(d.querySelector('[data-tab="budget"]'));
+const fixedTxt = () => $('fixedSum').textContent, budTot = () => d.querySelector('#budKpis .kpi.total .v').textContent;
+const f0 = fixedTxt(), b0 = budTot();
+const amt = d.querySelector('#extraRows .ex-amt'); amt.value = String(Number(amt.value) + 500); amt.dispatchEvent(new w.Event('input', { bubbles: true }));
+await new Promise(r => setTimeout(r, 600));
+check('editing a fixed cost applies by itself (no save click)', budTot() !== b0 && fixedTxt() !== f0);
+const topTile = () => [...d.querySelectorAll('#kpis .kpi')].find(k => /budget/i.test(k.querySelector('.k').textContent)).querySelector('.v').textContent;
+check('top budget indicator follows', topTile() === budTot());
+click(d.querySelector('[data-tab="project"]'));
+$('pf-end').value = '2027-03-26'; $('projForm').dispatchEvent(new w.Event('submit', { cancelable: true }));
+click(d.querySelector('[data-tab="budget"]'));
+check('a longer project raises the monthly fixed costs', fixedTxt() !== f0 && /mois|months/.test(fixedTxt()));
+check('automatic margin is explained', /%/.test($('contWhy').textContent) && $('bud-cont').disabled);
+$('bud-mode').value = 'manual'; $('bud-mode').dispatchEvent(new w.Event('change', { bubbles: true }));
+check('switching to a fixed margin enables the rate field', !$('bud-cont').disabled);
+check('no runtime errors after live budget edits', errors.length === 0);
+if (errors.length) console.log(errors);
 })();
