@@ -34,6 +34,34 @@ Onglet **Budget et équipe** : calculé à partir du Gantt. Chaque tâche compte
 
 **Budget & team** tab, computed from the Gantt: person-days and headcount per role, editable day rates, cost by phase, fixed costs per project type, contingency, earned/planned value; included in all three Word documents.
 
+## 0 ter. Comptes, équipes et cloud (Phase 1) / Accounts, teams and cloud
+
+Sans configuration, l'outil reste une démo locale (données dans le navigateur). Avec Supabase, il devient multi-utilisateur :
+Without configuration the tool stays a local demo. With Supabase it becomes multi-user:
+
+| Fonction / Feature | Détail / Detail |
+| --- | --- |
+| Connexion / Sign-in | E-mail + mot de passe (10 caractères min.), Google, Microsoft, mot de passe oublié, vérification en deux étapes (TOTP) |
+| Espaces de travail / Workspaces | Un par entreprise ou startup, plusieurs projets chacun, sélecteur dans l'en-tête |
+| Rôles / Roles | Propriétaire > Chef de projet > Membre > Lecteur, appliqués par la base de données (RLS) |
+| Portefeuille / Portfolio | Tous les projets de l'espace : santé (SPI), avancement, budget, fin la plus tardive, archivage |
+| Enregistrement / Saving | Automatique, versionné (détection des conflits), synchronisé en direct entre collègues, hors ligne toléré |
+| Invitations | Lien à usage unique, lié à l'adresse e-mail, valable 7 jours (seul le hachage est stocké) |
+| Liens client / Client links | Lecture seule sans compte, révocables, avec expiration, date de dernière consultation |
+| Activité / Activity | Journal de qui a fait quoi (modifications regroupées par 10 minutes) |
+| RGPD / GDPR | Données en UE (Francfort), export de mes données, suppression du compte |
+
+### Mise en place (10 minutes) / Setup
+
+1. **supabase.com → New project**, région **Central EU (Frankfurt)**.
+2. **SQL Editor → New query** : collez `db/schema.sql` → **Run**. (Relançable sans risque / safe to re-run.)
+3. **Authentication → URL Configuration** : *Site URL* = `https://burndown-tracker.vercel.app`, *Redirect URLs* = la même adresse (+ `http://localhost:8080` pour tester en local).
+4. **Authentication → Sign In / Providers** : laissez *Confirm email* activé ; activez *Leaked password protection*. Optionnel : Google et Azure (Microsoft) avec leurs identifiants OAuth.
+5. **Project Settings → API** : copiez *Project URL* et la clé **anon public**, puis créez `cloud.config.json` à la racine (voir `cloud.config.example.json`) et poussez. Vercel redéploie ; le build ajoute l'adresse Supabase à la CSP (`connect-src`).
+
+Ne mettez **jamais** la clé `service_role` dans ce fichier : le build la refuse. La clé anon est publique par conception ; la sécurité vient des règles RLS de `db/schema.sql`, testées par `tests/db.test.mjs` (17 scénarios : autre entreprise, visiteur anonyme, membre, lecteur, liens expirés, suppression de compte…).
+Never put the `service_role` key in this file: the build refuses it. The anon key is public by design; security comes from the RLS rules in `db/schema.sql`, tested by `tests/db.test.mjs`.
+
 ## 1. Déployer / Deploy
 
 ### Option A — Vercel + GitHub (recommandé / recommended)
@@ -141,10 +169,10 @@ Les fichiers .docx sont générés dans le navigateur (aucun serveur) et s'ouvre
 ```bash
 npm install        # jsdom pour les tests DOM / for DOM tests
 npm run build      # src/ → index.html + hachages CSP dans vercel.json et _headers
-npm test           # 12 logique + 8 import/export + 14 .docx + 19 assistant + 8 budget + 54 interface = 115 tests
+npm test           # 12 logique + 8 import/export + 14 .docx + 19 assistant + 8 budget + 7 cloud + 17 base de données + 54 interface + 38 comptes = 177 tests
 ```
 
-Structure : `src/core.js` (calculs purs), `src/io.js` (CSV/Mermaid), `src/docgen.js` (générateur .docx sans dépendance), `src/kb.js` + `src/generator.js` (assistant de projet), `src/budget.js` (équipe et budget), `src/app.js` (interface), `src/app.html` (gabarit + CSS), `src/sample.js` (projet exemple ESAIP AI Assistant).
+Structure : `src/core.js` (calculs purs), `src/io.js` (CSV/Mermaid), `src/docgen.js` (générateur .docx sans dépendance), `src/kb.js` + `src/generator.js` (assistant de projet), `src/budget.js` (équipe et budget), `src/cloud.js` + `src/cloud-ui.js` (comptes et cloud), `db/schema.sql` (base Supabase), `src/app.js` (interface), `src/app.html` (gabarit + CSS), `src/sample.js` (projet exemple ESAIP AI Assistant).
 La CI GitHub Actions (`.github/workflows/ci.yml`) reconstruit et teste à chaque push.
 
 Sécurité / Security: entrées validées et bornées (IDs, dates, tailles ≤ 2 Mo), tout texte échappé avant affichage, détection des cycles de dépendances, aucun secret, aucune requête réseau sortante (`connect-src 'none'`).

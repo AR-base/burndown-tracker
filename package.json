@@ -1,11 +1,14 @@
 {
   "name": "burndown-tracker",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Bilingual FR/EN burndown + Gantt tracker for any project (single static page).",
+  "description": "Bilingual FR/EN project tracker: burndown, Gantt, budget, team workspaces and documents for any project.",
   "scripts": {
     "build": "python3 src/build.py",
-    "test": "node tests/core.test.js && node tests/io.test.js && node tests/docgen.test.js && node tests/generator.test.js && node tests/budget.test.js && node tests/smoke.test.js"
+    "test": "python3 src/build.py --test-cloud && node tests/core.test.js && node tests/io.test.js && node tests/docgen.test.js && node tests/generator.test.js && node tests/budget.test.js && node tests/cloud.test.js && node tests/db.test.mjs && node tests/smoke.test.js && node tests/cloud-ui.test.js"
   },
-  "devDependencies": { "jsdom": "24.1.3" }
+  "devDependencies": {
+    "jsdom": "24.1.3",
+    "@electric-sql/pglite": "0.2.12"
+  }
 }

@@ -127,7 +127,10 @@ const I18N = {
 
 /* ---------- state ---------- */
 const load = () => { try { return JSON.parse(localStorage.getItem(STORE) || 'null'); } catch { return null; } };
-const persist = () => { try { localStorage.setItem(STORE, JSON.stringify({ project: P, ui: UI })); } catch { /* storage unavailable: session-only */ } };
+// a shared (read-only) project is never written over the viewer's own saved project
+const persist = () => { if (typeof RO !== 'undefined' && RO) return; try { localStorage.setItem(STORE, JSON.stringify({ project: P, ui: UI })); } catch { /* storage unavailable: session-only */ } };
+const hooks = { commit: [], render: [], replace: [], undo: [] };
+const emit = (ev, arg) => hooks[ev].forEach(f => { try { f(arg); } catch (e) { console.warn(ev, e); } });
 const saved = load();
 let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
 const UI = Object.assign({ lang: 'fr', tab: 'assistant', wzSize: 'medium', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
@@ -148,6 +151,10 @@ function taskStatus(k, now) {
 const statusKey = { done: 'sDone', late: 'sLate', inprog: 'sInprog', todo: 'sTodo' };
 
 /* ---------- chrome ---------- */
+const BASE_TABS = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['budget', 'tabBudget'], ['project', 'tabProject']];
+const ALL_TABS = ['projects', 'assistant', 'burndown', 'gantt', 'tasks', 'budget', 'project', 'team'];
+let extraTabs = { before: [], after: [] }, RO = false;
+const visibleTabs = () => [...extraTabs.before, ...BASE_TABS.filter(([id]) => !RO || !['assistant', 'project'].includes(id)), ...extraTabs.after];
 function renderChrome() {
   document.documentElement.lang = UI.lang;
   document.querySelectorAll('[data-i]').forEach(el => { el.textContent = t(el.dataset.i); });
@@ -155,10 +162,13 @@ function renderChrome() {
   $('pName').textContent = P.name;
   $('pMeta').textContent = `${dLabel(C.parseDate(P.start), true)} → ${dLabel(C.parseDate(P.end), true)} · ${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
   ['fr', 'en'].forEach(l => $('lang-' + l).setAttribute('aria-pressed', UI.lang === l));
-  const tabs = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['budget', 'tabBudget'], ['project', 'tabProject']];
+  const tabs = visibleTabs();
+  if (!tabs.some(([id]) => id === UI.tab)) UI.tab = tabs[0][0];
+  document.body.classList.toggle('ro', RO);
   $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
-  tabs.forEach(([id]) => { $('tab-' + id).hidden = UI.tab !== id; });
-  $('kpis').hidden = UI.tab === 'assistant';
+  ALL_TABS.forEach(id => { const el = $('tab-' + id); if (el) el.hidden = UI.tab !== id; });
+  $('kpis').hidden = UI.tab === 'assistant' || UI.tab === 'projects' || UI.tab === 'team';
+  $('hero').hidden = UI.tab === 'projects' || UI.tab === 'team';
   $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
   $('g-summary').setAttribute('aria-pressed', UI.gMode === 'summary'); $('g-master').setAttribute('aria-pressed', UI.gMode === 'master');
   document.querySelectorAll('#gZoom button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.z === UI.zoom));
@@ -580,6 +590,7 @@ function importText(txt) {
   const r = C.validateProject(raw);
   if (!r.project || (fmt === 'json' && !r.ok)) return msg(t('eInvalid') + r.errors.slice(0, 8).join(', '), false);
   if (!r.project.tasks.length) return msg(t('eNoTasks'), false);
+  emit('replace', 'import');
   P = r.project; editing = null; UI.tab = 'gantt'; commit(); toast(t('imported'));
   const skipped = (raw.tasks || []).length - P.tasks.length;
   msg(`${t('importedN')}${t({ json: 'fmtJson', csv: 'fmtCsv', mermaid: 'fmtMermaid' }[fmt])} · ${P.tasks.length} ${t('kTasks')}${skipped > 0 ? ` (−${skipped})` : ''}${r.errors.includes('cycle') ? ' · ' + t('eCycle') : ''}`, true);
@@ -596,8 +607,9 @@ const twoStep = (btn, fn) => btn.addEventListener('click', () => {
   if (armed !== btn) { armed = btn; msg(t('sure'), false); setTimeout(() => { if (armed === btn) { armed = null; msg('', true); } }, 4000); return; }
   armed = null; fn();
 });
-twoStep($('btnSample'), () => { P = C.validateProject(SAMPLE).project; editing = null; commit(); msg(t('imported'), true); });
+twoStep($('btnSample'), () => { emit('replace', 'sample'); P = C.validateProject(SAMPLE).project; editing = null; commit(); msg(t('imported'), true); });
 twoStep($('btnBlank'), () => {
+  emit('replace', 'blank');
   const s = nowT();
   P = C.validateProject({ name: t('blankName'), code: '', start: C.fmt(s), end: C.fmt(C.addDays(s, 56)), statusDate: '', workingDays: true,
     phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#4f6bed' }], milestones: [], tasks: [] }).project;
@@ -747,13 +759,14 @@ $('wzGo').addEventListener('click', async () => {
       typeId: typeSel === 'auto' ? undefined : typeSel, lang: UI.lang, custom });
     const r = C.validateProject(out.project);
     if (!r.ok) throw new Error(r.errors.join(','));
+    emit('replace', 'assistant');
     prevProject = P; lastGen = out.type; P = r.project; editing = null;
     commit(); renderResult(); toast(t('wzDone') + P.name);
     $('wzResult').scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   } catch (e) { console.warn('generation failed', e); msgEl.textContent = t('dlError'); msgEl.className = 'err'; }
   finally { $('wzGo').disabled = false; }
 });
-$('wzUndo').addEventListener('click', () => { if (!prevProject) return; P = prevProject; prevProject = null; lastGen = null; $('wzResult').hidden = true; commit(); $('wzMsg').textContent = t('wzUndone'); $('wzMsg').className = 'ok'; });
+$('wzUndo').addEventListener('click', () => { if (!prevProject) return; emit('undo'); P = prevProject; prevProject = null; lastGen = null; $('wzResult').hidden = true; commit(); $('wzMsg').textContent = t('wzUndone'); $('wzMsg').className = 'ok'; });
 $('wzResult').addEventListener('click', ev => { const b = ev.target.closest('[data-wdl]'); if (b) download(b.dataset.wdl, $('wzDlStatus')); });
 $('wzSeeGantt').addEventListener('click', () => { UI.tab = 'gantt'; UI.gMode = 'master'; persist(); renderChrome(); renderGantt(); });
 $('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); renderChrome(); $('doc-context')?.focus(); });
@@ -772,14 +785,14 @@ let cmdItems = [], cmdSel = 0, cmdReturn = null;
 function cmdActions() {
   const go = (id, k, ic) => ({ label: `${t('cmdGo')} ${t(k)}`, ic, run: () => { UI.tab = id; if (id === 'burndown') animateBd = true; persist(); renderChrome(); if (id === 'burndown') renderBurndown(); } });
   return [
-    { label: t('newProject'), ic: '+', hint: '', run: () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); } },
-    go('assistant', 'tabAssistant', 'A'), go('burndown', 'tabBurndown', 'B'), go('gantt', 'tabGantt', 'G'), go('tasks', 'tabTasks', 'T'), go('budget', 'tabBudget', '€'), go('project', 'tabProject', 'P'),
+    ...(RO ? [] : [{ label: t('newProject'), ic: '+', hint: '', run: () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); } }]),
+    ...(RO ? [] : [go('assistant', 'tabAssistant', 'A')]), go('burndown', 'tabBurndown', 'B'), go('gantt', 'tabGantt', 'G'), go('tasks', 'tabTasks', 'T'), go('budget', 'tabBudget', '€'), ...(RO ? [] : [go('project', 'tabProject', 'P')]), ...extraTabs.before.concat(extraTabs.after).map(([id, k]) => go(id, k, k[3] || '·')),
     ...[['needs', 'dlNeeds', '.docx'], ['technical', 'dlTech', '.docx'], ['report', 'dlReport', '.docx'], ['gs', 'dlGs', '.png'], ['gm', 'dlGm', '.png'], ['bd', 'dlBd', '.png'], ['csv', 'dlCsv', '.csv'], ['json', 'dlJson', '.json']]
       .map(([kind, k, ext]) => ({ label: `${t('download')} · ${t(k)}`, ic: '↓', hint: ext, run: () => download(kind) })),
     { label: t('cmdLang'), ic: UI.lang === 'fr' ? 'EN' : 'FR', run: () => { UI.lang = UI.lang === 'fr' ? 'en' : 'fr'; commit(); } },
     { label: `${t('tabGantt')} · ${t('summary')}`, ic: 'G', run: () => { UI.tab = 'gantt'; UI.gMode = 'summary'; persist(); renderChrome(); renderGantt(); } },
     { label: `${t('tabGantt')} · ${t('master')}`, ic: 'G', run: () => { UI.tab = 'gantt'; UI.gMode = 'master'; persist(); renderChrome(); renderGantt(); } },
-    { label: t('addTask'), ic: '+', run: () => { UI.tab = 'tasks'; persist(); renderChrome(); fillForm(null); $('tf-fr').focus(); } }
+    ...(RO ? [] : [{ label: t('addTask'), ic: '+', run: () => { UI.tab = 'tasks'; persist(); renderChrome(); fillForm(null); $('tf-fr').focus(); } }])
   ];
 }
 const fold = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -828,21 +841,48 @@ function renderAll() {
   renderAllInner();
   if (fid && document.activeElement !== $(fid) && $(fid)) { const el = $(fid); el.focus({ preventScroll: true }); if (sel && typeof el.setSelectionRange === 'function') try { el.setSelectionRange(sel[0], sel[1]); } catch { /* number inputs */ } }
 }
-function renderAllInner() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); }
+function lockReadOnly() {
+  if (!RO) return;
+  document.querySelectorAll('#tab-budget input, #tab-budget select, #tab-budget button, #taskTable button').forEach(el => { el.disabled = true; });
+}
+function renderAllInner() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); lockReadOnly(); hooks.render.forEach(f => f()); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
-function commit() { P.history = C.recordHistory(P, nowT()); persist(); renderAll(); }
-document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; commit(); }));
+function commit() {
+  if (RO) { renderAll(); return; }
+  P.history = C.recordHistory(P, nowT()); persist(); renderAll(); emit('commit', P);
+}
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; persist(); renderAll(); }));
 $('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (!b) return; UI.tab = b.dataset.tab; persist(); renderChrome(); if (UI.tab === 'burndown') { animateBd = true; renderBurndown(); } });
 $('tabs').addEventListener('keydown', ev => {
   if (!['ArrowRight', 'ArrowLeft'].includes(ev.key)) return;
-  const ids = ['assistant', 'burndown', 'gantt', 'tasks', 'budget', 'project'], i = ids.indexOf(UI.tab);
+  const ids = visibleTabs().map(([id]) => id), i = ids.indexOf(UI.tab);
   UI.tab = ids[(i + (ev.key === 'ArrowRight' ? 1 : ids.length - 1)) % ids.length]; persist(); renderChrome(); $('tb-' + UI.tab).focus();
 });
 $('gMode').addEventListener('click', ev => { const b = ev.target.closest('[data-mode]'); if (!b) return; UI.gMode = b.dataset.mode; persist(); renderChrome(); renderGantt(); });
 $('gZoom').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (!b) return; UI.zoom = +b.dataset.z; persist(); renderChrome(); renderGantt(); });
 $('optDeps').addEventListener('change', ev => { UI.deps = ev.target.checked; persist(); renderGantt(); });
 $('optCrit').addEventListener('change', ev => { UI.crit = ev.target.checked; persist(); renderGantt(); });
+/* ---------- API for the account / cloud layer ---------- */
+const App = {
+  get project() { return P; },
+  get readOnly() { return RO; },
+  ui: UI, t, esc, nm, toast, dLabel, eur: v => eurF(v), today: todayT, Core: C, persist,
+  saveFile: (bytes, name, type) => saveFile(bytes, name, type),
+  on(ev, fn) { hooks[ev].push(fn); },
+  addStrings(fr, en) { Object.assign(I18N.fr, fr); Object.assign(I18N.en, en); },
+  setProject(p, opts = {}) {
+    const r = C.validateProject(p); if (!r.project) return false;
+    P = r.project; editing = null; prevProject = null; lastGen = null;
+    if (opts.tab) UI.tab = opts.tab;
+    persist(); renderAll(); return true;
+  },
+  setExtraTabs(before, after) { extraTabs = { before: before || [], after: after || [] }; renderChrome(); },
+  setReadOnly(on) { RO = !!on; renderAll(); },
+  goTab(id) { UI.tab = id; persist(); renderChrome(); if (id === 'burndown') { animateBd = true; renderBurndown(); } },
+  renderAll: () => renderAll()
+};
+if (typeof CloudUI !== 'undefined') CloudUI.init(App);
 const hash = (location.hash || '').slice(1);
-if (['assistant', 'burndown', 'gantt', 'tasks', 'budget', 'project'].includes(hash)) UI.tab = hash;
+if (ALL_TABS.includes(hash)) UI.tab = hash;
 renderAll(); fillForm(null);
 })();
