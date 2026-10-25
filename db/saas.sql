@@ -87,7 +87,8 @@ end $$;
 drop trigger if exists shares_plan_guard on public.project_shares;
 create trigger shares_plan_guard before insert on public.project_shares for each row execute function private.shares_plan_guard();
 
--- plan, trial and usage of a workspace (any member)
+-- plan, trial and usage of a workspace (any member); dropped first so re-running after billing.sql works
+drop function if exists public.workspace_usage(uuid);
 create or replace function public.workspace_usage(ws uuid)
 returns table (plan text, effective_plan text, trial_ends_at timestamptz, trial_used boolean,
                projects int, people int, max_projects int, max_people int, max_shares int)
