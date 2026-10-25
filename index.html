@@ -413,7 +413,7 @@ body.gated>header,body.gated>main{display:none}
 .plan-err{color:var(--bad);font-size:12.5px;line-height:1.4;margin:8px 0 0;overflow-wrap:anywhere}
 .lp-foot a{color:var(--muted)}
 .lp-foot{margin-top:72px;padding-block:28px calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;color:var(--faint);font-size:12.5px}
-@media (max-width:900px){.gate-hero{align-items:flex-start}.gate-in{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:290px 32px}.gate-h{max-width:none;margin-top:8px}.gate-hero::before{background:linear-gradient(180deg,transparent 0,transparent 230px,rgba(194,204,196,.94) 290px)}.gate-nav{display:none}.gate-acts .seg{display:none}.lp-sec{padding-block:48px 0}}
+@media (max-width:900px){.gate-hero{align-items:flex-start}.gate-in{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:290px 32px}.gate-h{max-width:none;margin-top:8px}.gate-hero::before{background:linear-gradient(180deg,transparent 0,transparent 230px,rgba(194,204,196,.94) 290px)}.gate-nav{display:none}.gate-acts{gap:6px}.gate-acts .seg button{padding:5px 8px}.lp-sec{padding-block:48px 0}}
 
 /* ---------- plan, usage and onboarding (signed in) ---------- */
 .plan-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;margin-top:16px;padding:14px 18px;border-radius:var(--r);border:1px solid var(--line);background:var(--glass)}
@@ -575,7 +575,10 @@ td{overflow-wrap:break-word}
   .wiz-main{padding:20px;border-radius:18px}
   .hero-meta{padding-block:14px 0}
 }
-@media (max-width:380px){.seg[aria-label="Language"]{display:none}}
+@media (max-width:560px){.gate-acts-b [data-demo]{display:none}}
+@media (max-width:400px){.gate-brand{gap:8px;font-size:13.5px}.gate-acts{gap:6px}.gate-acts-b .btn{white-space:nowrap;padding-inline:12px}}
+@media (max-width:380px){.seg[aria-label="Language"] button{padding:5px 6px;font-size:11px}}
+@media (max-width:340px){.gate-brand{font-size:0;gap:0}}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}.chart-box svg path.draw{stroke-dasharray:none;stroke-dashoffset:0}}
 </style>
