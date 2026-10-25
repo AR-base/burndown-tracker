@@ -17,7 +17,8 @@ def assemble(base, config=None):
     if config:
         if not URL_RE.match(config['url']) or not KEY_RE.match(config['anonKey']):
             raise SystemExit('cloud config rejected: expected https://<ref>.supabase.co and a public anon key')
-        cfg = json.dumps({'url': config['url'], 'anonKey': config['anonKey']}).replace('</', '<\\/')
+        oauth = [x for x in config.get('oauth', ['google']) if x in ('google', 'azure')]   # sign-in buttons to show
+        cfg = json.dumps({'url': config['url'], 'anonKey': config['anonKey'], 'oauth': oauth}).replace('</', '<\\/')
         vendor = config.get('vendor') or open(os.path.join(base, 'vendor', 'supabase.js'), encoding='utf-8').read()
         cloud = '<script>const CLOUD_CONFIG = %s;</script>\n<script>%s</script>' % (cfg, inline(vendor))
     return src.replace('<!--CLOUDCFG-->', cloud)

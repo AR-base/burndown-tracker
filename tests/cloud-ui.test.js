@@ -27,7 +27,11 @@ function page(url = 'https://app.test/') {
   let A = page();
   await sleep(30);
   check('signed out: the sign-in screen comes first, the tracker is hidden', A.d.body.classList.contains('gated') && !A.$('gate').hidden && !!A.$('cuAuthForm'));
-  check('sign-in screen offers Google and Microsoft', A.$('gate').querySelectorAll('[data-oauth]').length === 2);
+  check('sign-in screen offers Google (from config)', A.$('gate').querySelectorAll('[data-oauth]').length === 1 && !!A.$('gate').querySelector('[data-oauth="google"]'));
+  check('public landing: features, how it works and three plans', A.d.querySelectorAll('#lp-features .lp-feat').length === 8 && A.d.querySelectorAll('#lp-how li').length === 3 && A.d.querySelectorAll('#lp-pricing .plan').length === 3);
+  A.click(A.d.querySelector('#lp-pricing [data-cta="pro"]'));
+  check('a pricing button opens account creation', !!A.$('cuName'));
+  A.click(A.d.querySelector('#gate [data-mode="in"]'));
   A.click(A.$('cuDemo')); await sleep(20);
   check('demo link opens the local demo without an account', !A.d.body.classList.contains('gated') && A.tabs().join() === 'brain,assistant,burndown,gantt,tasks,pm,budget,project' && !!A.$('cuSignIn'));
   A.click(A.$('cuSignIn'));
@@ -82,6 +86,17 @@ function page(url = 'https://app.test/') {
   A.$('cuShareLabel').value = 'Client ACME'; A.submit(A.$('cuShareForm')); await sleep(60);
   const shareUrl = A.$('cuShareLink') && A.$('cuShareLink').value;
   check('client share link created', /\?share=[0-9a-f]{64}$/.test(shareUrl || '') && A.d.querySelectorAll('[data-revoke]').length === 1);
+  /* SaaS: plan, limits, trial, onboarding */
+  A.click(A.d.querySelector('[data-tab="projects"]')); await sleep(20);
+  check('portfolio shows the Free plan and its usage', /Free/.test(A.d.querySelector('.plan-bar').textContent) && /1 \/ 3/.test(A.d.querySelector('.plan-bar').textContent));
+  check('first-run checklist tracks progress', /\d\/5/.test(A.d.querySelector('.checklist').textContent) && A.d.querySelectorAll('.checklist .done').length >= 3);
+  for (let i = 0; i < 2; i++) { A.click(A.$('cuNewProj')); await sleep(10); A.type(A.$('wz-desc'), 'Site vitrine numéro ' + i); A.click(A.$('wzGo')); await sleep(150); A.click(A.d.querySelector('[data-tab="projects"]')); await sleep(20); }
+  check('three projects fill the Free plan', fake._db.projects.length === 3 && /3 \/ 3/.test(A.d.querySelector('.plan-bar').textContent));
+  A.click(A.$('cuNewProj')); await sleep(20);
+  check('a fourth project opens the plans with the limit explained', !A.$('cloudModal').hidden && /3/.test(A.$('cloudModal').textContent) && A.$('cloudModal').querySelectorAll('.plan').length === 3);
+  A.click(A.$('cloudModal').querySelector('[data-trial]')); await sleep(80);
+  check('the owner starts the 14-day Pro trial: limits lifted', A.$('cloudModal').hidden && /Pro/.test(A.d.querySelector('.plan-bar .plan-chip').textContent) && /3 \/ 25/.test(A.d.querySelector('.plan-bar').textContent) && !A.d.querySelector('.plan-bar [data-trial]'));
+  A.click(A.d.querySelector('[data-open="' + pRow.id + '"]')); await sleep(60);
   /* account dialog: export + sign out */
   A.click(A.$('cuAvatar')); await sleep(30);
   check('account dialog: profile, 2-step, GDPR export and deletion', !!A.$('cuMfaOn') && !!A.$('cuExport') && !!A.$('cuDelForm'));
@@ -112,7 +127,7 @@ function page(url = 'https://app.test/') {
   B.$('cuName').value = 'Bob'; B.$('cuEmail').value = 'bob@acme.fr'; B.$('cuPw').value = 'correct-horse-battery'; B.submit(B.$('cuAuthForm')); await sleep(150);
   check('Bob joins ACME as a member', B.$('cuWs') && /ACME/.test(B.$('cuWs').textContent) && fake._db.workspace_members.some(m => m.role === 'member'));
   check('a member does not get invite or client-link controls', (B.click(B.d.querySelector('[data-tab="team"]')), !B.$('cuInvForm') && !B.$('cuShareForm')));
-  check('a member cannot delete projects', (B.click(B.d.querySelector('[data-tab="projects"]')), B.d.querySelectorAll('[data-del]').length === 0 && B.d.querySelectorAll('[data-open]').length === 1));
+  check('a member cannot delete projects', (B.click(B.d.querySelector('[data-tab="projects"]')), B.d.querySelectorAll('[data-del]').length === 0 && B.d.querySelectorAll('[data-open]').length === 3));
   /* Bob downgraded to viewer -> read-only */
   fake._db.workspace_members.find(m => m.role === 'member').role = 'viewer';
   B.click(B.$('cuAvatar')); await sleep(20); B.click(B.$('cuOut')); await sleep(40);

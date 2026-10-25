@@ -1,4 +1,7 @@
 {
   "url": "https://YOUR-PROJECT-REF.supabase.co",
-  "anonKey": "YOUR-PUBLIC-ANON-KEY"
+  "anonKey": "YOUR-PUBLIC-ANON-KEY",
+  "oauth": [
+    "google"
+  ]
 }

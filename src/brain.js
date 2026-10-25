@@ -84,7 +84,7 @@ const Brain = (() => {
       const r = canvas.getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1);
       W = Math.max(1, r.width); H = Math.max(1, r.height);
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-      if (!running) draw(performance.now());
+      draw(performance.now());                // resizing clears the canvas: always repaint
     }
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null;
     ro ? ro.observe(canvas) : window.addEventListener('resize', resize);

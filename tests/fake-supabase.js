@@ -12,6 +12,12 @@ function createFakeSupabase(opts = {}) {
   const log = (ws, pid, action, details = {}) => db.audit_log.push({ id: db.audit_log.length + 1, workspace_id: ws, project_id: pid, actor: me() && me().id, action, details, at: new Date().toISOString() });
   const err = msg => ({ data: null, error: { message: msg } });
   const emit = (ev, s) => listeners.forEach(f => f(ev, s));
+  // plans, as in db/saas.sql
+  const plan = ws => { const w = db.workspaces.find(x => x.id === ws) || {}; return w.plan === 'free' && w.trial_ends_at && Date.parse(w.trial_ends_at) > Date.now() ? 'pro' : (w.plan || 'free'); };
+  const LIM = { projects: { free: 3, pro: 25, team: 500 }, members: { free: 3, pro: 10, team: 50 }, shares: { free: 1, pro: 20, team: 20 } };
+  const lim = (ws, what) => LIM[what][plan(ws)];
+  const activeProjects = ws => db.projects.filter(p => p.workspace_id === ws && !p.archived).length;
+  const people = ws => db.workspace_members.filter(m => m.workspace_id === ws).length + db.invitations.filter(i => i.workspace_id === ws && !i.accepted_at).length;
 
   function visible(table) {
     const u = me(); if (!u) return [];
@@ -54,6 +60,7 @@ function createFakeSupabase(opts = {}) {
       }
       if (q.op === 'insert' && table === 'projects') {
         if (rank(roleIn(q.values.workspace_id)) < 2) return err('new row violates row-level security policy');
+        if (activeProjects(q.values.workspace_id) >= lim(q.values.workspace_id, 'projects')) return err('plan_limit_projects');
         const row = { id: uid(), archived: false, version: 1, created_by: me().id, updated_by: me().id, updated_at: new Date().toISOString(), ...q.values };
         db.projects.push(row); log(row.workspace_id, row.id, 'project.created', { name: row.name });
         return { data: q.single ? { ...row } : [{ ...row }], error: null };
@@ -65,6 +72,7 @@ function createFakeSupabase(opts = {}) {
           const src = db[table].find(x => x === r || x.id === r.id);
           if (table === 'projects') {
             if (rank(roleIn(src.workspace_id)) < 2) return;
+            if (q.values.archived === false && src.archived && activeProjects(src.workspace_id) >= lim(src.workspace_id, 'projects')) { out.limit = true; return; }
             Object.assign(src, q.values, { version: src.version + 1, updated_by: me().id, updated_at: new Date().toISOString() });
             log(src.workspace_id, src.id, 'project.updated', { name: src.name });
             channels.forEach(c => c.filter === 'id=eq.' + src.id && c.cb({ eventType: 'UPDATE', new: { ...src }, old: {} }));
@@ -73,6 +81,7 @@ function createFakeSupabase(opts = {}) {
           else return;
           out.push({ ...src });
         });
+        if (out.limit) return err('plan_limit_projects');
         return { data: q.returning ? out : null, error: null };
       }
       if (q.op === 'delete') {
@@ -90,15 +99,19 @@ function createFakeSupabase(opts = {}) {
   }
 
   const RPC = {
-    create_workspace({ ws_name }) { const w = { id: uid(), name: ws_name, created_at: new Date().toISOString() }; db.workspaces.push(w); db.workspace_members.push({ workspace_id: w.id, user_id: me().id, role: 'owner' }); log(w.id, null, 'workspace.created', { name: ws_name }); return w; },
+    create_workspace({ ws_name }) { const w = { id: uid(), name: ws_name, created_at: new Date().toISOString(), plan: 'free', trial_ends_at: null, trial_used: false }; db.workspaces.push(w); db.workspace_members.push({ workspace_id: w.id, user_id: me().id, role: 'owner' }); log(w.id, null, 'workspace.created', { name: ws_name }); return w; },
     list_members({ ws }) { if (!roleIn(ws)) return []; return db.workspace_members.filter(m => m.workspace_id === ws).map(m => ({ user_id: m.user_id, role: m.role, display_name: (db.profiles.find(p => p.id === m.user_id) || {}).display_name || '', email: (db.users.find(u => u.id === m.user_id) || {}).email, joined_at: '' })); },
     set_member_role({ ws, target, new_role }) { if (roleIn(ws) !== 'owner') throw new Error('forbidden'); db.workspace_members.find(m => m.workspace_id === ws && m.user_id === target).role = new_role; log(ws, null, 'member.role_changed', { to: new_role }); return null; },
     remove_member({ ws, target }) { if (target !== me().id && roleIn(ws) !== 'owner') throw new Error('forbidden'); db.workspace_members = db.workspace_members.filter(m => !(m.workspace_id === ws && m.user_id === target)); return null; },
-    create_invitation({ ws, invite_email, invite_role }) { if (rank(roleIn(ws)) < 3) throw new Error('forbidden'); const t = tok(); db.tokens[t] = { ws, invite_email, invite_role }; db.invitations.push({ id: uid(), workspace_id: ws, email: invite_email, role: invite_role, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 7 * 864e5).toISOString(), accepted_at: null }); log(ws, null, 'member.invited', { email: invite_email }); return t; },
+    create_invitation({ ws, invite_email, invite_role }) { if (rank(roleIn(ws)) < 3) throw new Error('forbidden'); if (people(ws) >= lim(ws, 'members')) throw new Error('plan_limit_members'); const t = tok(); db.tokens[t] = { ws, invite_email, invite_role }; db.invitations.push({ id: uid(), workspace_id: ws, email: invite_email, role: invite_role, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 7 * 864e5).toISOString(), accepted_at: null }); log(ws, null, 'member.invited', { email: invite_email }); return t; },
     accept_invitation({ invite_token }) { const i = db.tokens[invite_token]; if (!i) throw new Error('invitation_invalid'); if (i.invite_email !== me().email) throw new Error('invitation_wrong_account'); delete db.tokens[invite_token]; db.workspace_members.push({ workspace_id: i.ws, user_id: me().id, role: i.invite_role }); const w = db.workspaces.find(x => x.id === i.ws); return [{ workspace_id: w.id, workspace_name: w.name, role: i.invite_role }]; },
-    create_share({ proj, share_label }) { const p = db.projects.find(x => x.id === proj); if (!p || rank(roleIn(p.workspace_id)) < 3) throw new Error('forbidden'); const t = tok(); db.tokens[t] = { share: proj }; db.project_shares.push({ id: uid(), project_id: proj, label: share_label, created_at: new Date().toISOString(), expires_at: null, revoked_at: null, last_viewed_at: null, _t: t }); return t; },
+    create_share({ proj, share_label }) { const p = db.projects.find(x => x.id === proj); if (!p || rank(roleIn(p.workspace_id)) < 3) throw new Error('forbidden'); if (db.project_shares.filter(x => x.project_id === proj && !x.revoked_at).length >= lim(p.workspace_id, 'shares')) throw new Error('plan_limit_shares'); const t = tok(); db.tokens[t] = { share: proj }; db.project_shares.push({ id: uid(), project_id: proj, label: share_label, created_at: new Date().toISOString(), expires_at: null, revoked_at: null, last_viewed_at: null, _t: t }); return t; },
     revoke_share({ share_id }) { const s = db.project_shares.find(x => x.id === share_id); s.revoked_at = new Date().toISOString(); delete db.tokens[s._t]; return null; },
     get_shared_project({ share_token }) { const s = db.tokens[share_token]; if (!s || !s.share) return []; const p = db.projects.find(x => x.id === s.share); return p ? [{ name: p.name, data: p.data, updated_at: p.updated_at }] : []; },
+    workspace_usage({ ws }) { if (!roleIn(ws)) throw new Error('forbidden'); const w = db.workspaces.find(x => x.id === ws);
+      return [{ plan: w.plan, effective_plan: plan(ws), trial_ends_at: w.trial_ends_at, trial_used: w.trial_used, projects: activeProjects(ws), people: people(ws), max_projects: lim(ws, 'projects'), max_people: lim(ws, 'members'), max_shares: lim(ws, 'shares') }]; },
+    start_trial({ ws }) { if (roleIn(ws) !== 'owner') throw new Error('forbidden'); const w = db.workspaces.find(x => x.id === ws); if (w.plan !== 'free' || w.trial_used) throw new Error('trial_unavailable');
+      w.trial_used = true; w.trial_ends_at = new Date(Date.now() + 14 * 864e5).toISOString(); log(ws, null, 'plan.trial_started', {}); return w.trial_ends_at; },
     export_my_data() { return { account: { email: me().email }, memberships: db.workspace_members.filter(m => m.user_id === me().id) }; },
     delete_my_account() { const id = me().id; db.workspace_members = db.workspace_members.filter(m => m.user_id !== id); db.users = db.users.filter(u => u.id !== id); return null; }
   };

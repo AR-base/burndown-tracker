@@ -7,6 +7,8 @@ const db = new PGlite();
 await db.exec(readFileSync(new URL('db/test-prelude.sql', root), 'utf8'));
 await db.exec(readFileSync(new URL('db/schema.sql', root), 'utf8'));
 await db.exec(readFileSync(new URL('db/schema.sql', root), 'utf8')); // running it twice must be safe
+await db.exec(readFileSync(new URL('db/saas.sql', root), 'utf8'));
+await db.exec(readFileSync(new URL('db/saas.sql', root), 'utf8'));
 let n = 0; const ok = async (name, fn) => { await fn(); n++; console.log('✓', name); };
 const U = { ana: '11111111-1111-4111-8111-111111111111', bob: '22222222-2222-4222-8222-222222222222', eve: '33333333-3333-4333-8333-333333333333', cid: '44444444-4444-4444-8444-444444444444' };
 const mail = { ana: 'ana@acme.fr', bob: 'bob@acme.fr', eve: 'eve@evil.io', cid: 'cid@client.com' };
@@ -35,6 +37,7 @@ await ok('creating a workspace makes you its owner', async () => {
   const m = await as('ana', `select role from workspace_members where workspace_id = $1 and user_id = $2`, [ws, U.ana]);
   assert.equal(m[0].role, 'owner');
   ws2 = (await as('eve', `select * from create_workspace('Evil Corp')`))[0].id;
+  await db.query(`update workspaces set plan = 'team' where id = $1`, [ws]);   // the access-rule tests run on a paid plan
 });
 await ok('nobody sees another company’s workspace, members or projects', async () => {
   proj = (await as('ana', `insert into projects (workspace_id, name, data) values ($1, 'Boutique', $2) returning id, version, created_by`, [ws, project]))[0];
@@ -161,5 +164,52 @@ await ok('ownership transfer then leaving works', async () => {
   await as('ana', `select remove_member($1, $2)`, [ws, U.ana]);
   assert.equal((await as('ana', `select * from projects where workspace_id = $1`, [ws])).length, 0);
   assert.equal((await as('bob', `select role from workspace_members where workspace_id = $1`, [ws]))[0].role, 'owner');
+});
+
+/* ---------- SaaS plans ---------- */
+let ws3;
+U.zoe = '55555555-5555-4555-8555-555555555555'; mail.zoe = 'zoe@startup.io';
+await db.query(`insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, '{}')`, [U.zoe, mail.zoe]);
+await ok('a new workspace starts on the free plan with its limits', async () => {
+  ws3 = (await as('zoe', `select * from create_workspace('Startup')`))[0].id;
+  const u = (await as('zoe', `select * from workspace_usage($1)`, [ws3]))[0];
+  assert.equal(u.plan, 'free'); assert.equal(u.effective_plan, 'free'); assert.equal(u.max_projects, 3); assert.equal(u.max_people, 3); assert.equal(u.people, 1);
+  await fails(as('eve', `select * from workspace_usage($1)`, [ws3]), /forbidden/);
+});
+await ok('free plan: a 4th active project is refused, archiving frees a slot', async () => {
+  const ids = [];
+  for (let i = 0; i < 3; i++) ids.push((await as('zoe', `insert into projects (workspace_id, name, data) values ($1, $2, $3) returning id`, [ws3, 'P' + i, project]))[0].id);
+  await fails(as('zoe', `insert into projects (workspace_id, name, data) values ($1, 'P4', $2)`, [ws3, project]), /plan_limit_projects/);
+  await as('zoe', `update projects set archived = true where id = $1`, [ids[0]]);
+  await as('zoe', `insert into projects (workspace_id, name, data) values ($1, 'P4', $2)`, [ws3, project]);
+  await fails(as('zoe', `update projects set archived = false where id = $1`, [ids[0]]), /plan_limit_projects/);
+  await as('zoe', `update projects set data = $2 where id = $1`, [ids[1], { ...project, edited: true }]);   // ordinary saves still work at the limit
+});
+await ok('free plan: people (members + pending invitations) capped at 3, one client link per project', async () => {
+  await as('zoe', `select create_invitation($1, 'a@x.io', 'member')`, [ws3]);
+  await as('zoe', `select create_invitation($1, 'b@x.io', 'member')`, [ws3]);
+  await fails(as('zoe', `select create_invitation($1, 'c@x.io', 'member')`, [ws3]), /plan_limit_members/);
+  const p = (await as('zoe', `select id from projects where workspace_id = $1 and not archived limit 1`, [ws3]))[0].id;
+  await as('zoe', `select create_share($1, 'Client')`, [p]);
+  await fails(as('zoe', `select create_share($1, 'Client 2')`, [p]), /plan_limit_shares/);
+});
+await ok('the plan cannot be changed from the browser', async () => {
+  await fails(as('zoe', `update workspaces set plan = 'team' where id = $1`, [ws3]), /permission denied/);
+  await fails(as('zoe', `update workspaces set trial_ends_at = now() + interval '1 year' where id = $1`, [ws3]), /permission denied/);
+});
+await ok('owners get one 14-day Pro trial that lifts the limits', async () => {
+  await fails(as('bob', `select start_trial($1)`, [ws3]), /forbidden/);
+  const ends = (await as('zoe', `select start_trial($1) as e`, [ws3]))[0].e;
+  assert.ok(new Date(ends) - Date.now() > 13 * 864e5);
+  const u = (await as('zoe', `select * from workspace_usage($1)`, [ws3]))[0];
+  assert.equal(u.effective_plan, 'pro'); assert.equal(u.max_projects, 25); assert.equal(u.trial_used, true);
+  await as('zoe', `insert into projects (workspace_id, name, data) values ($1, 'P5', $2)`, [ws3, project]);
+  await fails(as('zoe', `select start_trial($1)`, [ws3]), /trial_unavailable/);
+});
+await ok('when the trial ends, existing data stays but new projects are refused again', async () => {
+  await db.query(`update workspaces set trial_ends_at = now() - interval '1 day' where id = $1`, [ws3]);
+  assert.equal((await as('zoe', `select * from workspace_usage($1)`, [ws3]))[0].effective_plan, 'free');
+  assert.equal((await as('zoe', `select count(*)::int as c from projects where workspace_id = $1 and not archived`, [ws3]))[0].c, 4);
+  await fails(as('zoe', `insert into projects (workspace_id, name, data) values ($1, 'P6', $2)`, [ws3, project]), /plan_limit_projects/);
 });
 console.log(`\n${n} tests passed`);

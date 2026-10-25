@@ -4,6 +4,21 @@
 const CloudUI = (() => {
   const STR = {
     fr: {
+      navFeat: 'Fonctionnalités', navHow: 'Comment ça marche', navPricing: 'Tarifs', navLogin: 'Se connecter', getStarted: 'Commencer gratuitement',
+      lpFeatEy: 'Tout le métier de chef de projet', lpFeatH: 'Un seul outil, toutes les fonctions du chef de projet', lpFeatL: 'De la phrase du client au rapport de clôture : rien à installer, tout est calculé et à jour.',
+      lpFeats: [['A', 'Assistant en une phrase', 'Le client décrit son besoin sans jargon : phases, tâches, dates, dépendances, jalons, budget et équipe sont créés.'], ['◎', 'Cerveau du chef de projet', 'Les 10 domaines du PMBOK reliés à vos données, en vert, orange ou rouge, à un clic de l’action.'], ['G', 'Gantt et burndown en direct', 'Gantt synthétique et maître, chemin critique, burndown, SPI et date de fin prévue mis à jour à chaque modification.'], ['R', 'Registres du chef de projet', 'Charte, parties prenantes, RACI, risques (5×5), communication, qualité, achats, changements, décisions et rapport hebdo.'], ['€', 'Budget et équipe calculés', 'Jours-homme par rôle, coûts fixes, marge pour imprévus et valeur acquise, recalculés en direct.'], ['↓', 'Documents Word FR / EN', 'Cahier des charges, dossier technique et rapport complet, générés en français ou en anglais.'], ['✦', 'Équipes, rôles et clients', 'Espaces de travail, propriétaire / chef de projet / membre / lecteur, liens client en lecture seule, modifications en direct.'], ['⛨', 'Sécurité de niveau entreprise', 'Données isolées par espace (RLS), double authentification, journal d’activité, export et suppression RGPD, hébergement UE.']],
+      lpHowEy: 'Comment ça marche', lpHowH: 'Du besoin au pilotage en trois étapes', lpHow: [['Décrivez', 'Une phrase, comme vous l’expliqueriez à un ami.'], ['Générez', 'Planning, budget, équipe, registres et documents prêts en quelques secondes.'], ['Pilotez', 'Suivez le burndown et le cerveau PM, invitez l’équipe, partagez un lien au client.']],
+      lpPriceEy: 'Tarifs', lpPriceH: 'Commencez gratuitement, grandissez quand vous voulez', lpPriceL: 'Prix par espace de travail. Sans engagement. Essai Pro de 14 jours sans carte bancaire.',
+      plan_free: 'Free', plan_pro: 'Pro', plan_team: 'Team', perMonth: '€ / mois / espace', popular: 'Le plus choisi', currentPlan: 'Plan actuel',
+      pf_free: ['3 projets actifs', '3 personnes', '1 lien client par projet', 'Cerveau PM, Gantt, burndown, budget', 'Registres et documents Word FR / EN'],
+      pf_pro: ['25 projets actifs', '10 personnes', '20 liens client par projet', 'Tout le plan Free', 'Support prioritaire'],
+      pf_team: ['500 projets actifs', '50 personnes', '20 liens client par projet', 'Tout le plan Pro', 'Accompagnement au déploiement'],
+      ctaFree: 'Commencer gratuitement', ctaPro: 'Essai gratuit 14 jours', ctaTeam: 'Commencer l’essai', footNote: 'Projet ESAIP · Données hébergées dans l’Union européenne',
+      plans: 'Abonnement', plansLead: 'Les limites s’appliquent à tout l’espace de travail. Le paiement en ligne arrive bientôt ; l’essai Pro ne demande aucune carte.',
+      startTrial: 'Essayer Pro 14 jours', trialOn: 'Essai Pro actif', trialDays: 'j restants', trialStarted: 'Essai Pro activé jusqu’au ', trialUsed: 'Essai déjà utilisé', ownerOnly: 'Seul le propriétaire de l’espace peut lancer l’essai.', seePlans: 'Voir les offres', soon: 'Paiement en ligne bientôt',
+      uProjects: 'Projets actifs', uPeople: 'Personnes', limitT: 'Limite de votre plan atteinte', limitProjects: 'Votre plan permet {n} projets actifs. Archivez un projet terminé, ou passez à Pro pour en avoir 25.', limitMembers: 'Votre plan permet {n} personnes (membres et invitations en attente).',
+      ckT: 'Bien démarrer', ckWs: 'Créer l’espace de travail', ckProj: 'Créer un premier projet', ckInv: 'Inviter un collègue', ckShare: 'Partager un lien client', ckMfa: 'Activer la double authentification', ckHide: 'Masquer',
+      e_plan_limit_projects: 'Limite de projets actifs atteinte pour votre plan.', e_plan_limit_members: 'Limite de personnes atteinte pour votre plan.', e_plan_limit_shares: 'Limite de liens client atteinte pour ce projet sur votre plan.', e_trial_unavailable: 'L’essai Pro a déjà été utilisé pour cet espace.',
       tabProjects: 'Projets', tabTeam: 'Équipe', signIn: 'Se connecter', signUp: 'Créer un compte', signOut: 'Se déconnecter', account: 'Mon compte',
       localMode: 'Démo locale', email: 'E-mail', password: 'Mot de passe', fullName: 'Nom complet', orWith: 'ou continuer avec', google: 'Google', microsoft: 'Microsoft',
       gateEyebrow: 'Espace chef de projet', gateH: 'Le cerveau, de tous vos projets.', gateLead: 'Décrivez un projet en une phrase : planning, burndown, budget, équipe, risques, RACI, documents et rapports sont prêts. Votre équipe et vos clients suivent tout en direct.', gateFeats: ['Gantt et burndown', 'Budget et équipe', 'Risques et RACI', 'Documents Word', 'Équipes et rôles', 'Liens client'], demo: 'Explorer la démo sans compte', loading: 'Connexion…', welcome: 'Bienvenue',
@@ -46,6 +61,21 @@ const CloudUI = (() => {
       e_conflict: 'Quelqu’un a modifié ce projet entre-temps.', e_unknown: 'Une erreur est survenue. Réessayez.', e_not_authenticated: 'Session expirée. Reconnectez-vous.'
     },
     en: {
+      navFeat: 'Features', navHow: 'How it works', navPricing: 'Pricing', navLogin: 'Sign in', getStarted: 'Start for free',
+      lpFeatEy: 'The whole project-manager job', lpFeatH: 'One tool for everything a project manager does', lpFeatL: 'From the client’s sentence to the closing report: nothing to install, everything computed and up to date.',
+      lpFeats: [['A', 'One-sentence assistant', 'The client describes the need without jargon: phases, tasks, dates, dependencies, milestones, budget and team are created.'], ['◎', 'The project manager’s brain', 'The 10 PMBOK areas wired to your data, green, amber or red, one click from action.'], ['G', 'Live Gantt and burndown', 'Summary and master Gantt, critical path, burndown, SPI and forecast finish updated on every change.'], ['R', 'Project-manager registers', 'Charter, stakeholders, RACI, risks (5×5), communication, quality, procurement, changes, decisions and weekly report.'], ['€', 'Budget and team, computed', 'Person-days per role, fixed costs, contingency and earned value, recalculated live.'], ['↓', 'Word documents FR / EN', 'Requirements spec, technical document and full report, generated in French or English.'], ['✦', 'Teams, roles and clients', 'Workspaces, owner / project manager / member / viewer, read-only client links, live editing.'], ['⛨', 'Enterprise-grade security', 'Data isolated per workspace (RLS), two-step verification, activity log, GDPR export and deletion, EU hosting.']],
+      lpHowEy: 'How it works', lpHowH: 'From need to delivery in three steps', lpHow: [['Describe', 'One sentence, as you would explain it to a friend.'], ['Generate', 'Schedule, budget, team, registers and documents ready in seconds.'], ['Steer', 'Follow the burndown and the PM brain, invite the team, share a link with the client.']],
+      lpPriceEy: 'Pricing', lpPriceH: 'Start free, grow whenever you like', lpPriceL: 'Price per workspace. No commitment. 14-day Pro trial, no credit card.',
+      plan_free: 'Free', plan_pro: 'Pro', plan_team: 'Team', perMonth: '€ / month / workspace', popular: 'Most popular', currentPlan: 'Current plan',
+      pf_free: ['3 active projects', '3 people', '1 client link per project', 'PM brain, Gantt, burndown, budget', 'Registers and Word documents FR / EN'],
+      pf_pro: ['25 active projects', '10 people', '20 client links per project', 'Everything in Free', 'Priority support'],
+      pf_team: ['500 active projects', '50 people', '20 client links per project', 'Everything in Pro', 'Onboarding assistance'],
+      ctaFree: 'Start for free', ctaPro: 'Free 14-day trial', ctaTeam: 'Start the trial', footNote: 'ESAIP project · Data hosted in the European Union',
+      plans: 'Subscription', plansLead: 'Limits apply to the whole workspace. Online payment is coming soon; the Pro trial needs no card.',
+      startTrial: 'Try Pro for 14 days', trialOn: 'Pro trial active', trialDays: 'days left', trialStarted: 'Pro trial active until ', trialUsed: 'Trial already used', ownerOnly: 'Only the workspace owner can start the trial.', seePlans: 'See plans', soon: 'Online payment soon',
+      uProjects: 'Active projects', uPeople: 'People', limitT: 'Your plan’s limit is reached', limitProjects: 'Your plan allows {n} active projects. Archive a finished project, or move to Pro for 25.', limitMembers: 'Your plan allows {n} people (members and pending invitations).',
+      ckT: 'Getting started', ckWs: 'Create the workspace', ckProj: 'Create a first project', ckInv: 'Invite a teammate', ckShare: 'Share a client link', ckMfa: 'Turn on two-step verification', ckHide: 'Hide',
+      e_plan_limit_projects: 'Your plan’s active-project limit is reached.', e_plan_limit_members: 'Your plan’s people limit is reached.', e_plan_limit_shares: 'Your plan’s client-link limit for this project is reached.', e_trial_unavailable: 'The Pro trial was already used for this workspace.',
       tabProjects: 'Projects', tabTeam: 'Team', signIn: 'Sign in', signUp: 'Create account', signOut: 'Sign out', account: 'My account',
       localMode: 'Local demo', email: 'E-mail', password: 'Password', fullName: 'Full name', orWith: 'or continue with', google: 'Google', microsoft: 'Microsoft',
       gateEyebrow: 'Project manager workspace', gateH: 'The brain, behind all your projects.', gateLead: 'Describe a project in one sentence: schedule, burndown, budget, team, risks, RACI, documents and reports are ready. Your team and clients follow it all live.', gateFeats: ['Gantt and burndown', 'Budget and team', 'Risks and RACI', 'Word documents', 'Teams and roles', 'Client links'], demo: 'Explore the demo without an account', loading: 'Signing in…', welcome: 'Welcome',
@@ -104,6 +134,9 @@ const CloudUI = (() => {
     const { t, esc } = App, $ = id => document.getElementById(id);
     const E = e => { const c = (e && e.code) || 'unknown'; return (STR[App.ui.lang]['e_' + c] ? t('e_' + c) : t('e_unknown')) + (c === 'transfer_ownership_first' ? (e.detail || '').split(':').slice(1).join(':') : ''); };
     const redirect = location.origin + location.pathname;
+    const OAUTH = (Array.isArray(cfg.oauth) ? cfg.oauth : ['google']).filter(p => p === 'google' || p === 'azure');
+    const G_ICON = '<svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+    const MS_ICON = '<svg width="15" height="15" viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>';
     let cloud;
     try { cloud = Cloud.create({ url: cfg.url, anonKey: cfg.anonKey, lib, redirectTo: redirect }); } catch { return; }
 
@@ -140,10 +173,10 @@ const CloudUI = (() => {
 
     /* ---------- modal helper ---------- */
     let lastFocus = null;
-    function modal(html, onMount) {
+    function modal(html, onMount, cls = '') {
       lastFocus = document.activeElement;
       modalRoot.hidden = false;
-      modalRoot.innerHTML = `<div class="cmdk-back" data-close></div><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="cuMTitle">${html}<button type="button" class="modal-x" data-close aria-label="${esc(t('close'))}">×</button></div>`;
+      modalRoot.innerHTML = `<div class="cmdk-back" data-close></div><div class="modal-box ${cls}" role="dialog" aria-modal="true" aria-labelledby="cuMTitle">${html}<button type="button" class="modal-x" data-close aria-label="${esc(t('close'))}">×</button></div>`;
       modalRoot.onclick = ev => { if (ev.target.closest('[data-close]')) closeModal(); };
       onMount && onMount();
       const f = modalRoot.querySelector('input:not([type=hidden]), button:not(.modal-x)'); f && f.focus();
@@ -154,6 +187,39 @@ const CloudUI = (() => {
     const msgEl = (id, text, ok) => { const el = $(id); if (el) { el.textContent = text; el.className = 'form-msg ' + (ok ? 'ok' : 'err'); } };
 
     /* ---------- authentication ---------- */
+    /* ---------- plans (limits enforced by db/saas.sql) ---------- */
+    const PLANS = [{ id: 'free', price: 0 }, { id: 'pro', price: 19, hot: true }, { id: 'team', price: 49 }];
+    // u: workspace usage in the app, null on the public landing page
+    function pricingHtml(u) {
+      const cur = u ? u.effective_plan : null, trialRunning = u && u.plan === 'free' && u.effective_plan === 'pro';
+      const cta = p => {
+        if (!u) return `<button class="btn${p.hot ? ' pri' : ''}" type="button" data-cta="${p.id}">${esc(t(p.id === 'free' ? 'ctaFree' : p.id === 'pro' ? 'ctaPro' : 'ctaTeam'))}</button>`;
+        if (p.id === u.plan && !trialRunning) return `<button class="btn" type="button" disabled>${esc(t('currentPlan'))}</button>`;
+        if (p.id === 'pro' && u.plan === 'free') {
+          if (trialRunning) return `<button class="btn" type="button" disabled>${esc(t('trialOn'))} · ${daysLeft(u)} ${esc(t('trialDays'))}</button>`;
+          if (u.trial_used) return `<button class="btn" type="button" disabled>${esc(t('trialUsed'))}</button>`;
+          return isOwner() ? `<button class="btn pri" type="button" data-trial>${esc(t('startTrial'))}</button>` : `<p class="hint">${esc(t('ownerOnly'))}</p>`;
+        }
+        return p.id === 'free' ? '' : `<button class="btn" type="button" disabled>${esc(t('soon'))}</button>`;
+      };
+      return `<div class="plans">${PLANS.map(p => `<article class="plan${p.hot ? ' hot' : ''}${cur === p.id ? ' cur' : ''}">
+        ${cur === p.id ? `<span class="plan-tag">${esc(t(trialRunning ? 'trialOn' : 'currentPlan'))}</span>` : p.hot ? `<span class="plan-tag">${esc(t('popular'))}</span>` : ''}
+        <h3>${esc(t('plan_' + p.id))}</h3><div class="plan-price"><b>${p.price}</b><span>${esc(t('perMonth'))}</span></div>
+        <ul>${STR[App.ui.lang]['pf_' + p.id].map(x => `<li>${esc(x)}</li>`).join('')}</ul>${cta(p)}</article>`).join('')}</div>`;
+    }
+    const daysLeft = u => Math.max(0, Math.ceil((Date.parse(u.trial_ends_at) - Date.now()) / 864e5));
+    function openPlans(note) {
+      modal(`<p class="eyebrow">${esc((wsObj() || {}).name || '')}</p><h2 id="cuMTitle" class="modal-h">${esc(note ? t('limitT') : t('plans'))}</h2>
+        <p class="hint">${esc(note || t('plansLead'))}</p><div style="margin-top:18px">${pricingHtml(S.usage || { plan: 'free', effective_plan: 'free', trial_used: false })}</div>${note ? `<p class="plan-note">${esc(t('plansLead'))}</p>` : ''}`, null, 'wide');
+    }
+    async function startTrial() {
+      try { const ends = await cloud.startTrial(st.ws); App.toast(t('trialStarted') + fmtDate(ends)); if (!modalRoot.hidden) closeModal(); await loadWs(); }
+      catch (e) { App.toast(E(e), true); }
+    }
+    const limitNote = (what, u) => t(what === 'projects' ? 'limitProjects' : 'limitMembers').replace('{n}', String(u ? (what === 'projects' ? u.max_projects : u.max_people) : 3));
+    const atLimit = what => S.usage && (what === 'projects' ? S.usage.projects >= S.usage.max_projects : S.usage.people >= S.usage.max_people);
+    document.addEventListener('click', ev => { if (ev.target.closest('[data-trial]')) startTrial(); else if (ev.target.closest('[data-plans]')) openPlans(); });
+
     /* ---------- sign-in gate: the first screen in cloud mode ---------- */
     const gate = $('gate'), gateCard = $('gateCard');
     let gateBrain = null;
@@ -163,6 +229,13 @@ const CloudUI = (() => {
       $('gateH').innerHTML = h2 ? `${esc(h1)}, <em>${esc(h2)}</em>` : esc(h1);
       $('gateLead').textContent = t('gateLead');
       $('gateFeats').innerHTML = STR[App.ui.lang].gateFeats.map(f => `<li>${esc(f)}</li>`).join('');
+      $('gateNav').innerHTML = [['lp-features', 'navFeat'], ['lp-how', 'navHow'], ['lp-pricing', 'navPricing']].map(([id, k]) => `<button type="button" data-jump="${id}">${esc(t(k))}</button>`).join('');
+      const L = STR[App.ui.lang], head = (ey, h, l) => { const [a, b] = t(h).split(/,\s*/); return `<div class="lp-head"><p class="eyebrow">${esc(t(ey))}</p><h2 class="lp-h">${b ? `${esc(a)}, <em>${esc(b)}</em>` : esc(a)}</h2>${l ? `<p class="lp-lead">${esc(t(l))}</p>` : ''}</div>`; };
+      $('lpMore').innerHTML = `<section class="wrap lp-sec" id="lp-features">${head('lpFeatEy', 'lpFeatH', 'lpFeatL')}
+          <div class="lp-grid">${L.lpFeats.map(([ic, h, d]) => `<article class="lp-feat"><span class="lp-ic" aria-hidden="true">${esc(ic)}</span><h3>${esc(h)}</h3><p>${esc(d)}</p></article>`).join('')}</div></section>
+        <section class="wrap lp-sec" id="lp-how">${head('lpHowEy', 'lpHowH')}<ol class="lp-steps">${L.lpHow.map(([b, d]) => `<li><b>${esc(b)}</b><span>${esc(d)}</span></li>`).join('')}</ol></section>
+        <section class="wrap lp-sec" id="lp-pricing">${head('lpPriceEy', 'lpPriceH', 'lpPriceL')}${pricingHtml(null)}</section>
+        <footer class="wrap lp-foot"><span>© ${new Date().getFullYear()} Burndown PM</span><span>${esc(t('footNote'))}</span></footer>`;
       gate.querySelectorAll('[data-glang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.glang === App.ui.lang));
     }
     function showGate(card) {
@@ -174,6 +247,9 @@ const CloudUI = (() => {
     function hideGate() { document.body.classList.remove('gated'); gate.hidden = true; gateBrain && gateBrain.stop(); }
     function gateLoading() { showGate({ html: `<p class="gate-load">${esc(t('loading'))}</p>` }); }
     gate.addEventListener('click', ev => {
+      const j = ev.target.closest('[data-jump]'); if (j) { $(j.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      const c = ev.target.closest('[data-cta]');
+      if (c) { if (S.user) return; openAuth(c.dataset.cta === 'login' ? 'in' : 'up'); gateCard.scrollIntoView?.({ behavior: 'smooth', block: 'center' }); return; }
       const l = ev.target.closest('[data-glang]'); if (!l) return;
       App.ui.lang = l.dataset.glang; App.persist(); App.renderAll(); renderGateCopy();
       const m = gateCard.querySelector('[data-mode][aria-pressed="true"]'); if (m) openAuth(m.dataset.mode);
@@ -190,8 +266,7 @@ const CloudUI = (() => {
           <button class="btn pri wide-btn" type="submit" id="cuAuthGo">${esc(up ? t('signUp') : t('signIn'))}</button>
           <p class="form-msg" id="cuAuthMsg" role="alert"></p>
         </form>
-        <p class="or">${esc(t('orWith'))}</p>
-        <div class="oauth"><button class="btn" type="button" data-oauth="google">${esc(t('google'))}</button><button class="btn" type="button" data-oauth="azure">${esc(t('microsoft'))}</button></div>
+        ${OAUTH.length ? `<p class="or">${esc(t('orWith'))}</p><div class="oauth">${OAUTH.map(p => `<button class="btn" type="button" data-oauth="${p}">${p === 'google' ? G_ICON : MS_ICON}<span>${esc(t(p === 'google' ? 'google' : 'microsoft'))}</span></button>`).join('')}</div>` : ''}
         <div class="modal-foot">${up ? '<span></span>' : `<button type="button" class="linkish" id="cuForgot">${esc(t('forgot'))}</button>`}<button type="button" class="linkish" id="cuDemo">${esc(t('demo'))}</button></div>`,
       bind() {
         gateCard.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => openAuth(b.dataset.mode, note));
@@ -236,6 +311,7 @@ const CloudUI = (() => {
         if (await cloud.mfaNeeded()) { openMfaChallenge(); return; }
         if (S.demo) { S.demo = false; App.clearLocal(); }
         S.profile = await cloud.profile();
+        cloud.mfaFactors().then(f => { S.mfa = f; renderProjects(); }).catch(() => {});
         const inv = ssGet('pendingInvite');
         if (inv) { ssSet('pendingInvite', null); try { const r = await cloud.acceptInvitation(inv); if (r) { st.ws = r.workspace_id; st.pid = null; keep(); App.toast(t('joined') + r.workspace_name); } } catch (e) { App.toast(E(e), true); } }
         S.wss = await cloud.workspaces();
@@ -251,8 +327,8 @@ const CloudUI = (() => {
 
     async function loadWs() {
       const w = wsObj(); S.role = w ? w.role : null;
-      const [projects, members, activity] = await Promise.all([cloud.projects(st.ws, S.archived), cloud.members(st.ws), cloud.activity(st.ws)]);
-      S.projects = projects; S.members = members; S.activity = activity;
+      const [projects, members, activity, usage] = await Promise.all([cloud.projects(st.ws, S.archived), cloud.members(st.ws), cloud.activity(st.ws), cloud.usage(st.ws)]);
+      S.projects = projects; S.members = members; S.activity = activity; S.usage = usage;
       S.invites = canManage() ? await cloud.invitations(st.ws) : [];
       renderProjects(); renderTeam(); renderHeader();
     }
@@ -330,7 +406,7 @@ const CloudUI = (() => {
           detach(); S.unwatch = cloud.watchProject(r.id, onRemote); setStatus('saved');
           App.toast(t('createdIn') + ((wsObj() || {}).name || '')); loadWs().catch(() => {});
           scheduleSave(0);                  // anything edited while the project was being created
-        }).catch(e => { S.creating = false; S.pendingCreate = true; App.toast(E(e), true); });
+        }).catch(e => { S.creating = false; S.pendingCreate = true; if (e.code === 'plan_limit_projects') { setStatus('error'); openPlans(limitNote('projects', S.usage)); } else App.toast(E(e), true); });
         return;
       }
       if (!st.pid) return;                 // a local project nobody asked to put online
@@ -343,6 +419,32 @@ const CloudUI = (() => {
       (canManage() ? cloud.deleteProject(gone) : cloud.archiveProject(gone, true)).catch(() => {}).then(() => loadWs().catch(() => {}));
       st.pid = null; keep(); setStatus('idle');
     });
+
+    /* ---------- plan bar and first-run checklist ---------- */
+    function planBar() {
+      const u = S.usage; if (!u) return '';
+      const trial = u.plan === 'free' && u.effective_plan === 'pro';
+      const meter = (k, v, max) => `<div class="usage${v >= max ? ' full' : ''}"><span>${esc(t(k))}<b>${v} / ${max}</b></span><div class="meter"><i style="width:${Math.min(100, v / Math.max(1, max) * 100)}%"></i></div></div>`;
+      return `<div class="plan-bar"><span class="plan-chip ${esc(u.effective_plan)}">${esc(t('plan_' + u.effective_plan))}</span>
+        ${trial ? `<span class="trial-note">${esc(t('trialOn'))} · ${daysLeft(u)} ${esc(t('trialDays'))}</span>` : ''}
+        ${meter('uProjects', u.projects, u.max_projects)}${meter('uPeople', u.people, u.max_people)}
+        <div class="actions">${u.plan === 'free' && !u.trial_used && isOwner() ? `<button class="btn pri sm" type="button" data-trial>${esc(t('startTrial'))}</button>` : ''}<button class="btn sm" type="button" data-plans>${esc(t('seePlans'))}</button></div></div>`;
+    }
+    const ckKey = () => 'ck-hidden-' + st.ws;
+    function checklist() {
+      if (!canEdit() || ssGetLS(ckKey())) return '';
+      const items = [
+        ['ws', true], ['proj', S.projects.length > 0 || S.activity.some(a => a.action === 'project.created')],
+        ['inv', S.members.length > 1 || S.invites.length > 0 || S.activity.some(a => a.action === 'member.invited')],
+        ['share', S.activity.some(a => a.action === 'share.created')], ['mfa', !!(S.mfa && S.mfa.length)]
+      ];
+      const done = items.filter(x => x[1]).length;
+      if (done === items.length) return '';
+      return `<div class="card checklist"><div class="card-h"><h2>${esc(t('ckT'))} <span class="ck-prog">${done}/${items.length}</span></h2><button class="linkish" type="button" data-ck-hide>${esc(t('ckHide'))}</button></div>
+        <div class="card-b"><ol>${items.map(([k, ok]) => `<li class="${ok ? 'done' : ''}"><button type="button" data-ck="${k}"${ok ? ' disabled' : ''}><span class="ck" aria-hidden="true">${ok ? '✓' : ''}</span>${esc(t('ck' + k[0].toUpperCase() + k.slice(1)))}</button></li>`).join('')}</ol></div></div>`;
+    }
+    const ssGetLS = k => { try { return localStorage.getItem(k); } catch { return null; } };
+    const ssSetLS = (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } };
 
     /* ---------- Projects tab: portfolio ---------- */
     const panelP = $('tab-projects'), panelT = $('tab-team');
@@ -373,6 +475,7 @@ const CloudUI = (() => {
       panelP.innerHTML = `<div class="port-head"><div><p class="eyebrow">${esc(t('portfolio'))}</p><h2 class="port-title">${esc((wsObj() || {}).name || '')} <span class="role-badge">${esc(t('r_' + S.role))}</span></h2></div>
         <div class="actions" style="margin:0">${canEdit() ? `<button class="btn pri" type="button" id="cuNewProj">+ ${esc(t('newProject'))}</button>` : ''}
         <label class="g-tools"><input type="checkbox" id="cuArch"${S.archived ? ' checked' : ''}> <span>${esc(t('showArchived'))}</span></label></div></div>
+        ${planBar()}${checklist()}
         ${S.archived ? '' : `<div class="kpis port-kpis">${tile('active', String(items.length))}${tile('atRisk', String(atRisk), atRisk ? 'warn-tile' : '')}${tile('totalBudget', App.eur(total))}${tile('latestEnd', latest ? App.dLabel(C.parseDate(latest), true) : '—')}</div>`}
         <div class="proj-grid">${items.length ? items.map(({ row, p, h, budget }) => `<article class="card proj-card${row.id === st.pid ? ' is-open' : ''}">
           <div class="card-b"><div class="proj-top"><h3>${esc(p.name)}</h3>${S.archived ? '' : pill(h.status)}</div>
@@ -386,9 +489,17 @@ const CloudUI = (() => {
           : S.archived || !canEdit() ? `<p class="hint empty">${esc(t(S.archived ? 'noArchived' : 'noProjects'))}</p>`
           : `<div class="card onboard first-proj"><div class="card-b"><p class="eyebrow">${esc(t('noProjects'))}</p><h2 class="wiz-h">${esc(t('firstProj'))}</h2><p class="hint">${esc(t('firstProjL'))}</p>
             <div class="actions"><button class="btn pri wiz-go" type="button" id="cuFirstProj">+ ${esc(t('newProject'))}</button></div></div></div>`}</div>`;
-      const startNew = () => { S.pendingCreate = true; flushSave(); detach(); st.pid = null; keep(); App.setReadOnly(false); App.setEmpty(true); App.goTab('assistant'); setTimeout(() => $('wz-desc') && $('wz-desc').focus(), 0); };
+      const startNew = () => { if (atLimit('projects')) { openPlans(limitNote('projects', S.usage)); return; } S.pendingCreate = true; flushSave(); detach(); st.pid = null; keep(); App.setReadOnly(false); App.setEmpty(true); App.goTab('assistant'); setTimeout(() => $('wz-desc') && $('wz-desc').focus(), 0); };
       if ($('cuNewProj')) $('cuNewProj').onclick = startNew;
       if ($('cuFirstProj')) $('cuFirstProj').onclick = startNew;
+      const hide = panelP.querySelector('[data-ck-hide]'); if (hide) hide.onclick = () => { ssSetLS(ckKey(), '1'); renderProjects(); };
+      panelP.querySelectorAll('[data-ck]').forEach(b => b.onclick = async () => {
+        const k = b.dataset.ck;
+        if (k === 'proj') startNew();
+        else if (k === 'inv') { App.goTab('team'); setTimeout(() => $('cuInvEmail') && $('cuInvEmail').focus(), 0); }
+        else if (k === 'share') { if (!st.pid && S.projects[0]) await openProject(S.projects[0].id); App.goTab('team'); setTimeout(() => $('cuShareLabel') && $('cuShareLabel').focus(), 0); }
+        else if (k === 'mfa') openAccount();
+      });
       $('cuArch').onchange = async ev => { S.archived = ev.target.checked; try { S.projects = await cloud.projects(st.ws, S.archived); } catch (e) { App.toast(E(e), true); } renderProjects(); };
       let armed = null;
       panelP.onclick = async ev => {
@@ -432,7 +543,7 @@ const CloudUI = (() => {
               <td class="r">${m.user_id === me ? `<button class="btn sm" type="button" data-leave>${esc(t('leave'))}</button>` : (isOwner() || (canManage() && ['member', 'viewer'].includes(m.role))) ? `<button class="btn sm danger" type="button" data-rm="${esc(m.user_id)}">${esc(t('remove'))}</button>` : ''}</td></tr>`).join('')}
             </tbody></table></div>
             <div class="card-b role-legend">${roles.map(r => `<span><b>${esc(t('r_' + r))}</b> · ${esc(t('rd_' + r))}</span>`).join('')}</div></div>
-          ${canManage() ? `<div class="card"><div class="card-h"><h2>${esc(t('invite'))}</h2></div><div class="card-b"><p class="hint">${esc(t('inviteLead'))}</p>
+          ${canManage() ? `<div class="card"><div class="card-h"><h2>${esc(t('invite'))}</h2></div><div class="card-b"><p class="hint">${esc(t('inviteLead'))}</p>${atLimit('members') ? `<p class="doc-lang">${esc(limitNote('members', S.usage))} <button class="linkish" type="button" data-plans>${esc(t('seePlans'))}</button></p>` : ''}
             <form id="cuInvForm" class="row-form" novalidate><div class="f grow"><label for="cuInvEmail">${esc(t('email'))}</label><input id="cuInvEmail" type="email" maxlength="254" required></div>
             <div class="f"><label for="cuInvRole">${esc(t('role'))}</label><select id="cuInvRole">${invRoles.map(r => `<option value="${r}"${r === 'member' ? ' selected' : ''}>${esc(t('r_' + r))}</option>`).join('')}</select></div>
             <button class="btn pri" type="submit" id="cuInvGo">${esc(t('invite'))}</button></form><p class="form-msg" id="cuInvMsg" role="alert"></p>

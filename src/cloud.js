@@ -6,7 +6,8 @@ const Cloud = (() => {
     constructor(code, detail) { super(code); this.code = code; this.detail = detail || ''; }
   }
   const KNOWN = ['forbidden', 'forbidden_role', 'last_owner', 'invitation_invalid', 'invitation_wrong_account', 'transfer_ownership_first',
-    'workspace_limit', 'share_limit', 'invitation_limit', 'not_authenticated', 'not_found', 'project_workspace_immutable'];
+    'workspace_limit', 'share_limit', 'invitation_limit', 'not_authenticated', 'not_found', 'project_workspace_immutable',
+    'plan_limit_projects', 'plan_limit_members', 'plan_limit_shares', 'trial_unavailable'];
   function codeOf(err) {
     if (!err) return 'unknown';
     const msg = String(err.message || err.error_description || err.msg || err || '');
@@ -87,6 +88,9 @@ const Cloud = (() => {
       },
       async renameWorkspace(id, name) { return call(sb.from('workspaces').update({ name: String(name).trim().slice(0, 80) }).eq('id', id)); },
       async deleteWorkspace(id) { return call(sb.from('workspaces').delete().eq('id', id)); },
+      /* ---- plans (db/saas.sql); null when the database has no plans yet ---- */
+      async usage(ws) { try { const r = await rpc('workspace_usage', { ws }); return (r && r[0]) || null; } catch (e) { if (e.code === 'offline') throw e; return null; } },
+      startTrial: ws => rpc('start_trial', { ws }),
 
       /* ---- members and invitations ---- */
       members: ws => rpc('list_members', { ws }),

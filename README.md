@@ -69,6 +69,19 @@ Never put the `service_role` key in this file: the build refuses it. The anon ke
 - **Cerveau PM / PM brain** — un cerveau en particules animé (canvas) relié aux 10 domaines du PMBOK ; chaque zone affiche une mesure en direct et passe au vert / orange / rouge selon l’état réel du projet ; un clic ouvre le module correspondant. Boutons HTML accessibles, mouvement réduit respecté. / An animated particle brain wired to the 10 PMBOK knowledge areas, each with a live metric and status colour; clicking opens the matching module.
 - Toutes les saisies passent par `PM.clean` (types, bornes, listes fermées, longueurs, 300 lignes max) et tout le texte est échappé à l’affichage. / All input goes through `PM.clean`; all text is escaped on output.
 
+## 0 quinquies. SaaS : offres, limites, essai / Plans, limits, trial
+
+- **Page d’accueil publique** avec fonctionnalités, étapes et tarifs, puis la connexion (e-mail ou Google). / Public landing page with features, steps and pricing, then sign-in (e-mail or Google).
+- **Offres par espace / Plans per workspace** — Free : 3 projets actifs, 3 personnes, 1 lien client par projet · Pro (19 €/mois) : 25 projets, 10 personnes, 20 liens · Team (49 €/mois) : 500 projets, 50 personnes. Les limites sont appliquées **dans la base** (triggers), impossibles à contourner depuis le navigateur. / Limits are enforced in the database.
+- **Essai Pro 14 jours** lancé par le propriétaire, une fois par espace, sans carte. À la fin, les données restent ; seules les nouvelles créations au-delà du plan Free sont refusées. Le plan payant ne peut être changé que par le rôle service (administrateur ou futur webhook Stripe). / One 14-day Pro trial per workspace; the paid plan can only be changed server-side.
+- **Barre d’abonnement, compteurs d’usage et liste « Bien démarrer »** dans l’onglet Projets. / Plan bar, usage meters and getting-started checklist in the Projects tab.
+
+### Activer / Enable
+1. Supabase → **SQL Editor** → coller `db/saas.sql` → **Run** (à faire une fois, après `schema.sql` ; relançable sans risque).
+2. **Google** : Google Cloud Console → *APIs & Services → Credentials → Create credentials → OAuth client ID* (type *Web application*). *Authorized redirect URI* : `https://<votre-ref>.supabase.co/auth/v1/callback`. Copier l’ID client et le secret dans Supabase → **Authentication → Sign In / Providers → Google** → activer → enregistrer. Le secret ne va **jamais** dans ce dépôt.
+3. Boutons affichés : `"oauth": ["google"]` dans `cloud.config.json` (ajouter `"azure"` pour Microsoft une fois configuré).
+4. Passer un espace en Pro / Team à la main : `update public.workspaces set plan = 'pro' where name = '…';` (SQL Editor).
+
 ## 1. Déployer / Deploy
 
 ### Option A — Vercel + GitHub (recommandé / recommended)
