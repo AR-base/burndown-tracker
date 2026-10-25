@@ -54,6 +54,9 @@ const Core = (() => {
     // Team day rates and budget settings (validated by budget.js, loaded lazily to avoid a require cycle)
     const B = typeof Budget !== 'undefined' ? Budget : (typeof require === 'function' ? require('./budget.js') : null);
     if (B) { const tb = B.clean(raw.team, raw.budget); p.team = tb.team; p.budget = tb.budget; }
+    // Project-management registers (charter, stakeholders, RACI, risks, …) validated by pm.js
+    const PMx = typeof PM !== 'undefined' ? PM : (typeof require === 'function' ? require('./pm.js') : null);
+    if (PMx) p.pm = PMx.clean(raw.pm);
     const ps = parseDate(p.start), pe = parseDate(p.end);
     if (ps === null) errors.push('start');
     if (pe === null) errors.push('end');

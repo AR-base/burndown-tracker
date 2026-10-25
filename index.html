@@ -16,24 +16,26 @@
    glass cards on a midnight field, coral reserved for the single thing that matters on each screen. */
 :root{
   color-scheme:dark;
-  --bg:#11151C; --bg-2:#141A24; --navy:#212D40; --slate:#364156; --rose:#7D4E57; --coral:#D66853;
-  --surface:#1A2332; --sunk:#161D29; --raise:#253148;
-  --glass:rgba(33,45,64,.58); --glass-strong:rgba(26,35,50,.86);
-  --line:rgba(140,156,186,.16); --line-strong:#364156; --grid:rgba(54,65,86,.62);
-  --ink:#F3EEE9; --muted:#A3ACBD; --faint:#6E798D;
-  --accent:#D66853; --accent-2:#B3707D; --accent-soft:rgba(214,104,83,.16); --accent-glow:rgba(214,104,83,.42);
-  --ideal:#8B97AF; --good:#5CC9A1; --warn:#EDB45B; --bad:#F2657D;
-  --good-soft:rgba(92,201,161,.14); --warn-soft:rgba(237,180,91,.15); --bad-soft:rgba(242,101,125,.15);
+  --bg:#070606; --bg-2:#0D0B0C; --navy:#141112; --slate:#2F2B2C; --rose:#4B2FA8; --coral:#8556F7;
+  --gold:#CEAE31; --gold-2:#EBCA4C; --gold-3:#AF8F30; --lav:#D3AFFE; --lav-2:#B28DF0; --cyan:#4FD1E8; --pink:#F28DC7;
+  --surface:#141112; --sunk:#0E0C0D; --raise:#2F2B2C;
+  --glass:rgba(28,25,26,.62); --glass-strong:rgba(14,12,13,.9);
+  --line:rgba(249,250,250,.09); --line-strong:#3A3536; --grid:rgba(47,43,44,.62);
+  --ink:#F9FAFA; --muted:#ABA6A8; --faint:#716B6D;
+  --accent:#8556F7; --accent-2:#D3AFFE; --accent-soft:rgba(133,86,247,.17); --accent-glow:rgba(133,86,247,.45);
+  --ideal:#8E888A; --good:#5DD6A6; --warn:#F0A840; --bad:#F25F7A;
+  --good-soft:rgba(93,214,166,.14); --warn-soft:rgba(240,168,64,.15); --bad-soft:rgba(242,95,122,.15);
   --f-display:'Sora','Avenir Next','Segoe UI',system-ui,sans-serif;
   --f-body:'Manrope','Avenir Next','Segoe UI',system-ui,sans-serif;
   --f-mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
-  --r:14px; --r-sm:10px; --ease:cubic-bezier(.2,.8,.2,1);
-  --shadow:0 1px 0 rgba(255,255,255,.04) inset,0 18px 40px -18px rgba(0,0,0,.55);
+  --r:16px; --r-sm:10px; --ease:cubic-bezier(.2,.8,.2,1);
+  --shadow:0 1px 0 rgba(255,255,255,.04) inset,0 18px 40px -18px rgba(0,0,0,.7);
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 var(--f-body);-webkit-font-smoothing:antialiased;min-height:100vh;
-  background-image:radial-gradient(1200px 600px at 85% -10%,rgba(125,78,87,.22),transparent 60%),radial-gradient(900px 500px at -10% 10%,rgba(33,45,64,.9),transparent 60%);
+  background-image:radial-gradient(1100px 620px at 88% -12%,rgba(133,86,247,.20),transparent 60%),radial-gradient(800px 480px at -8% 6%,rgba(206,174,49,.07),transparent 60%);
   background-attachment:fixed}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--glass-strong)}
 body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.35;
@@ -55,7 +57,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .eyebrow{font:600 10.5px/1.2 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .brand h1{font:600 16px/1.25 var(--f-display);margin:1px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38ch}
 .bar-act{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.tabs{display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(17,21,28,.6);border:1px solid var(--line);overflow-x:auto;scrollbar-width:none;max-width:100%}
+.tabs{display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(7,6,6,.6);border:1px solid var(--line);overflow-x:auto;scrollbar-width:none;max-width:100%}
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{border:0;background:none;padding:7px 14px;border-radius:999px;cursor:pointer;font:600 13px/1 var(--f-body);color:var(--muted);white-space:nowrap;transition:color .2s,background .25s var(--ease)}
 .tabs button:hover{color:var(--ink)}
@@ -64,10 +66,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* signed in: 8 views, so the switcher gets its own row under the brand and actions */
 .bar-in:has(#tabs > :nth-child(7)) .tabs{order:3;flex:1 1 100%;width:max-content;max-width:100%}
 .bar-in:has(#tabs > :nth-child(7)) .brand{flex:1 1 220px}
-.seg{display:inline-flex;padding:3px;border-radius:999px;background:rgba(17,21,28,.6);border:1px solid var(--line)}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:rgba(7,6,6,.6);border:1px solid var(--line)}
 .seg button{border:0;background:none;padding:6px 12px;border-radius:999px;cursor:pointer;font:600 12px/1 var(--f-body);color:var(--muted);transition:background .2s,color .2s}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.kbd-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:rgba(17,21,28,.5);color:var(--muted);border-radius:999px;padding:6px 10px 6px 12px;cursor:pointer;font-size:12.5px}
+.kbd-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:rgba(7,6,6,.5);color:var(--muted);border-radius:999px;padding:6px 10px 6px 12px;cursor:pointer;font-size:12.5px}
 .kbd-btn:hover{color:var(--ink);border-color:var(--line-strong)}
 kbd{font:500 11px var(--f-mono);padding:2px 6px;border-radius:6px;background:var(--raise);color:var(--muted);border:1px solid var(--line)}
 
@@ -81,7 +83,7 @@ kbd{font:500 11px var(--f-mono);padding:2px 6px;border-radius:6px;background:var
 /* glass surfaces with a cursor spotlight */
 .card,.kpi,.wiz-main,.wiz-steps li{position:relative;isolation:isolate}
 .card::after,.kpi::after,.wiz-main::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;opacity:0;transition:opacity .35s;
-  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(214,104,83,.10),transparent 45%)}
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(133,86,247,.10),transparent 45%)}
 .card:hover::after,.kpi:hover::after,.wiz-main:hover::after{opacity:1}
 .card{background:var(--glass);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 .card-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
@@ -92,12 +94,12 @@ kbd{font:500 11px var(--f-mono);padding:2px 6px;border-radius:6px;background:var
 /* KPIs */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
 .kpi{background:var(--glass);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0;box-shadow:var(--shadow);transition:transform .35s var(--ease),border-color .3s}
-.kpi:hover{transform:translateY(-2px);border-color:rgba(214,104,83,.35)}
+.kpi:hover{transform:translateY(-2px);border-color:rgba(133,86,247,.35)}
 .kpi .k{font:600 10.5px/1.2 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .kpi .v{font:600 26px/1.15 var(--f-display);margin-top:8px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .kpi .v small{font:500 12px var(--f-body);color:var(--muted);letter-spacing:0}
 .kpi .s{font-size:12px;color:var(--muted);margin-top:3px}
-.meter{height:5px;background:rgba(17,21,28,.8);border-radius:3px;margin-top:10px;overflow:hidden}
+.meter{height:5px;background:rgba(7,6,6,.8);border-radius:3px;margin-top:10px;overflow:hidden}
 .meter i{display:block;height:100%;background:linear-gradient(90deg,var(--rose),var(--coral));border-radius:3px;box-shadow:0 0 12px var(--accent-glow)}
 .ring{display:flex;align-items:center;gap:12px;margin-top:6px}
 .ring svg{flex:none}
@@ -129,7 +131,7 @@ kbd{font:500 11px var(--f-mono);padding:2px 6px;border-radius:6px;background:var
 .tid{font:500 11.5px var(--f-mono);color:var(--faint)}
 .chip{display:inline-block;padding:3px 9px;border-radius:999px;font:600 11px/1.4 var(--f-body);white-space:nowrap}
 .c-done{background:var(--good-soft);color:var(--good)} .c-late{background:var(--bad-soft);color:var(--bad)}
-.c-inprog{background:var(--accent-soft);color:var(--accent)} .c-todo{background:rgba(54,65,86,.5);color:var(--muted)}
+.c-inprog{background:var(--accent-soft);color:var(--accent)} .c-todo{background:rgba(47,43,44,.5);color:var(--muted)}
 .sec-t{font:600 10.5px/1.2 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 4px}
 .sec-t:first-child{margin-top:0}
 
@@ -145,21 +147,21 @@ kbd{font:500 11px var(--f-mono);padding:2px 6px;border-radius:6px;background:var
 /* tables */
 .tbl-wrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:13px}
-th{font:600 10.5px/1.2 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);white-space:nowrap;background:rgba(17,21,28,.35)}
+th{font:600 10.5px/1.2 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);white-space:nowrap;background:rgba(7,6,6,.35)}
 td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tbody tr{transition:background .2s}
-tbody tr:hover{background:rgba(54,65,86,.25)}
-tr.phase-row td{background:rgba(17,21,28,.4);font:600 12.5px var(--f-display)}
+tbody tr:hover{background:rgba(47,43,44,.25)}
+tr.phase-row td{background:rgba(7,6,6,.4);font:600 12.5px var(--f-display)}
 tr.total-row td{font-weight:700;border-top:1px solid var(--line-strong)}
 td.r,th.r{text-align:right}
-.pbar{width:84px;height:6px;background:rgba(17,21,28,.8);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.pbar{width:84px;height:6px;background:rgba(7,6,6,.8);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
 .pbar i{display:block;height:100%;border-radius:3px}
 
 /* buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line-strong);background:rgba(54,65,86,.35);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;font:600 13px/1.2 var(--f-body);transition:transform .2s var(--ease),background .2s,border-color .2s,box-shadow .25s}
-.btn:hover{background:rgba(54,65,86,.6);border-color:#4A5874}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line-strong);background:rgba(47,43,44,.35);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;font:600 13px/1.2 var(--f-body);transition:transform .2s var(--ease),background .2s,border-color .2s,box-shadow .25s}
+.btn:hover{background:rgba(47,43,44,.6);border-color:#4A4445}
 .btn:active{transform:scale(.97)}
-.btn.pri{background:linear-gradient(180deg,#E0735E,var(--coral));border-color:transparent;color:#fff;box-shadow:0 8px 22px -10px var(--accent-glow),0 1px 0 rgba(255,255,255,.25) inset}
+.btn.pri{background:linear-gradient(180deg,#9C74FA,var(--coral));border-color:transparent;color:#fff;box-shadow:0 8px 22px -10px var(--accent-glow),0 1px 0 rgba(255,255,255,.25) inset}
 .btn.pri:hover{box-shadow:0 10px 28px -8px var(--accent-glow),0 1px 0 rgba(255,255,255,.25) inset;filter:brightness(1.05)}
 .btn.danger{color:var(--bad)}
 .btn.sm{padding:4px 10px;font-size:12px}
@@ -170,7 +172,7 @@ td.r,th.r{text-align:right}
 .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
 .f{display:flex;flex-direction:column;gap:6px;min-width:0}
 .f label,.lbl{font:600 10.5px/1.2 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.f input,.f select,.f textarea,.edit-row input,.extra-row input,.extra-row select,.rate-in{border:1px solid var(--line);background:rgba(17,21,28,.55);border-radius:var(--r-sm);padding:9px 11px;min-width:0;width:100%;color:var(--ink);transition:border-color .2s,box-shadow .2s}
+.f input,.f select,.f textarea,.edit-row input,.extra-row input,.extra-row select,.rate-in{border:1px solid var(--line);background:rgba(7,6,6,.55);border-radius:var(--r-sm);padding:9px 11px;min-width:0;width:100%;color:var(--ink);transition:border-color .2s,box-shadow .2s}
 .f input:focus,.f select:focus,.f textarea:focus,.edit-row input:focus,.extra-row input:focus,.extra-row select:focus,.rate-in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .f input[type=range]{padding:0;accent-color:var(--coral)}
 input[type=checkbox]{accent-color:var(--coral)}
@@ -185,7 +187,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.8)}
 .edit-row{display:grid;grid-template-columns:70px minmax(0,1fr) minmax(0,1fr) 120px auto;gap:8px;align-items:center}
 .edit-row input[type=color]{padding:2px;height:36px}
 @media (max-width:640px){.edit-row{grid-template-columns:1fr 1fr}}
-.doc-lang{margin:0 0 12px;padding:10px 14px;border-radius:var(--r-sm);background:var(--accent-soft);border:1px solid rgba(214,104,83,.3);font-size:13px}
+.doc-lang{margin:0 0 12px;padding:10px 14px;border-radius:var(--r-sm);background:var(--accent-soft);border:1px solid rgba(133,86,247,.3);font-size:13px}
 
 /* download menu */
 .dl{position:relative}
@@ -193,7 +195,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.8)}
 .dl-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:40;width:300px;max-width:calc(100vw - 32px);background:var(--glass-strong);-webkit-backdrop-filter:saturate(1.4) blur(20px);backdrop-filter:saturate(1.4) blur(20px);border:1px solid var(--line-strong);border-radius:16px;box-shadow:0 30px 60px -20px rgba(0,0,0,.7);padding:6px;animation:pop .22s var(--ease)}
 @keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
 .dl-menu button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;border:0;background:none;padding:9px 12px;border-radius:10px;cursor:pointer;text-align:left;font-size:13.5px;color:var(--ink)}
-.dl-menu button:hover,.dl-menu button:focus-visible{background:rgba(214,104,83,.14)}
+.dl-menu button:hover,.dl-menu button:focus-visible{background:rgba(133,86,247,.14)}
 .dl-menu small{font:500 11px var(--f-mono);color:var(--muted)}
 .dl-h{font:600 10.5px/1.2 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:10px 12px 4px}
 .dl-note{font-size:11.5px;color:var(--muted);margin:6px 12px 2px}
@@ -209,38 +211,38 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.8)}
   background:conic-gradient(from 0deg,var(--coral),var(--rose),var(--slate),var(--coral));animation:orb 14s linear infinite}
 @keyframes orb{to{transform:rotate(360deg)}}
 .wiz-h{font:700 clamp(24px,3.2vw,36px)/1.08 var(--f-display);margin:0;letter-spacing:-.02em;text-wrap:balance;max-width:20ch}
-.wiz-h em{font-style:normal;background:linear-gradient(90deg,var(--coral),#F0A08C);-webkit-background-clip:text;background-clip:text;color:transparent}
+.wiz-h em{font-style:normal;background:linear-gradient(90deg,var(--coral),#EBCA4C);-webkit-background-clip:text;background-clip:text;color:transparent}
 .wiz-lead{margin:0;color:var(--muted);max-width:62ch;font-size:15px}
-.wiz-input{width:100%;border:1px solid var(--line-strong);border-radius:16px;background:rgba(17,21,28,.6);padding:16px 18px;font:17px/1.5 var(--f-body);resize:vertical;min-height:96px;color:var(--ink);transition:border-color .25s,box-shadow .3s}
+.wiz-input{width:100%;border:1px solid var(--line-strong);border-radius:16px;background:rgba(7,6,6,.6);padding:16px 18px;font:17px/1.5 var(--f-body);resize:vertical;min-height:96px;color:var(--ink);transition:border-color .25s,box-shadow .3s}
 .wiz-input::placeholder{color:var(--faint)}
 .wiz-input:focus{outline:none;border-color:var(--coral);box-shadow:0 0 0 4px var(--accent-soft),0 12px 40px -12px var(--accent-glow)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chips button{border:1px solid var(--line);background:rgba(17,21,28,.45);border-radius:999px;padding:6px 13px;font-size:12.5px;cursor:pointer;color:var(--muted);transition:all .2s var(--ease)}
+.chips button{border:1px solid var(--line);background:rgba(7,6,6,.45);border-radius:999px;padding:6px 13px;font-size:12.5px;cursor:pointer;color:var(--muted);transition:all .2s var(--ease)}
 .chips button:hover{border-color:var(--coral);color:var(--ink);transform:translateY(-1px)}
 .wiz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-.wiz-grid .seg{width:100%}.wiz-grid .seg button{flex:1;padding:9px 6px}
+.wiz-grid .seg{width:100%;display:flex}.wiz-grid .seg button{flex:1 1 0;min-width:0;padding:9px 4px;overflow-wrap:anywhere}
 .wiz-detect{margin:0;font-size:13px;color:var(--muted);min-height:1.4em}
-.wiz-detect b{color:var(--ink);padding:2px 10px;border-radius:999px;background:var(--accent-soft);border:1px solid rgba(214,104,83,.35);margin-left:4px}
+.wiz-detect b{color:var(--ink);padding:2px 10px;border-radius:999px;background:var(--accent-soft);border:1px solid rgba(133,86,247,.35);margin-left:4px}
 .wiz-go{padding:12px 22px;font-size:15px}
 .wiz-ai{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
 .wiz-steps{list-style:none;counter-reset:s;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
 .wiz-steps li{counter-increment:s;background:var(--glass);border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 16px 58px;display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}
 .wiz-steps li::before{content:counter(s);position:absolute;left:16px;top:16px;width:28px;height:28px;border-radius:9px;background:linear-gradient(145deg,var(--coral),var(--rose));color:#fff;font:600 13px/28px var(--f-mono);text-align:center;box-shadow:0 6px 16px -6px var(--accent-glow)}
 .wiz-steps b{color:var(--ink);font:600 14.5px var(--f-display)}
-.wiz-res{margin-top:16px;border-color:rgba(214,104,83,.45);box-shadow:0 0 0 1px rgba(214,104,83,.15),0 24px 60px -24px var(--accent-glow)}
+.wiz-res{margin-top:16px;border-color:rgba(133,86,247,.45);box-shadow:0 0 0 1px rgba(133,86,247,.15),0 24px 60px -24px var(--accent-glow)}
 .wiz-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:0 0 4px}
-.wiz-stats div{min-width:0;padding:12px 14px;border-radius:12px;background:rgba(17,21,28,.4);border:1px solid var(--line)}
+.wiz-stats div{min-width:0;padding:12px 14px;border-radius:12px;background:rgba(7,6,6,.4);border:1px solid var(--line)}
 .wiz-stats dt{font:600 10.5px/1.2 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .wiz-stats dd{margin:6px 0 0;font:600 17px/1.3 var(--f-display);overflow-wrap:anywhere}
 
 /* budget */
 .bud-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-.bud-kpis .kpi.total{background:linear-gradient(150deg,rgba(214,104,83,.22),rgba(125,78,87,.18));border-color:rgba(214,104,83,.4)}
-.bud-kpis .kpi.total .v{color:#F6B4A5}
+.bud-kpis .kpi.total{background:linear-gradient(150deg,rgba(133,86,247,.22),rgba(206,174,49,.18));border-color:rgba(133,86,247,.4)}
+.bud-kpis .kpi.total .v{color:#EBCA4C}
 .rate-in{width:96px;padding:5px 8px;text-align:right;font:500 13px var(--f-mono)}
 .pc-row{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(0,2fr) auto;gap:12px;align-items:center;padding:8px 0;font-size:13px}
 .pc-row>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pc-bar{height:10px;background:rgba(17,21,28,.8);border-radius:5px;overflow:hidden}.pc-bar i{display:block;height:100%;border-radius:5px;transition:width .6s var(--ease)}
+.pc-bar{height:10px;background:rgba(7,6,6,.8);border-radius:5px;overflow:hidden}.pc-bar i{display:block;height:100%;border-radius:5px;transition:width .6s var(--ease)}
 .extra-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.4fr) 92px minmax(0,1fr) 96px auto;gap:8px;align-items:center}
 @media (max-width:760px){.extra-row{grid-template-columns:1fr 1fr}}
 .ex-tot{text-align:right;font-size:13px}
@@ -249,32 +251,32 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.8)}
 
 /* command bar */
 .cmdk{position:fixed;inset:0;z-index:100;display:grid;place-items:start center;padding:12vh 16px 16px}
-.cmdk-back{position:absolute;inset:0;background:rgba(8,10,14,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:fade .2s}
+.cmdk-back{position:absolute;inset:0;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:fade .2s}
 @keyframes fade{from{opacity:0}}
-.cmdk-box{position:relative;width:min(620px,100%);background:var(--glass-strong);-webkit-backdrop-filter:saturate(1.5) blur(24px);backdrop-filter:saturate(1.5) blur(24px);border:1px solid var(--line-strong);border-radius:18px;box-shadow:0 40px 90px -30px rgba(0,0,0,.8),0 0 0 1px rgba(214,104,83,.08);overflow:hidden;animation:pop .22s var(--ease)}
+.cmdk-box{position:relative;width:min(620px,100%);background:var(--glass-strong);-webkit-backdrop-filter:saturate(1.5) blur(24px);backdrop-filter:saturate(1.5) blur(24px);border:1px solid var(--line-strong);border-radius:18px;box-shadow:0 40px 90px -30px rgba(0,0,0,.8),0 0 0 1px rgba(133,86,247,.08);overflow:hidden;animation:pop .22s var(--ease)}
 .cmdk-in{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
 .cmdk-in input{flex:1;border:0;background:none;outline:none;font:16px var(--f-body);color:var(--ink);min-width:0}
 .cmdk-in input::placeholder{color:var(--faint)}
 .cmdk ul{list-style:none;margin:0;padding:6px;max-height:min(52vh,420px);overflow-y:auto}
 .cmdk li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px}
-.cmdk li .ci{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:rgba(54,65,86,.5);color:var(--muted);flex:none;font:600 12px var(--f-mono)}
+.cmdk li .ci{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:rgba(47,43,44,.5);color:var(--muted);flex:none;font:600 12px var(--f-mono)}
 .cmdk li small{margin-left:auto;color:var(--faint);font:500 11px var(--f-mono)}
-.cmdk li[aria-selected="true"]{background:rgba(214,104,83,.16)}
+.cmdk li[aria-selected="true"]{background:rgba(133,86,247,.16)}
 .cmdk li[aria-selected="true"] .ci{background:var(--coral);color:#fff}
 .cmdk-empty{padding:18px;color:var(--muted);font-size:13px}
 
 /* account layer */
 .acct{display:flex;align-items:center;gap:8px}
-.sync-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:rgba(17,21,28,.5);color:var(--muted);border-radius:999px;padding:5px 11px;font:600 11.5px/1.2 var(--f-body);white-space:nowrap;cursor:default}
+.sync-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:rgba(7,6,6,.5);color:var(--muted);border-radius:999px;padding:5px 11px;font:600 11.5px/1.2 var(--f-body);white-space:nowrap;cursor:default}
 button.sync-pill{cursor:pointer}
 .sync-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
 .s-saved{color:var(--good)} .s-saving,.s-pending{color:var(--muted)} .s-saving::before{animation:pulse 1s infinite} .s-offline{color:var(--warn)} .s-conflict,.s-error{color:var(--bad);border-color:rgba(242,101,125,.45)} .s-local{color:var(--faint)}
 @keyframes pulse{50%{opacity:.25}}
-.ws-select{border:1px solid var(--line);background:rgba(17,21,28,.55);color:var(--ink);border-radius:999px;padding:6px 28px 6px 12px;font:600 12.5px var(--f-body);max-width:190px;text-overflow:ellipsis}
-.avatar{width:34px;height:34px;border-radius:50%;border:1px solid rgba(214,104,83,.5);background:linear-gradient(145deg,var(--rose),var(--slate));color:#fff;font:600 12.5px var(--f-display);cursor:pointer;display:grid;place-items:center}
+.ws-select{border:1px solid var(--line);background:rgba(7,6,6,.55);color:var(--ink);border-radius:999px;padding:6px 28px 6px 12px;font:600 12.5px var(--f-body);max-width:190px;text-overflow:ellipsis}
+.avatar{width:34px;height:34px;border-radius:50%;border:1px solid rgba(133,86,247,.5);background:linear-gradient(145deg,var(--rose),var(--slate));color:#fff;font:600 12.5px var(--f-display);cursor:pointer;display:grid;place-items:center}
 .avatar:hover{box-shadow:0 0 0 3px var(--accent-soft)}
 .sm-pad{padding:7px 14px}
-.ro-banner{margin:16px 0 0;padding:10px 14px;border-radius:var(--r-sm);background:var(--accent-soft);border:1px solid rgba(214,104,83,.35);font-size:13px}
+.ro-banner{margin:16px 0 0;padding:10px 14px;border-radius:var(--r-sm);background:var(--accent-soft);border:1px solid rgba(133,86,247,.35);font-size:13px}
 .ro-banner.err{background:var(--bad-soft);border-color:rgba(242,101,125,.4)}
 .ro #tf-card,.ro #gImport,.ro #newBtn,.ro .row-actions,.ro #addExtra,.ro #saveBudget{display:none !important}
 .modal-box{position:relative;width:min(520px,100%);max-height:calc(100vh - 14vh - 32px);overflow-y:auto;background:var(--glass-strong);-webkit-backdrop-filter:saturate(1.5) blur(24px);backdrop-filter:saturate(1.5) blur(24px);border:1px solid var(--line-strong);border-radius:20px;box-shadow:0 40px 90px -30px rgba(0,0,0,.8);padding:26px;animation:pop .22s var(--ease)}
@@ -297,19 +299,19 @@ button.sync-pill{cursor:pointer}
 .mfa-enrol{display:grid;grid-template-columns:168px minmax(0,1fr);gap:14px;align-items:start}
 .mfa-enrol img{background:#fff;border-radius:10px;padding:6px;max-width:100%}
 @media (max-width:520px){.mfa-enrol{grid-template-columns:1fr}}
-code{font:12px var(--f-mono);background:rgba(17,21,28,.6);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
+code{font:12px var(--f-mono);background:rgba(7,6,6,.6);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
 .row-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px}.row-form .grow{flex:1 1 220px}
 .link-box{margin-top:14px;padding:12px;border-radius:12px;background:rgba(92,201,161,.08);border:1px solid rgba(92,201,161,.3)}
-.link-row{display:flex;gap:8px;margin-top:6px}.link-row input{flex:1;min-width:0;font:12px var(--f-mono);border:1px solid var(--line);background:rgba(17,21,28,.6);color:var(--ink);border-radius:8px;padding:7px 9px}
+.link-row{display:flex;gap:8px;margin-top:6px}.link-row input{flex:1;min-width:0;font:12px var(--f-mono);border:1px solid var(--line);background:rgba(7,6,6,.6);color:var(--ink);border-radius:8px;padding:7px 9px}
 .port-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:6px}
 .port-title{font:700 clamp(22px,2.6vw,30px)/1.15 var(--f-display);margin:4px 0 0;letter-spacing:-.015em;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.role-badge{display:inline-block;padding:3px 10px;border-radius:999px;font:600 11px/1.4 var(--f-body);background:rgba(54,65,86,.6);color:var(--muted);vertical-align:middle;letter-spacing:.02em}
+.role-badge{display:inline-block;padding:3px 10px;border-radius:999px;font:600 11px/1.4 var(--f-body);background:rgba(47,43,44,.6);color:var(--muted);vertical-align:middle;letter-spacing:.02em}
 .port-kpis{margin-top:16px}
 .warn-tile .v{color:var(--warn)}
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin-top:16px}
 .proj-card{transition:transform .3s var(--ease),border-color .3s}
-.proj-card:hover{transform:translateY(-2px);border-color:rgba(214,104,83,.35)}
-.proj-card.is-open{border-color:rgba(214,104,83,.6);box-shadow:0 0 0 1px rgba(214,104,83,.2),var(--shadow)}
+.proj-card:hover{transform:translateY(-2px);border-color:rgba(133,86,247,.35)}
+.proj-card.is-open{border-color:rgba(133,86,247,.6);box-shadow:0 0 0 1px rgba(133,86,247,.2),var(--shadow)}
 .proj-card .card-b{display:flex;flex-direction:column;gap:10px}
 .proj-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .proj-top h3{font:600 16px/1.3 var(--f-display);margin:0;overflow-wrap:anywhere}
@@ -319,14 +321,17 @@ code{font:12px var(--f-mono);background:rgba(17,21,28,.6);padding:2px 6px;border
 .proj-stats dd{margin:3px 0 0;font:600 14px var(--f-display);overflow-wrap:anywhere}
 .empty{grid-column:1/-1;padding:28px;text-align:center;border:1px dashed var(--line-strong);border-radius:var(--r)}
 .onboard{max-width:720px;margin-top:10px}.onboard .card-b{display:flex;flex-direction:column;gap:12px;padding:28px}
-.role-sel{border:1px solid var(--line);background:rgba(17,21,28,.55);color:var(--ink);border-radius:8px;padding:5px 8px;font-size:12.5px}
+.role-sel{border:1px solid var(--line);background:rgba(7,6,6,.55);color:var(--ink);border-radius:8px;padding:5px 8px;font-size:12.5px}
 .role-legend{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
 .role-legend b{color:var(--ink);font-weight:600}
 .team-grid{align-items:start}
 .act{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;max-height:640px;overflow-y:auto}
 .act li{display:grid;grid-template-columns:10px minmax(0,1fr);gap:12px;font-size:13px;line-height:1.45}
 .act-dot{width:8px;height:8px;border-radius:50%;background:var(--coral);margin-top:6px;box-shadow:0 0 8px var(--accent-glow)}
-@media (max-width:640px){.sync-pill.s-local{display:none}.ws-select{max-width:120px}}
+@media (max-width:640px){.sync-pill.s-local{display:none}.ws-select{max-width:104px}
+  .bar-act{flex-wrap:wrap !important}
+  .sync-pill{font-size:0;gap:0;padding:8px;width:24px;height:24px;justify-content:center}
+  body:has(#cuAvatar) #newBtn{display:none}}
 
 /* toasts */
 .toasts{position:fixed;z-index:120;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
@@ -336,6 +341,154 @@ code{font:12px var(--f-mono);background:rgba(17,21,28,.6);padding:2px 6px;border
 .toast.out{animation:toastOut .3s var(--ease) forwards}
 @keyframes toast{from{opacity:0;transform:translateY(10px) scale(.97)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(6px)}}
+
+
+/* ---------- sign-in gate (cloud mode): the first screen ---------- */
+body.gated>header,body.gated>main{display:none}
+.gate{position:relative;min-height:100vh;min-height:100dvh;overflow:hidden;isolation:isolate;display:flex;align-items:center}
+.gate-cv{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.gate::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(60% 70% at 72% 45%,rgba(133,86,247,.20),transparent 70%),linear-gradient(90deg,rgba(7,6,6,.96) 0%,rgba(7,6,6,.8) 30%,rgba(7,6,6,.2) 55%,rgba(7,6,6,.1) 100%)}
+.gate-in{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,440px);gap:40px;align-items:center;width:100%;padding-block:48px}
+.gate-top{position:absolute;top:max(16px,env(safe-area-inset-top,0px));left:0;right:0;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.gate-brand{display:flex;align-items:center;gap:10px;font:600 15px var(--f-display);letter-spacing:.01em}
+.gate-brand b{color:var(--gold-2)}
+.gate-h{font:700 clamp(36px,5.6vw,72px)/1.02 var(--f-display);letter-spacing:-.035em;margin:14px 0 18px;max-width:13ch;text-wrap:balance}
+.gate-h em{font-style:normal;background:linear-gradient(95deg,var(--lav) 10%,var(--gold-2) 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gate-lead{color:var(--muted);font-size:clamp(15px,1.4vw,17px);max-width:52ch;margin:0}
+.gate-feats{list-style:none;margin:26px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.gate-feats li{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(14,12,13,.55);font-size:12.5px;color:var(--ink);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.gate-feats li::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:8px;vertical-align:middle;box-shadow:0 0 8px var(--gold)}
+.gate-card{background:rgba(14,12,13,.78);-webkit-backdrop-filter:saturate(1.4) blur(22px);backdrop-filter:saturate(1.4) blur(22px);border:1px solid var(--line-strong);border-radius:24px;padding:28px;box-shadow:0 40px 90px -30px rgba(0,0,0,.85),0 0 0 1px rgba(133,86,247,.08);min-width:0}
+.gate-card .modal-h{font-size:24px}
+.gate-load{display:flex;align-items:center;gap:10px;color:var(--muted)}
+.gate-load::before{content:"";width:16px;height:16px;border-radius:50%;border:2px solid var(--line-strong);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gate-demo{margin-top:14px;text-align:center}
+@media (max-width:900px){.gate{align-items:flex-start}.gate-in{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:290px 32px}.gate-h{max-width:none;margin-top:8px}.gate::before{background:linear-gradient(180deg,transparent 0,transparent 240px,rgba(7,6,6,.85) 300px)}}
+
+/* ---------- PM brain ---------- */
+.brain-head{text-align:center;max-width:860px;margin:6px auto 0}
+.brain-h{font:700 clamp(26px,3.4vw,44px)/1.06 var(--f-display);letter-spacing:-.03em;margin:10px auto 12px;text-wrap:balance}
+.brain-h em,.wiz-h em{font-style:normal;background:linear-gradient(95deg,var(--lav) 5%,var(--gold-2) 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brain-lead{color:var(--muted);margin:0 auto;max-width:62ch;font-size:15px}
+.brain-stage{position:relative;display:grid;grid-template-columns:minmax(190px,250px) minmax(0,1fr) minmax(190px,250px);min-height:min(620px,74vh);margin-top:8px}
+.brain-cv{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.bn-col{list-style:none;margin:0;padding:24px 0;display:flex;flex-direction:column;justify-content:space-around;gap:10px;position:relative;z-index:1}
+.bn-l{grid-column:1}.bn-r{grid-column:3}
+.bn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;padding:11px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(14,12,13,.7);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--ink);transition:transform .3s var(--ease),border-color .25s,box-shadow .3s,background .25s}
+.bn-r .bn{flex-direction:row}.bn-l .bn{flex-direction:row-reverse;text-align:right}
+.bn:hover,.bn.on{border-color:rgba(133,86,247,.6);background:rgba(28,22,40,.85);box-shadow:0 0 0 1px rgba(133,86,247,.25),0 14px 36px -14px var(--accent-glow)}
+.bn.on{transform:scale(1.03)}
+.bn-dot{width:10px;height:10px;border-radius:50%;flex:none;background:currentColor;box-shadow:0 0 12px currentColor}
+.bn.st-good,.bn.st-risk,.bn.st-late{background-color:rgba(14,12,13,.7)}
+.bn.st-good .bn-dot{color:var(--good)}.bn.st-risk .bn-dot{color:var(--warn)}.bn.st-late .bn-dot{color:var(--bad)}
+.bn-t{display:flex;flex-direction:column;min-width:0;gap:2px}
+.bn-t b{font:600 14px/1.25 var(--f-display);color:var(--ink);overflow-wrap:anywhere}
+.bn-t small{font-size:12px;color:var(--muted);line-height:1.35;overflow-wrap:anywhere}
+.brain-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end;margin-top:4px}
+.brain-detail .bd-in{padding:18px 20px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"pill h btn" "pill p btn" "pill v btn";gap:4px 18px;align-items:center}
+.brain-detail .pill{grid-area:pill;align-self:start}.brain-detail h3{grid-area:h;margin:0;font:600 18px var(--f-display)}
+.brain-detail .hint{grid-area:p;margin:0}.brain-detail .hint b{color:var(--ink)}
+.bd-val{grid-area:v;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}.bd-val b{font:600 16px var(--f-display);color:var(--gold-2)}.bd-val span{font-size:13px;color:var(--muted)}
+.brain-detail .btn{grid-area:btn}
+.brain-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+.brain-legend li{display:flex;align-items:center;gap:8px;background:none !important}.brain-legend li::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+@media (max-width:820px){
+  .brain-stage{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-height:0}
+  .brain-cv{position:relative;grid-column:1/-1;height:300px}
+  .bn-col{display:contents}
+  .bn,.bn-l .bn{flex-direction:row;text-align:left;padding:10px 12px}
+  .brain-foot{grid-template-columns:minmax(0,1fr)}
+  .brain-detail .bd-in{grid-template-columns:minmax(0,1fr);grid-template-areas:"pill" "h" "p" "v" "btn"}
+  .brain-detail .btn{justify-self:start;margin-top:8px}
+  .brain-legend{flex-direction:row;flex-wrap:wrap;gap:12px}
+}
+
+/* ---------- PM toolkit ---------- */
+.pm-wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:start}
+.pm-nav{display:flex;flex-direction:column;gap:2px;position:sticky;top:calc(var(--bar-h,120px) + 12px);padding:6px;border-radius:var(--r);background:var(--glass);border:1px solid var(--line)}
+.pm-nav button{display:flex;justify-content:space-between;align-items:center;gap:8px;border:0;background:none;color:var(--muted);text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;font:600 13px/1.3 var(--f-body)}
+.pm-nav button:hover{color:var(--ink);background:rgba(47,43,44,.45)}
+.pm-nav button[aria-current="true"]{color:var(--ink);background:var(--accent-soft);box-shadow:inset 2px 0 0 var(--accent)}
+.pm-nav .n{font:500 11px var(--f-mono);color:var(--faint);background:rgba(7,6,6,.6);border-radius:999px;padding:2px 7px}
+.pm-h{min-width:0;flex:1 1 320px}.pm-h h2{font:600 17px/1.3 var(--f-display);margin:0}.pm-h .hint{margin:3px 0 0}
+.pm-t td{padding:6px 6px;vertical-align:top}.pm-t th{padding:10px 6px}
+.pm-t input,.pm-t select,.pm-t textarea,.pm-roles input{width:100%;min-width:0;border:1px solid transparent;background:rgba(7,6,6,.35);border-radius:8px;padding:7px 9px;color:var(--ink);font:13px/1.4 var(--f-body);transition:border-color .2s,background .2s}
+.pm-t textarea{resize:none;min-height:36px;overflow:hidden;field-sizing:content;display:block}
+.pm-t textarea.long{min-height:54px}
+.pm-t input:hover,.pm-t select:hover,.pm-t textarea:hover{border-color:var(--line)}
+.pm-t input:focus,.pm-t select:focus,.pm-t textarea:focus,.pm-roles input:focus{outline:none;border-color:var(--accent);background:rgba(7,6,6,.7);box-shadow:0 0 0 3px var(--accent-soft)}
+.pm-t [aria-invalid="true"]{border-color:var(--bad)}
+.pm-t .pm-num{width:64px;text-align:center;font-family:var(--f-mono)}
+.c-title,.c-name,.c-what,.c-deliverable,.c-item,.c-decision,.c-lesson{min-width:180px}
+.c-response,.c-rationale,.c-criteria,.c-notes,.c-actions,.c-action{min-width:210px}
+.c-role,.c-audience,.c-method,.c-contact,.c-supplier,.c-channel,.c-requestedBy{min-width:140px}
+.c-owner,.c-by{min-width:80px}
+.c-date,.c-opened,.c-due{min-width:138px}
+.c-strategy,.c-status,.c-severity,.c-freq,.c-type,.c-category{min-width:122px}
+.c-score{width:48px;text-align:center}.pm-t td.c-score{padding-top:13px}
+@media (max-width:700px){
+  .pm-tbl:has(.pm-cards){overflow:visible}
+  .pm-cards,.pm-cards tbody{display:block}.pm-cards thead{display:none}
+  .pm-cards tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;padding:12px;margin-bottom:10px;border:1px solid var(--line);border-radius:14px;background:rgba(7,6,6,.3)}
+  .pm-cards td{display:flex;flex-direction:column;gap:4px;padding:0;border:0;min-width:0 !important;text-align:left}
+  .pm-cards td::before{content:attr(data-label);font:600 10px/1.2 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .pm-cards td:not([data-label])::before{content:none}
+  .pm-cards td.c-title,.pm-cards td.c-name,.pm-cards td.c-what,.pm-cards td.c-deliverable,.pm-cards td.c-item,.pm-cards td.c-decision,.pm-cards td.c-lesson,.pm-cards td.long,.pm-cards td:has(textarea.long){grid-column:1/-1}
+  .pm-cards td:last-child{grid-column:1/-1;align-items:flex-end}
+  .pm-cards td.c-n{position:absolute;opacity:0;pointer-events:none}
+  .pm-cards .pm-num{width:100%}
+}
+.t-raci td.c,.t-raci th.c{text-align:center;min-width:64px}
+.raci-sel{text-align:center;font:600 13px var(--f-mono) !important;min-width:52px}
+.rc-R{color:var(--lav)}.rc-A{color:var(--gold-2)}.rc-C{color:var(--cyan)}.rc-I{color:var(--muted)}
+.raci-warn{margin-top:6px}
+.t-raci td:first-child{min-width:240px}
+.pm-roles{max-width:520px;margin:10px 0 14px}
+.icon-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;font-size:17px;line-height:1}
+.icon-btn:hover{color:var(--bad);border-color:rgba(242,95,122,.5)}
+.score{display:inline-block;min-width:34px;text-align:center;padding:3px 8px;border-radius:8px;font:600 12.5px var(--f-mono)}
+.sc-low{background:rgba(93,214,166,.16);color:var(--good)}.sc-mid{background:rgba(235,202,76,.16);color:var(--gold-2)}.sc-hi{background:rgba(240,168,64,.2);color:var(--warn)}.sc-bad{background:rgba(242,95,122,.2);color:var(--bad)}
+.pm-top{display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;align-items:center;margin-bottom:18px}
+.pm-side{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+.pm-side li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:10px 12px;border-radius:12px;background:rgba(7,6,6,.35);border:1px solid var(--line)}
+.pm-side li>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pm-side b{font:600 13.5px/1.35 var(--f-body);overflow-wrap:anywhere}.pm-side small{color:var(--muted);font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.num-dot{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#141112;font:700 11.5px var(--f-mono);flex:none;box-shadow:0 0 10px rgba(206,174,49,.45)}
+.c-n{width:36px;text-align:center}
+.heat{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;gap:6px}
+.heat-y{writing-mode:vertical-rl;transform:rotate(180deg);font:600 10.5px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+.heat-x{grid-column:2;font:600 10.5px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+.heat-g{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;aspect-ratio:1}
+.hc{border-radius:8px;display:grid;place-items:center;opacity:.55;font:600 13px var(--f-mono)}.hc.has{opacity:1;box-shadow:0 0 0 1px currentColor inset}
+.pi-grid{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;gap:6px}
+.pi-y{writing-mode:vertical-rl;transform:rotate(180deg);font:600 10.5px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+.pi-x{grid-column:2;font:600 10.5px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+.pi-box{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;aspect-ratio:1.05;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pi-q:nth-child(n+3){display:flex;align-items:flex-end}
+.pi-q{padding:7px 8px;font:600 10px/1.3 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);border:1px solid rgba(249,250,250,.04)}
+.pi-q:nth-child(2){background:rgba(133,86,247,.10);color:var(--lav)}
+.pi-dot{position:absolute;transform:translate(-50%,50%);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#141112;font:700 11px var(--f-mono);box-shadow:0 0 0 2px rgba(7,6,6,.8),0 0 12px rgba(206,174,49,.5)}
+.report-box{width:100%;min-height:380px;border:1px solid var(--line);background:rgba(7,6,6,.55);border-radius:12px;padding:16px;color:var(--ink);font:12.5px/1.6 var(--f-mono);resize:vertical}
+.pm-charter{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:640px){.pm-charter{grid-template-columns:minmax(0,1fr)}}
+.chk input{width:auto !important;flex:none}
+.chk{display:inline-flex !important;align-items:center;gap:8px;text-transform:none !important;letter-spacing:0 !important;font:500 13px var(--f-body) !important;color:var(--ink) !important;cursor:pointer}
+.empty-row{text-align:center;padding:22px !important}
+@media (max-width:980px){.pm-wrap{grid-template-columns:minmax(0,1fr)}.pm-nav{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none}.pm-nav button{white-space:nowrap;flex:none}}
+@media (max-width:700px){.pm-top{grid-template-columns:minmax(0,1fr)}.heat,.pi-grid{max-width:300px}}
+
+/* ---------- empty workspace ---------- */
+.noproj #dl,.noproj #hero,.noproj #kpis{display:none !important}
+.empty-note{margin:16px 0 0;padding:18px 20px;border-radius:var(--r);border:1px solid rgba(206,174,49,.35);background:linear-gradient(120deg,rgba(206,174,49,.10),rgba(133,86,247,.08));display:flex;flex-direction:column;gap:4px}
+.empty-note b{font:600 16px var(--f-display)}.empty-note span{color:var(--muted);font-size:13.5px}
+
+/* text never leaves its box */
+.kpi .v,.kpi .s,.card-h h2,.mini li,.wiz-stats dd,.proj-top h3,.toast{overflow-wrap:anywhere;min-width:0}
+.pill,.chip{white-space:nowrap;flex:none}
+#teamTable td.num{white-space:nowrap}
+.card-h>*{min-width:0}
+td{overflow-wrap:break-word}
 
 /* phone */
 @media (max-width:640px){
@@ -357,6 +510,16 @@ code{font:12px var(--f-mono);background:rgba(17,21,28,.6);padding:2px 6px;border
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}.chart-box svg path.draw{stroke-dasharray:none;stroke-dashoffset:0}}
 </style>
+
+<div class="gate" id="gate" hidden>
+  <canvas class="gate-cv" id="gateCv" aria-hidden="true"></canvas>
+  <div class="wrap gate-top"><span class="gate-brand"><span class="logo" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18"><rect x="1.5" y="2" width="3" height="14" rx="1.5" fill="#fff"/><rect x="7.5" y="6" width="3" height="10" rx="1.5" fill="#fff" fill-opacity=".85"/><rect x="13.5" y="10.5" width="3" height="5.5" rx="1.5" fill="#fff" fill-opacity=".7"/></svg></span>Burndown <b>PM</b></span>
+    <div class="seg" role="group" aria-label="Language"><button type="button" data-glang="fr">FR</button><button type="button" data-glang="en">EN</button></div></div>
+  <div class="wrap gate-in">
+    <div class="gate-copy"><p class="eyebrow" id="gateEyebrow"></p><h1 class="gate-h" id="gateH"></h1><p class="gate-lead" id="gateLead"></p><ul class="gate-feats" id="gateFeats"></ul></div>
+    <div class="gate-card" id="gateCard"><p class="gate-load" id="gateLoad"></p></div>
+  </div>
+</div>
 
 <header class="bar">
   <div class="wrap bar-in">
@@ -404,7 +567,10 @@ code{font:12px var(--f-mono);background:rgba(17,21,28,.6);padding:2px 6px;border
 
   <section class="panel" id="tab-projects" role="tabpanel" hidden></section>
   <section class="panel" id="tab-team" role="tabpanel" hidden></section>
+  <section class="panel" id="tab-brain" role="tabpanel" hidden></section>
+  <section class="panel" id="tab-pm" role="tabpanel" hidden></section>
   <section class="panel" id="tab-assistant" role="tabpanel" hidden>
+    <p class="empty-note" id="emptyNote" hidden><b data-i="noProjT"></b><span data-i="noProjL"></span></p>
     <div class="wiz">
       <div class="wiz-main">
         <p class="eyebrow" data-i="wzEyebrow"></p>
@@ -443,6 +609,7 @@ code{font:12px var(--f-mono);background:rgba(17,21,28,.6);padding:2px 6px;border
           <button class="btn pri" type="button" data-wdl="needs"><span data-i="dlNeeds"></span> · .docx</button>
           <button class="btn pri" type="button" data-wdl="technical"><span data-i="dlTech"></span> · .docx</button>
           <button class="btn pri" type="button" data-wdl="report"><span data-i="dlReport"></span> · .docx</button>
+          <button class="btn" type="button" id="wzSeeBrain" data-i="tabBrain"></button>
           <button class="btn" type="button" id="wzSeeGantt" data-i="wzSeeGantt"></button>
           <button class="btn" type="button" id="wzEdit" data-i="wzEdit"></button>
         </div>
@@ -678,6 +845,9 @@ const Core = (() => {
     // Team day rates and budget settings (validated by budget.js, loaded lazily to avoid a require cycle)
     const B = typeof Budget !== 'undefined' ? Budget : (typeof require === 'function' ? require('./budget.js') : null);
     if (B) { const tb = B.clean(raw.team, raw.budget); p.team = tb.team; p.budget = tb.budget; }
+    // Project-management registers (charter, stakeholders, RACI, risks, …) validated by pm.js
+    const PMx = typeof PM !== 'undefined' ? PM : (typeof require === 'function' ? require('./pm.js') : null);
+    if (PMx) p.pm = PMx.clean(raw.pm);
     const ps = parseDate(p.start), pe = parseDate(p.end);
     if (ps === null) errors.push('start');
     if (pe === null) errors.push('end');
@@ -887,7 +1057,7 @@ if (typeof module !== 'undefined') module.exports = Core;
    Every parser returns a RAW project object that still goes through Core.validateProject. */
 const GanttIO = (() => {
   const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
-  const PALETTE = ['#D66853', '#E9A27F', '#C98896', '#8FA6D1', '#B7A3D9', '#9AA7BD', '#7FC4B8', '#E3C17A'];
+  const PALETTE = ['#8556F7', '#CEAE31', '#D3AFFE', '#4FD1E8', '#F28DC7', '#B28DF0', '#5DD6A6', '#EBCA4C'];
   const MAX = 2e6;
 
   /* ---- dates: 2026-10-05 | 05/10/2026 | 5/10/26 | 05.10.2026 (day first, French/European) ---- */
@@ -1111,13 +1281,13 @@ const DocGen = (() => {
   /* ---------- docx parts ---------- */
   const NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
   const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:color w:val="142033"/><w:lang w:val="%LANG%"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:color w:val="141112"/><w:lang w:val="%LANG%"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
-<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="44"/><w:color w:val="142033"/></w:rPr></w:style>
-<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="240"/></w:pPr><w:rPr><w:sz w:val="24"/><w:color w:val="596579"/></w:rPr></w:style>
-<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="320" w:after="120"/><w:outlineLvl w:val="0"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="1F56F0"/></w:pBdr></w:pPr><w:rPr><w:b/><w:sz w:val="30"/><w:color w:val="1F56F0"/></w:rPr></w:style>
-<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="142033"/></w:rPr></w:style>
-<w:style w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/><w:basedOn w:val="Normal"/><w:qFormat/><w:rPr><w:i/><w:sz w:val="17"/><w:color w:val="596579"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="44"/><w:color w:val="141112"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="240"/></w:pPr><w:rPr><w:sz w:val="24"/><w:color w:val="5E585A"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="320" w:after="120"/><w:outlineLvl w:val="0"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="6B3FE0"/></w:pBdr></w:pPr><w:rPr><w:b/><w:sz w:val="30"/><w:color w:val="6B3FE0"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="141112"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/><w:basedOn w:val="Normal"/><w:qFormat/><w:rPr><w:i/><w:sz w:val="17"/><w:color w:val="5E585A"/></w:rPr></w:style>
 </w:styles>`;
 
   function runs(text, base = '') {
@@ -1132,7 +1302,7 @@ const DocGen = (() => {
     if (!rows.length) return '';
     const cols = Math.max(...rows.map(r => r.length));
     const border = '<w:tblBorders>' + ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(b => `<w:${b} w:val="single" w:sz="4" w:space="0" w:color="C9D1DD"/>`).join('') + '</w:tblBorders>';
-    const cell = (v, head, i) => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/>${head ? '<w:shd w:val="clear" w:color="auto" w:fill="E8EEFC"/>' : ''}${opts.fills && opts.fills[i] ? `<w:shd w:val="clear" w:color="auto" w:fill="${opts.fills[i]}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${runs(v, `<w:sz w:val="17"/>${head ? '<w:b/>' : ''}`)}</w:p></w:tc>`;
+    const cell = (v, head, i) => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/>${head ? '<w:shd w:val="clear" w:color="auto" w:fill="EFE8FE"/>' : ''}${opts.fills && opts.fills[i] ? `<w:shd w:val="clear" w:color="auto" w:fill="${opts.fills[i]}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${runs(v, `<w:sz w:val="17"/>${head ? '<w:b/>' : ''}`)}</w:p></w:tc>`;
     return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${border}<w:tblCellMar><w:top w:w="40" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>` +
       rows.map((r, i) => `<w:tr>${i === 0 ? '<w:trPr><w:tblHeader/></w:trPr>' : ''}${Array.from({ length: cols }, (_, j) => cell(r[j] ?? '', i === 0, j)).join('')}</w:tr>`).join('') + '</w:tbl><w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>';
   }
@@ -1314,6 +1484,15 @@ const DocGen = (() => {
       out.push({ k: 'p', t: `**${T.crit} :** ${crit.join(' · ') || T.none}. ${T.critTxt}.` });
     }
     if (spec.fields.includes('risks')) textSection('risks');
+    // project-management registers (charter, stakeholders, RACI, risks, quality…) kept in the PM toolkit
+    const PMx = typeof PM !== 'undefined' ? PM : (typeof require === 'function' ? require('./pm.js') : null);
+    if (PMx && P.pm && !PMx.isEmpty(P.pm)) {
+      const D = PMx.docTables(P, kind, lang);
+      if (D.sections.length) {
+        H1(D.title); out.push({ k: 'p', t: D.lead });
+        D.sections.forEach(x => { out.push({ k: 'h2', t: x.title }); out.push({ k: 'p', t: x.lead }); if (x.rows) out.push({ k: 'table', rows: x.rows }); else out.push({ k: 'note', t: D.none }); if (x.text) out.push({ k: 'note', t: x.text }); });
+      }
+    }
     if (spec.status) {
       H1(T.statusT);
       out.push({ k: 'table', rows: [[T.metric, T.value],
@@ -1450,6 +1629,321 @@ const Budget = (() => {
   return { DEFAULT_TEAM, roleOf, staffing, compute, clean, autoContingency };
 })();
 if (typeof module !== 'undefined') module.exports = Budget;
+</script>
+<script>/* PM toolkit: the registers a project manager keeps, their validation, generation for a new project,
+   and the live "brain" view of the ten PM knowledge areas. Pure functions, no DOM. */
+const PM = (() => {
+  const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
+  const BG = () => (typeof Budget !== 'undefined') ? Budget : require('./budget.js');
+
+  /* ---- register schemas: column key, type, limits ---- */
+  const E = {
+    strategy: ['manage', 'satisfy', 'inform', 'monitor'],
+    rstrat: ['avoid', 'mitigate', 'transfer', 'accept'],
+    rstatus: ['open', 'watch', 'closed'],
+    severity: ['low', 'medium', 'high', 'critical'],
+    istatus: ['open', 'progress', 'resolved'],
+    cstatus: ['pending', 'approved', 'rejected'],
+    qstatus: ['todo', 'pass', 'fail'],
+    pstatus: ['planned', 'ordered', 'received'],
+    freq: ['daily', 'weekly', 'biweekly', 'monthly', 'milestone'],
+    mtype: ['kickoff', 'standup', 'review', 'steering', 'retro', 'client'],
+    lcat: ['planning', 'team', 'technical', 'client', 'risk', 'process']
+  };
+  const REG = {
+    stakeholders: [['name', 'text', 80, true], ['role', 'text', 80], ['influence', 'int', [1, 5]], ['interest', 'int', [1, 5]], ['strategy', 'enum', E.strategy], ['contact', 'text', 120]],
+    risks: [['title', 'text', 160, true], ['p', 'int', [1, 5]], ['i', 'int', [1, 5]], ['owner', 'text', 40], ['strategy', 'enum', E.rstrat], ['response', 'text', 240], ['status', 'enum', E.rstatus]],
+    issues: [['title', 'text', 160, true], ['severity', 'enum', E.severity], ['owner', 'text', 40], ['opened', 'date'], ['due', 'date'], ['status', 'enum', E.istatus]],
+    decisions: [['date', 'date'], ['decision', 'text', 200, true], ['by', 'text', 60], ['rationale', 'text', 240]],
+    changes: [['title', 'text', 160, true], ['requestedBy', 'text', 60], ['date', 'date'], ['impactDays', 'int', [-365, 365]], ['impactCost', 'int', [-1e8, 1e8]], ['status', 'enum', E.cstatus]],
+    comms: [['what', 'text', 120, true], ['audience', 'text', 120], ['freq', 'enum', E.freq], ['channel', 'text', 60], ['owner', 'text', 40]],
+    quality: [['deliverable', 'text', 120, true], ['criteria', 'text', 240], ['method', 'text', 120], ['status', 'enum', E.qstatus]],
+    procurement: [['item', 'text', 120, true], ['supplier', 'text', 80], ['amount', 'int', [0, 1e8]], ['due', 'date'], ['status', 'enum', E.pstatus]],
+    meetings: [['date', 'date'], ['type', 'enum', E.mtype], ['notes', 'text', 600, true], ['actions', 'text', 400]],
+    lessons: [['date', 'date'], ['category', 'enum', E.lcat], ['lesson', 'text', 300, true], ['action', 'text', 240]]
+  };
+  const RACI = ['R', 'A', 'C', 'I'];
+  const str = (v, m) => (typeof v === 'string' ? v.trim().slice(0, m) : '');
+  const okId = v => typeof v === 'string' && /^[A-Za-z0-9_-]{1,16}$/.test(v);
+
+  function cleanRow(cols, raw, i) {
+    if (!raw || typeof raw !== 'object') return null;
+    const row = { id: okId(raw.id) ? raw.id : 'r' + (i + 1) };
+    for (const [k, type, lim, req] of cols) {
+      const v = raw[k];
+      if (type === 'text') row[k] = str(v, lim);
+      else if (type === 'int') { const n = Math.round(Number(v)); row[k] = Number.isFinite(n) ? Math.min(lim[1], Math.max(lim[0], n)) : lim[0] > 0 ? lim[0] : 0; }
+      else if (type === 'enum') row[k] = lim.includes(v) ? v : lim[0];
+      else if (type === 'date') row[k] = typeof v === 'string' && C.parseDate(v) !== null ? v : '';
+      if (req && !row[k]) return null;
+    }
+    return row;
+  }
+
+  /* Validate an untrusted pm object (from storage, import or the network). */
+  function clean(raw) {
+    const r = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    const out = {};
+    for (const [name, cols] of Object.entries(REG)) {
+      const seen = new Set();
+      out[name] = (Array.isArray(r[name]) ? r[name] : []).slice(0, 300).map((x, i) => cleanRow(cols, x, i)).filter(x => x && !seen.has(x.id) && seen.add(x.id));
+    }
+    const c = r.charter && typeof r.charter === 'object' ? r.charter : {};
+    out.charter = { purpose: str(c.purpose, 600), sponsor: str(c.sponsor, 120), manager: str(c.manager, 120), success: str(c.success, 600), approved: c.approved === true, approvedOn: typeof c.approvedOn === 'string' && C.parseDate(c.approvedOn) !== null ? c.approvedOn : '' };
+    const rx = r.raci && typeof r.raci === 'object' ? r.raci : {};
+    const roles = (Array.isArray(rx.roles) ? rx.roles : []).map(x => str(x, 16).toUpperCase().replace(/[^A-Z0-9_-]/g, '')).filter(Boolean).slice(0, 12);
+    const rows = (Array.isArray(rx.rows) ? rx.rows : []).slice(0, 60).map((x, i) => x && typeof x === 'object' ? { id: okId(x.id) ? x.id : 'x' + (i + 1), item: str(x.item, 120) } : null).filter(x => x && x.item);
+    const cells = {};
+    if (rx.cells && typeof rx.cells === 'object') for (const [k, v] of Object.entries(rx.cells)) {
+      const [rid, role] = k.split('|');
+      if (rows.some(x => x.id === rid) && roles.includes(role) && RACI.includes(v)) cells[`${rid}|${role}`] = v;
+    }
+    out.raci = { roles, rows, cells };
+    return out;
+  }
+  const empty = () => clean({});
+  const isEmpty = pm => !pm || (!pm.charter.purpose && Object.keys(REG).every(k => !pm[k].length) && !pm.raci.rows.length);
+
+  /* ---- generate a full PM kit from any project (generated, imported or typed) ---- */
+  function generate(P, lang = 'fr', typeRisks = []) {
+    const fr = lang === 'fr', L = (a, b) => (fr ? a : b);
+    const docs = (P.docs && (P.docs[lang] || P.docs.fr || P.docs.en)) || {};
+    const ms = id => { const v = (P.milestones.find(m => m.id === id) || {}).date || P.end; return new Date(C.parseDate(v)).toLocaleDateString(fr ? 'fr-FR' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }); };
+    const phaseEnd = id => { const ts = P.tasks.filter(t => t.phase === id); return ts.length ? ts.reduce((m, t) => (t.end > m ? t.end : m), ts[0].end) : P.start; };
+    const roles = [...new Set(P.tasks.map(t => BG().roleOf(t.owner)))].filter(r => r && r !== 'PM').slice(0, 8);
+    roles.unshift('CLIENT', 'PM');
+    const sponsor = docs.sponsor || L('Sponsor', 'Sponsor'), manager = docs.author || L('Chef de projet', 'Project manager');
+    const firstLine = s => String(s || '').split('\n').map(x => x.trim()).find(x => x && !x.includes(' | ') && !x.startsWith('#')) || '';
+    let n = 0; const id = p => `${p}${++n}`;
+
+    const risks = (typeRisks.length ? typeRisks : [
+      [L('Retard sur les livrables clés', 'Key deliverables late'), 3, 4, L('Suivi hebdomadaire du burndown, marge sur le chemin critique', 'Weekly burndown review, buffer on the critical path')],
+      [L('Besoins qui changent en cours de projet', 'Requirements change mid-project'), 3, 3, L('Demandes de changement chiffrées et validées par le sponsor', 'Change requests costed and approved by the sponsor')],
+      [L('Indisponibilité d’une personne clé', 'Key person unavailable'), 2, 4, L('Binômes et documentation des tâches critiques', 'Pairing and documentation of critical tasks')]
+    ]).map(([t, p, i, resp]) => ({ id: id('R'), title: t, p, i, owner: 'PM', strategy: p * i >= 15 ? 'avoid' : 'mitigate', response: resp, status: 'open' }));
+    risks.push({ id: id('R'), title: L('Dérive du budget', 'Budget overrun'), p: 2, i: 4, owner: 'PM', strategy: 'mitigate', response: L('Revue mensuelle valeur acquise / planifiée, marge pour imprévus', 'Monthly earned vs planned value review, contingency reserve'), status: 'open' });
+
+    const deliverables = P.phases.map(ph => ({ ph, ts: P.tasks.filter(t => t.phase === ph.id) })).filter(x => x.ts.length);
+    const raciRows = deliverables.map((x, i) => ({ id: 'D' + (i + 1), item: `${x.ph.id} · ${fr ? x.ph.fr : x.ph.en}` }));
+    const cells = {};
+    deliverables.forEach((x, i) => {
+      const rid = 'D' + (i + 1), owners = [...new Set(x.ts.map(t => BG().roleOf(t.owner)))];
+      const pmOnly = owners.every(o => o === 'PM');
+      roles.forEach(r => { cells[`${rid}|${r}`] = owners.includes(r) && r !== 'PM' ? 'R' : 'I'; });
+      // the PM approves the team's work; when the PM does the work (scoping, closure), the client approves it
+      cells[`${rid}|PM`] = pmOnly ? 'R' : 'A';
+      cells[`${rid}|CLIENT`] = pmOnly ? 'A' : ['P2', 'P4'].includes(x.ph.id) ? 'C' : 'I';
+      const reviewer = roles.find(r => ['ARCH', 'SEC', 'QA'].includes(r) && !owners.includes(r));
+      if (reviewer) cells[`${rid}|${reviewer}`] = 'C';
+    });
+
+    return clean({
+      charter: {
+        purpose: firstLine(docs.context) || L(`Livrer « ${P.name} » dans les délais, le budget et la qualité attendus.`, `Deliver “${P.name}” on time, on budget and to the expected quality.`),
+        sponsor, manager,
+        success: L(`Mise en service le ${ms('M5')}, toutes les exigences indispensables validées en recette, budget respecté à ±10 %.`, `Go-live on ${ms('M5')}, all must-have requirements accepted, budget within ±10 %.`)
+      },
+      stakeholders: [
+        { id: id('S'), name: sponsor, role: L('Sponsor / client', 'Sponsor / client'), influence: 5, interest: 5, strategy: 'manage' },
+        { id: id('S'), name: manager, role: L('Chef de projet', 'Project manager'), influence: 4, interest: 5, strategy: 'manage' },
+        { id: id('S'), name: L('Utilisateurs finaux', 'End users'), role: L('Utilisent le produit', 'Use the product'), influence: 2, interest: 5, strategy: 'inform' },
+        { id: id('S'), name: L('Équipe technique', 'Technical team'), role: L('Conçoit et réalise', 'Designs and builds'), influence: 3, interest: 4, strategy: 'inform' },
+        { id: id('S'), name: L('Direction / finance', 'Management / finance'), role: L('Valide le budget', 'Approves the budget'), influence: 5, interest: 2, strategy: 'satisfy' },
+        { id: id('S'), name: L('Support / exploitation', 'Support / operations'), role: L('Reprend le produit après la mise en service', 'Takes over after go-live'), influence: 2, interest: 2, strategy: 'monitor' }
+      ],
+      raci: { roles, rows: raciRows, cells },
+      risks,
+      comms: [
+        { id: id('C'), what: L('Point d’équipe (stand-up)', 'Team stand-up'), audience: L('Équipe projet', 'Project team'), freq: 'daily', channel: 'Teams / Slack', owner: 'PM' },
+        { id: id('C'), what: L('Rapport d’avancement (burndown, SPI, budget)', 'Status report (burndown, SPI, budget)'), audience: L('Sponsor, client', 'Sponsor, client'), freq: 'weekly', channel: 'E-mail', owner: 'PM' },
+        { id: id('C'), what: L('Revue de sprint / démonstration', 'Sprint review / demo'), audience: L('Client, utilisateurs clés', 'Client, key users'), freq: 'biweekly', channel: L('Visio', 'Video call'), owner: 'PM' },
+        { id: id('C'), what: L('Comité de pilotage', 'Steering committee'), audience: L('Sponsor, direction', 'Sponsor, management'), freq: 'milestone', channel: L('Réunion', 'Meeting'), owner: 'PM' },
+        { id: id('C'), what: L('Rétrospective', 'Retrospective'), audience: L('Équipe projet', 'Project team'), freq: 'biweekly', channel: L('Atelier', 'Workshop'), owner: 'PM' }
+      ],
+      quality: [
+        ...P.milestones.slice(0, 5).map(m => ({ id: id('Q'), deliverable: fr ? m.fr : m.en, criteria: L('Validé par le sponsor à la date du jalon', 'Approved by the sponsor on the milestone date'), method: L('Revue et signature', 'Review and sign-off'), status: 'todo' })),
+        { id: id('Q'), deliverable: L('Code et application', 'Code and application'), criteria: L('Tests automatiques au vert, couverture ≥ 70 %, 0 faille critique', 'Automated tests green, coverage ≥ 70 %, 0 critical flaw'), method: L('Intégration continue + revue de code', 'CI + code review'), status: 'todo' }
+      ],
+      procurement: (P.budget && Array.isArray(P.budget.extras) ? P.budget.extras : []).filter(x => x.amount > 0).slice(0, 12)
+        .map(x => ({ id: id('A'), item: fr ? x.fr : x.en, supplier: '', amount: x.amount, due: (x.per || 'once') === 'once' ? phaseEnd('P2') : P.start, status: 'planned' })),
+      meetings: [{ id: id('M'), date: P.start, type: 'kickoff', notes: L('Réunion de lancement : objectifs, périmètre, rôles, planning et règles de communication.', 'Kick-off: objectives, scope, roles, schedule and communication rules.'), actions: L('Valider le cahier des charges avant le jalon M1', 'Approve the requirements before milestone M1') }],
+      decisions: [{ id: id('D'), date: P.start, decision: L('Méthode : phases + sprints d’une semaine, suivi par burndown', 'Method: phases + one-week sprints, tracked by burndown'), by: 'PM', rationale: L('Visibilité hebdomadaire pour le client', 'Weekly visibility for the client') }],
+      issues: [], changes: [], lessons: []
+    });
+  }
+
+  /* ---- the ten PM knowledge areas (PMBOK), with live status for the brain ---- */
+  const AREAS = [
+    { id: 'integration', fr: 'Intégration', en: 'Integration', go: 'pm:charter', does: ['Tient la charte, arbitre les changements et décide', 'Owns the charter, arbitrates changes and decides'] },
+    { id: 'scope', fr: 'Périmètre', en: 'Scope', go: 'tasks', does: ['Définit ce qui est inclus, découpe en tâches (WBS)', 'Defines what is in, breaks it into tasks (WBS)'] },
+    { id: 'schedule', fr: 'Délais', en: 'Schedule', go: 'gantt', does: ['Planifie, suit le Gantt et le chemin critique', 'Plans, tracks the Gantt and critical path'] },
+    { id: 'cost', fr: 'Coûts', en: 'Cost', go: 'budget', does: ['Estime, budgétise et suit la valeur acquise', 'Estimates, budgets and tracks earned value'] },
+    { id: 'quality', fr: 'Qualité', en: 'Quality', go: 'pm:quality', does: ['Fixe les critères d’acceptation et les contrôle', 'Sets acceptance criteria and checks them'] },
+    { id: 'resources', fr: 'Ressources', en: 'Resources', go: 'budget', does: ['Constitue l’équipe, répartit la charge', 'Builds the team, balances the workload'] },
+    { id: 'communication', fr: 'Communication', en: 'Communication', go: 'pm:comms', does: ['Informe la bonne personne au bon moment', 'Informs the right people at the right time'] },
+    { id: 'risk', fr: 'Risques', en: 'Risk', go: 'pm:risks', does: ['Anticipe, évalue et traite les risques', 'Anticipates, scores and treats risks'] },
+    { id: 'procurement', fr: 'Achats', en: 'Procurement', go: 'pm:procurement', does: ['Achète licences, services et matériel', 'Buys licences, services and hardware'] },
+    { id: 'stakeholders', fr: 'Parties prenantes', en: 'Stakeholders', go: 'pm:stakeholders', does: ['Implique sponsor, client et utilisateurs', 'Engages sponsor, client and users'] }
+  ];
+  const lvl = (bad, warn) => (bad ? 'bad' : warn ? 'warn' : 'good');
+  function areas(P, todayT, lang = 'fr') {
+    const fr = lang === 'fr', pm = P.pm || empty(), h = C.health(P, todayT), b = C.burndown(P, todayT), B = BG().compute(P, todayT);
+    const openRisks = pm.risks.filter(r => r.status !== 'closed'), worst = openRisks.reduce((m, r) => Math.max(m, r.p * r.i), 0);
+    const openIssues = pm.issues.filter(x => x.status !== 'resolved'), critical = openIssues.filter(x => x.severity === 'critical' || x.severity === 'high').length;
+    const pend = pm.changes.filter(x => x.status === 'pending').length;
+    const qDone = pm.quality.filter(x => x.status === 'pass').length, qFail = pm.quality.filter(x => x.status === 'fail').length;
+    const overload = B.staff.filter(r => r.load > 0.95).length;
+    const tasksDone = P.tasks.filter(t => t.done).length;
+    const keyPlayers = pm.stakeholders.filter(s => s.influence >= 4 && s.interest >= 4).length;
+    const procLeft = pm.procurement.filter(x => x.status !== 'received');
+    const procLate = procLeft.filter(x => x.status === 'planned' && x.due && C.parseDate(x.due) < C.statusTime(P, todayT)).length;
+    const eur = v => new Intl.NumberFormat(fr ? 'fr-FR' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+    const T = (a, e) => (fr ? a : e);
+    const m = {
+      integration: { status: lvl(critical > 0, pend > 0 || !pm.charter.approved), value: pend ? `${pend} ${T('changement(s) à arbitrer', 'change(s) to decide')}` : T(pm.charter.approved ? 'Charte validée' : 'Charte à valider', pm.charter.approved ? 'Charter approved' : 'Charter to approve'), detail: `${pm.decisions.length} ${T('décisions', 'decisions')} · ${openIssues.length} ${T('problèmes ouverts', 'open issues')}` },
+      scope: { status: lvl(false, pend > 0), value: `${tasksDone}/${P.tasks.length} ${T('tâches terminées', 'tasks done')}`, detail: `${b.total} ${T('points', 'points')} · ${P.milestones.length} ${T('jalons', 'milestones')}` },
+      schedule: { status: h.status === 'on' ? 'good' : h.status === 'risk' ? 'warn' : 'bad', value: `SPI ${h.spi.toFixed(2)}`, detail: b.forecast !== null ? `${T('Fin prévue', 'Forecast')} ${C.fmt(b.forecast)}` : T('Pas encore de vélocité', 'No velocity yet') },
+      cost: { status: lvl(B.plannedValue > 0 && B.earnedValue / B.plannedValue < 0.8, B.plannedValue > 0 && B.earnedValue / B.plannedValue < 0.95), value: eur(B.total), detail: `${T('Valeur acquise', 'Earned value')} ${eur(B.earnedValue)}` },
+      quality: { status: lvl(qFail > 0, pm.quality.length > 0 && qDone === 0 && h.pctPlanned > 0.6), value: `${qDone}/${pm.quality.length} ${T('critères validés', 'criteria passed')}`, detail: qFail ? `${qFail} ${T('en échec', 'failed')}` : T('Aucun échec', 'No failures') },
+      resources: { status: lvl(false, overload > 0), value: `${B.people} ${T('personnes', 'people')}`, detail: overload ? `${overload} ${T('rôle(s) surchargé(s)', 'overloaded role(s)')}` : `${B.personDays} ${T('jours-homme', 'person-days')}` },
+      communication: { status: lvl(false, pm.comms.length === 0), value: `${pm.comms.length} ${T('rituels', 'rituals')}`, detail: `${pm.meetings.length} ${T('comptes rendus', 'meeting notes')}` },
+      risk: { status: lvl(worst >= 15, worst >= 10), value: `${openRisks.length} ${T('risques ouverts', 'open risks')}`, detail: `${T('Score max', 'Top score')} ${worst}/25` },
+      procurement: { status: lvl(procLate > 0, false), value: eur(pm.procurement.reduce((a, x) => a + x.amount, 0)), detail: procLate ? `${procLate} ${T('achat(s) à commander, échéance passée', 'purchase(s) overdue to order')}` : `${procLeft.length} ${T('achats en cours', 'purchases open')}` },
+      stakeholders: { status: lvl(false, pm.stakeholders.length === 0), value: `${pm.stakeholders.length} ${T('parties prenantes', 'stakeholders')}`, detail: `${keyPlayers} ${T('acteurs clés', 'key players')}` }
+    };
+    return AREAS.map(a => ({ ...a, name: fr ? a.fr : a.en, does: a.does[fr ? 0 : 1], ...m[a.id] }));
+  }
+
+  /* ---- weekly status report, written from the live data ---- */
+  function statusReport(P, todayT, lang = 'fr') {
+    const fr = lang === 'fr', T = (a, e) => (fr ? a : e), pm = P.pm || empty(), now = C.statusTime(P, todayT);
+    const h = C.health(P, todayT), b = C.burndown(P, todayT), B = BG().compute(P, todayT);
+    const d = t => new Date(t).toLocaleDateString(fr ? 'fr-FR' : 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+    const weekAgo = C.addDays(now, -7), nextWeek = C.addDays(now, 7);
+    const done = P.tasks.filter(t => t.done && C.parseDate(t.done) > weekAgo), next = P.tasks.filter(t => !t.done && C.parseDate(t.start) <= nextWeek && C.parseDate(t.end) >= now);
+    const nm = o => (fr ? o.fr : o.en) || o.fr || o.en;
+    const risks = pm.risks.filter(r => r.status !== 'closed').sort((a, b) => b.p * b.i - a.p * a.i).slice(0, 3);
+    const word = { on: T('dans les temps', 'on track'), risk: T('à risque', 'at risk'), late: T('en retard', 'late') }[h.status];
+    const eur = v => new Intl.NumberFormat(fr ? 'fr-FR' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+    return [
+      `${T('Rapport d’avancement', 'Status report')} — ${P.name} — ${d(now)}`, '',
+      `${T('Météo', 'Health')} : ${word.toUpperCase()} · SPI ${h.spi.toFixed(2)} · ${Math.round(h.pctEarned * 100)} % ${T('réalisé', 'done')} (${Math.round(h.pctPlanned * 100)} % ${T('prévu', 'planned')})`,
+      `${T('Fin prévue', 'Forecast finish')} : ${b.forecast !== null ? d(b.forecast) : '—'} (${T('planifiée', 'planned')} ${d(C.parseDate(P.end))}) · ${T('Budget', 'Budget')} ${eur(B.total)}`, '',
+      `${T('Terminé cette semaine', 'Done this week')} :`, ...(done.length ? done.map(t => `  • ${t.id} ${nm(t)}`) : [`  • ${T('Aucune tâche clôturée', 'No task closed')}`]), '',
+      `${T('Prévu la semaine prochaine', 'Planned next week')} :`, ...(next.length ? next.slice(0, 8).map(t => `  • ${t.id} ${nm(t)} (${t.progress} %)`) : [`  • —`]), '',
+      `${T('Principaux risques', 'Top risks')} :`, ...(risks.length ? risks.map(r => `  • ${r.title} — ${r.p}×${r.i}=${r.p * r.i} — ${r.response}`) : [`  • —`]), '',
+      `${T('Décisions attendues', 'Decisions needed')} :`, ...(pm.changes.filter(c => c.status === 'pending').map(c => `  • ${c.title} (${c.impactDays >= 0 ? '+' : ''}${c.impactDays} ${T('j', 'd')}, ${eur(c.impactCost)})`).concat(pm.issues.filter(i => i.status !== 'resolved' && ['high', 'critical'].includes(i.severity)).map(i => `  • ${i.title}`)).slice(0, 6)),
+      ...(pm.changes.some(c => c.status === 'pending') || pm.issues.some(i => i.status !== 'resolved' && ['high', 'critical'].includes(i.severity)) ? [] : [`  • ${T('Aucune', 'None')}`])
+    ].join('\n');
+  }
+
+
+  /* ---- labels (FR / EN) for the interface and the documents ---- */
+  const LBL = {
+    fr: {
+      charter: ['Charte projet', 'Pourquoi le projet existe, qui le porte et à quoi on reconnaît le succès.'],
+      stakeholders: ['Parties prenantes', 'Qui est concerné, quelle influence, quel intérêt — et comment s’en occuper.'],
+      raci: ['Matrice RACI', 'Pour chaque livrable : qui Réalise, qui est Approbateur (un seul), qui est Consulté, qui est Informé.'],
+      risks: ['Registre des risques', 'Ce qui pourrait mal tourner, sa probabilité × son impact, et la parade prévue.'],
+      comms: ['Plan de communication', 'Qui reçoit quelle information, à quel rythme et par quel canal.'],
+      quality: ['Qualité et recette', 'Les critères d’acceptation de chaque livrable et leur résultat.'],
+      procurement: ['Achats', 'Licences, services et matériel à commander, avec montant et échéance.'],
+      issues: ['Problèmes', 'Ce qui bloque aujourd’hui (un risque qui s’est produit) et qui le règle.'],
+      decisions: ['Décisions', 'Les décisions prises, par qui et pourquoi, pour ne pas y revenir.'],
+      changes: ['Demandes de changement', 'Toute modification du périmètre, chiffrée en jours et en euros, puis acceptée ou refusée.'],
+      meetings: ['Réunions', 'Comptes rendus et actions décidées.'],
+      lessons: ['Retours d’expérience', 'Ce qu’on refera, ce qu’on évitera au prochain projet.'],
+      report: ['Rapport hebdomadaire', 'Rédigé automatiquement à partir des données du projet, prêt à envoyer au client.'],
+      col: { name: 'Nom', role: 'Rôle', influence: 'Influence', interest: 'Intérêt', strategy: 'Stratégie', contact: 'Contact', title: 'Intitulé', p: 'Proba.', i: 'Impact', score: 'Score',
+        owner: 'Responsable', response: 'Réponse prévue', status: 'Statut', severity: 'Gravité', opened: 'Ouvert le', due: 'Échéance', date: 'Date', decision: 'Décision', by: 'Par',
+        rationale: 'Justification', requestedBy: 'Demandé par', impactDays: 'Impact (jours)', impactCost: 'Impact (€)', what: 'Information', audience: 'Destinataires', freq: 'Fréquence',
+        channel: 'Canal', deliverable: 'Livrable', criteria: 'Critère d’acceptation', method: 'Vérification', item: 'Article', supplier: 'Fournisseur', amount: 'Montant (€)',
+        type: 'Type', notes: 'Compte rendu', actions: 'Actions', category: 'Catégorie', lesson: 'Leçon', action: 'À faire la prochaine fois',
+        purpose: 'Raison d’être et objectif', sponsor: 'Sponsor', manager: 'Chef de projet', success: 'Critères de succès', approved: 'Charte validée par le sponsor', approvedOn: 'Validée le' },
+      en_: {
+        manage: 'Gérer de près', satisfy: 'Satisfaire', inform: 'Tenir informé', monitor: 'Surveiller', avoid: 'Éviter', mitigate: 'Réduire', transfer: 'Transférer', accept: 'Accepter',
+        open: 'Ouvert', watch: 'Sous surveillance', closed: 'Clos', low: 'Faible', medium: 'Moyenne', high: 'Élevée', critical: 'Critique', progress: 'En cours', resolved: 'Résolu',
+        pending: 'En attente', approved: 'Accepté', rejected: 'Refusé', todo: 'À vérifier', pass: 'Validé', fail: 'En échec', planned: 'À commander', ordered: 'Commandé', received: 'Reçu',
+        daily: 'Quotidien', weekly: 'Hebdomadaire', biweekly: 'Toutes les 2 semaines', monthly: 'Mensuel', milestone: 'À chaque jalon',
+        kickoff: 'Lancement', standup: 'Stand-up', review: 'Revue', steering: 'Comité de pilotage', retro: 'Rétrospective', client: 'Point client',
+        planning: 'Planification', team: 'Équipe', technical: 'Technique', risk: 'Risques', process: 'Méthode'
+      },
+      raciLegend: 'R = réalise · A = approuve (un seul par ligne) · C = consulté · I = informé', raciNoA: 'sans approbateur', raciManyA: 'plusieurs approbateurs', raciNoR: 'personne ne réalise',
+      grid: ['Satisfaire', 'Gérer de près', 'Surveiller', 'Tenir informé'], heat: 'Carte de chaleur des risques', probability: 'Probabilité', impact: 'Impact',
+      docH: 'Pilotage du projet', docLead: 'Registres tenus par le chef de projet, à jour à la date du document.', none: 'Aucun élément pour l’instant.'
+    },
+    en: {
+      charter: ['Project charter', 'Why the project exists, who sponsors it and what success looks like.'],
+      stakeholders: ['Stakeholders', 'Who is involved, how much influence and interest — and how to handle them.'],
+      raci: ['RACI matrix', 'For each deliverable: who is Responsible, who Approves (only one), who is Consulted, who is Informed.'],
+      risks: ['Risk register', 'What could go wrong, probability × impact, and the planned response.'],
+      comms: ['Communication plan', 'Who gets which information, how often and through which channel.'],
+      quality: ['Quality and acceptance', 'Acceptance criteria for each deliverable and their result.'],
+      procurement: ['Procurement', 'Licences, services and hardware to buy, with amount and due date.'],
+      issues: ['Issues', 'What blocks the project today (a risk that happened) and who fixes it.'],
+      decisions: ['Decisions', 'Decisions taken, by whom and why, so they are not reopened.'],
+      changes: ['Change requests', 'Any scope change, costed in days and euros, then approved or rejected.'],
+      meetings: ['Meetings', 'Minutes and agreed actions.'],
+      lessons: ['Lessons learned', 'What to repeat and what to avoid on the next project.'],
+      report: ['Weekly status report', 'Written automatically from the project data, ready to send to the client.'],
+      col: { name: 'Name', role: 'Role', influence: 'Influence', interest: 'Interest', strategy: 'Strategy', contact: 'Contact', title: 'Title', p: 'Prob.', i: 'Impact', score: 'Score',
+        owner: 'Owner', response: 'Planned response', status: 'Status', severity: 'Severity', opened: 'Opened', due: 'Due', date: 'Date', decision: 'Decision', by: 'By',
+        rationale: 'Rationale', requestedBy: 'Requested by', impactDays: 'Impact (days)', impactCost: 'Impact (€)', what: 'Information', audience: 'Audience', freq: 'Frequency',
+        channel: 'Channel', deliverable: 'Deliverable', criteria: 'Acceptance criterion', method: 'Check', item: 'Item', supplier: 'Supplier', amount: 'Amount (€)',
+        type: 'Type', notes: 'Minutes', actions: 'Actions', category: 'Category', lesson: 'Lesson', action: 'Next time',
+        purpose: 'Purpose and objective', sponsor: 'Sponsor', manager: 'Project manager', success: 'Success criteria', approved: 'Charter approved by the sponsor', approvedOn: 'Approved on' },
+      en_: {
+        manage: 'Manage closely', satisfy: 'Keep satisfied', inform: 'Keep informed', monitor: 'Monitor', avoid: 'Avoid', mitigate: 'Mitigate', transfer: 'Transfer', accept: 'Accept',
+        open: 'Open', watch: 'Watching', closed: 'Closed', low: 'Low', medium: 'Medium', high: 'High', critical: 'Critical', progress: 'In progress', resolved: 'Resolved',
+        pending: 'Pending', approved: 'Approved', rejected: 'Rejected', todo: 'To check', pass: 'Passed', fail: 'Failed', planned: 'To order', ordered: 'Ordered', received: 'Received',
+        daily: 'Daily', weekly: 'Weekly', biweekly: 'Every 2 weeks', monthly: 'Monthly', milestone: 'At each milestone',
+        kickoff: 'Kick-off', standup: 'Stand-up', review: 'Review', steering: 'Steering committee', retro: 'Retrospective', client: 'Client meeting',
+        planning: 'Planning', team: 'Team', technical: 'Technical', risk: 'Risk', process: 'Process'
+      },
+      raciLegend: 'R = responsible · A = approves (one per row) · C = consulted · I = informed', raciNoA: 'no approver', raciManyA: 'several approvers', raciNoR: 'nobody responsible',
+      grid: ['Keep satisfied', 'Manage closely', 'Monitor', 'Keep informed'], heat: 'Risk heat map', probability: 'Probability', impact: 'Impact',
+      docH: 'Project management', docLead: 'Registers kept by the project manager, up to date on the document date.', none: 'Nothing yet.'
+    }
+  };
+  const SECTIONS = ['charter', 'stakeholders', 'raci', 'risks', 'comms', 'quality', 'procurement', 'issues', 'decisions', 'changes', 'meetings', 'lessons', 'report'];
+
+  /* RACI checks: exactly one A and at least one R per deliverable */
+  function raciIssues(raci, lang = 'fr') {
+    const L = LBL[lang];
+    return raci.rows.map(r => {
+      const v = raci.roles.map(ro => raci.cells[`${r.id}|${ro}`]);
+      const a = v.filter(x => x === 'A').length, rr = v.filter(x => x === 'R').length;
+      return { id: r.id, msg: [a === 0 ? L.raciNoA : a > 1 ? L.raciManyA : '', rr === 0 ? L.raciNoR : ''].filter(Boolean).join(' · ') };
+    }).filter(x => x.msg);
+  }
+
+  /* ---- document sections: rows ready for DocGen tables ---- */
+  function docTables(P, kind, lang = 'fr') {
+    const pm = P.pm || empty(), L = LBL[lang], c = L.col, e = v => L.en_[v] || v, out = [];
+    const dfmt = v => v ? new Date(C.parseDate(v)).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' }) : '—';
+    const eur = v => new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+    const add = (key, rows, text) => out.push({ title: L[key][0], lead: L[key][1], rows: rows && rows.length > 1 ? rows : null, text });
+    const ch = pm.charter;
+    const want = { needs: ['charter', 'stakeholders', 'raci', 'comms', 'quality'], technical: ['raci', 'risks', 'quality', 'procurement'], report: ['charter', 'risks', 'issues', 'changes', 'decisions', 'quality', 'lessons'] }[kind] || [];
+    for (const key of want) {
+      if (key === 'charter') add(key, [[lang === 'fr' ? 'Rubrique' : 'Item', lang === 'fr' ? 'Contenu' : 'Content'], [c.purpose, ch.purpose || '—'], [c.sponsor, ch.sponsor || '—'], [c.manager, ch.manager || '—'], [c.success, ch.success || '—'], [c.approved, ch.approved ? `✓ ${dfmt(ch.approvedOn)}` : '—']]);
+      else if (key === 'stakeholders') add(key, [[c.name, c.role, c.influence, c.interest, c.strategy], ...pm.stakeholders.map(x => [x.name, x.role, `${x.influence}/5`, `${x.interest}/5`, e(x.strategy)])]);
+      else if (key === 'raci') add(key, [[lang === 'fr' ? 'Livrable' : 'Deliverable', ...pm.raci.roles], ...pm.raci.rows.map(r => [r.item, ...pm.raci.roles.map(ro => pm.raci.cells[`${r.id}|${ro}`] || '·')])], L.raciLegend);
+      else if (key === 'risks') add(key, [[c.title, c.p, c.i, c.score, c.strategy, c.response, c.status], ...[...pm.risks].sort((a, b) => b.p * b.i - a.p * a.i).map(x => [x.title, String(x.p), String(x.i), String(x.p * x.i), e(x.strategy), x.response, e(x.status)])]);
+      else if (key === 'comms') add(key, [[c.what, c.audience, c.freq, c.channel, c.owner], ...pm.comms.map(x => [x.what, x.audience, e(x.freq), x.channel, x.owner])]);
+      else if (key === 'quality') add(key, [[c.deliverable, c.criteria, c.method, c.status], ...pm.quality.map(x => [x.deliverable, x.criteria, x.method, e(x.status)])]);
+      else if (key === 'procurement') add(key, [[c.item, c.supplier, c.amount, c.due, c.status], ...pm.procurement.map(x => [x.item, x.supplier || '—', eur(x.amount), dfmt(x.due), e(x.status)])]);
+      else if (key === 'issues') add(key, [[c.title, c.severity, c.owner, c.due, c.status], ...pm.issues.map(x => [x.title, e(x.severity), x.owner, dfmt(x.due), e(x.status)])]);
+      else if (key === 'changes') add(key, [[c.title, c.requestedBy, c.impactDays, c.impactCost, c.status], ...pm.changes.map(x => [x.title, x.requestedBy, String(x.impactDays), eur(x.impactCost), e(x.status)])]);
+      else if (key === 'decisions') add(key, [[c.date, c.decision, c.by, c.rationale], ...pm.decisions.map(x => [dfmt(x.date), x.decision, x.by, x.rationale])]);
+      else if (key === 'lessons') add(key, [[c.date, c.category, c.lesson, c.action], ...pm.lessons.map(x => [dfmt(x.date), e(x.category), x.lesson, x.action])]);
+    }
+    return { title: L.docH, lead: L.docLead, none: L.none, sections: out };
+  }
+
+  return { REG, E, RACI, LBL, SECTIONS, clean, empty, isEmpty, generate, AREAS, areas, statusReport, raciIssues, docTables };
+})();
+if (typeof module !== 'undefined') module.exports = PM;
 </script>
 <script>/* costs row: [labelFr, labelEn, amount €, basis once|month|person|personMonth]
    Project knowledge base: one entry per kind of project a client may describe in plain words.
@@ -1745,8 +2239,8 @@ const Generator = (() => {
   const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
   const K = (typeof KB !== 'undefined') ? KB : require('./kb.js');
   const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/[^a-z0-9+\- ]/g, ' ').replace(/\s+/g, ' ').trim();
-  const PHASES = [['P1', 'Cadrage', 'Initiation', '#D66853'], ['P2', 'Conception', 'Design', '#E9A27F'], ['P3', 'Réalisation', 'Build', '#C98896'],
-    ['P4', 'Tests et recette', 'Testing and acceptance', '#8FA6D1'], ['P5', 'Mise en service', 'Go-live', '#B7A3D9'], ['P6', 'Clôture', 'Closure', '#9AA7BD']];
+  const PHASES = [['P1', 'Cadrage', 'Initiation', '#8556F7'], ['P2', 'Conception', 'Design', '#CEAE31'], ['P3', 'Réalisation', 'Build', '#D3AFFE'],
+    ['P4', 'Tests et recette', 'Testing and acceptance', '#4FD1E8'], ['P5', 'Mise en service', 'Go-live', '#F28DC7'], ['P6', 'Clôture', 'Closure', '#B28DF0']];
   const SIZES = { small: { f: 0.7, prios: ['M'], lanes: 2 }, medium: { f: 1, prios: ['M', 'S'], lanes: 2 }, large: { f: 1.35, prios: ['M', 'S', 'C'], lanes: 2 } };
 
   /* ---- detection: weighted keyword match on the normalised text ---- */
@@ -1843,6 +2337,12 @@ const Generator = (() => {
       docs: { fr: docs({ description, client, author, lang: 'fr', tp, feats, tasks, milestones, name, size }),
               en: docs({ description, client, author, lang: 'en', tp, feats, tasks, milestones, name, size }) }
     };
+    // the project manager's registers (charter, stakeholders, RACI, risks, communication plan…), written for this project
+    const PMx = typeof PM !== 'undefined' ? PM : (typeof require === 'function' ? require('./pm.js') : null);
+    if (PMx) {
+      const base = C.validateProject(project).project, fr = lang === 'fr';
+      project.pm = PMx.generate(base, lang, (tp.risks || []).map(r => [fr ? r[0] : r[1], r[2], r[3], fr ? r[4] : r[5]]));
+    }
     return { project, type: tp, detection: det };
   }
 
@@ -2136,12 +2636,12 @@ R5 | AI cost | 3 | 3 | 9 | Monthly cap and cache`,
     }
   },
   phases: [
-    { id: 'P1', fr: 'Initialisation', en: 'Initiation', color: '#D66853' },
-    { id: 'P2', fr: 'Conception', en: 'Design', color: '#E9A27F' },
-    { id: 'P3', fr: 'Développement', en: 'Build', color: '#C98896' },
-    { id: 'P4', fr: 'Tests et recette', en: 'Test and UAT', color: '#8FA6D1' },
-    { id: 'P5', fr: 'Déploiement', en: 'Deployment', color: '#B7A3D9' },
-    { id: 'P6', fr: 'Clôture', en: 'Closure', color: '#9AA7BD' }
+    { id: 'P1', fr: 'Initialisation', en: 'Initiation', color: '#8556F7' },
+    { id: 'P2', fr: 'Conception', en: 'Design', color: '#CEAE31' },
+    { id: 'P3', fr: 'Développement', en: 'Build', color: '#D3AFFE' },
+    { id: 'P4', fr: 'Tests et recette', en: 'Test and UAT', color: '#4FD1E8' },
+    { id: 'P5', fr: 'Déploiement', en: 'Deployment', color: '#F28DC7' },
+    { id: 'P6', fr: 'Clôture', en: 'Closure', color: '#B28DF0' }
   ],
   milestones: [
     { id: 'M1', fr: 'Cahier des charges validé', en: 'Spec signed off', date: '2026-10-09' },
@@ -2338,6 +2838,415 @@ const Cloud = (() => {
 })();
 if (typeof module !== 'undefined') module.exports = Cloud;
 </script>
+<script>/* Particle brain on a canvas: a slowly turning 3-D cloud of points shaped like a brain (two hemispheres,
+   cerebellum, brain stem), with faint synapses and travelling pulses. Anchors mark the ten areas of a
+   project manager's work; the caller draws its labels in HTML and gets the anchors' screen positions
+   back to link them. Decorative only (aria-hidden): every action lives in real buttons. */
+const Brain = (() => {
+  const COLORS = { violet: '#8556F7', lav: '#D3AFFE', white: '#F9FAFA', gold: '#EBCA4C', pink: '#F28DC7', cyan: '#4FD1E8', good: '#5DD6A6', warn: '#F0A840', bad: '#F25F7A' };
+  // where each knowledge area sits on the brain (x forward, y up), roughly following what that part of the brain does
+  const ANCHORS = {
+    integration: [0.98, 0.18], scope: [0.62, 0.62], schedule: [0.1, 0.8], cost: [-0.42, 0.66], quality: [-0.92, 0.2],
+    resources: [0.38, -0.12], communication: [0.82, -0.2], risk: [-0.35, 0.18], procurement: [-0.74, -0.52], stakeholders: [-0.02, -0.32]
+  };
+  function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+  function geometry(n = 1700) {
+    const R = rng(7), pts = [];
+    const dir = () => { const u = R() * 2 - 1, a = R() * Math.PI * 2, s = Math.sqrt(1 - u * u); return [s * Math.cos(a), u, s * Math.sin(a)]; };
+    const pick = () => { const r = R(); return r < 0.05 ? 'gold' : r < 0.09 ? 'pink' : r < 0.13 ? 'cyan' : r < 0.22 ? 'white' : r < 0.55 ? 'lav' : 'violet'; };
+    const push = (x, y, z, kind) => pts.push({ x, y, z, c: pick(), s: 0.6 + R() * 0.9, kind, tw: R() * Math.PI * 2 });
+    // cerebrum: two hemispheres with folds (gyri) and a flattened base
+    for (const side of [-1, 1]) for (let i = 0; i < n * 0.39; i++) {
+      const [dx, dy, dz] = dir();
+      const fold = 1 + 0.055 * Math.sin(10 * dx + 3 * Math.sin(6 * dy)) * Math.cos(9 * dy + 4 * dz) + 0.03 * Math.sin(17 * dz + 5 * dx);
+      let x = dx * 1.04 * fold, y = dy * 0.74 * fold + 0.1, z = dz * 0.47 * fold + side * 0.45;
+      if (y < -0.36) { if (x > -0.1 && x < 0.75) y = Math.max(y, -0.52 + 0.06 * Math.sin(x * 6)); else y = -0.36 + (y + 0.36) * 0.25; }
+      if (side * z < 0.05) continue;                                        // longitudinal fissure
+      push(x, y, z, 'c');
+    }
+    // cerebellum: small, finely striped, under the back of the brain
+    for (let i = 0; i < n * 0.13; i++) {
+      const [dx, dy, dz] = dir(); const f = 1 + 0.07 * Math.sin(dy * 30);
+      push(-0.7 + dx * 0.36 * f, -0.5 + dy * 0.22 * f, dz * 0.62, 'b');
+    }
+    // brain stem
+    for (let i = 0; i < n * 0.05; i++) {
+      const a = R() * Math.PI * 2, h = R();
+      push(-0.3 - h * 0.12 + Math.cos(a) * 0.11, -0.5 - h * 0.55, Math.sin(a) * 0.11, 's');
+    }
+    // a few points inside, for depth
+    for (let i = 0; i < n * 0.08; i++) {
+      const [dx, dy, dz] = dir(), r = Math.cbrt(R()) * 0.85;
+      push(dx * r * 0.95, dy * r * 0.6 + 0.08, dz * r * 0.85, 'i');
+    }
+    // synapses: link some points to a close neighbour
+    const edges = [];
+    for (let i = 0; i < pts.length; i += 3) {
+      let best = -1, bd = 0.032;
+      for (let j = 0; j < pts.length; j += 2) {
+        if (j === i) continue;
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, dz = pts[i].z - pts[j].z, d = dx * dx + dy * dy + dz * dz;
+        if (d < bd && d > 0.004) { bd = d; best = j; }
+      }
+      if (best >= 0) edges.push([i, best]);
+    }
+    // anchors: the outermost point near each target, on the hemisphere facing the viewer (negative z is near)
+    const anchors = {};
+    for (const [id, [ax, ay]] of Object.entries(ANCHORS)) {
+      let best = 0, bs = Infinity;
+      pts.forEach((p, i) => { if (p.kind === 'i') return; const d = (p.x - ax) ** 2 + (p.y - ay) ** 2 + p.z * 0.08; if (p.z < -0.2 && d < bs) { bs = d; best = i; } });
+      anchors[id] = best;
+    }
+    return { pts, edges, anchors };
+  }
+
+  function sprite(color, size = 32) {
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gr.addColorStop(0, color); gr.addColorStop(0.22, color); gr.addColorStop(0.45, color + '55'); gr.addColorStop(1, color + '00');
+    g.fillStyle = gr; g.fillRect(0, 0, size, size); return c;
+  }
+
+  /* create(canvas, opts) → controller
+     opts.offsetX: horizontal position of the brain centre (0..1 of the canvas width)
+     opts.scale: brain size relative to the smaller canvas side
+     opts.targets(): screen points [{id, x, y}] the anchors are linked to (canvas pixels, CSS units) */
+  function create(canvas, opts = {}) {
+    const noop = { start() {}, stop() {}, focus() {}, status() {}, redraw() {}, anchors: () => ({}), destroy() {} };
+    if (!canvas || typeof canvas.getContext !== 'function' || /jsdom/i.test(navigator.userAgent || '')) return noop;
+    const ctx = canvas.getContext('2d'); if (!ctx) return noop;
+    const G = geometry(opts.count || 1700), S = {}; Object.entries(COLORS).forEach(([k, v]) => { S[k] = sprite(v); });
+    const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let W = 0, H = 0, dpr = 1, raf = 0, running = false, focusId = null, statusOf = {}, t0 = performance.now(), px = 0, py = 0, screen = {};
+    const pulses = [];
+    function resize() {
+      const r = canvas.getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = Math.max(1, r.width); H = Math.max(1, r.height);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      if (!running) draw(performance.now());
+    }
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null;
+    ro ? ro.observe(canvas) : window.addEventListener('resize', resize);
+    const clamp = v => Math.max(-0.5, Math.min(0.5, v));
+    const onMove = ev => { if (!running) return; const r = canvas.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return; px = clamp((ev.clientX - r.left) / r.width - 0.5); py = clamp((ev.clientY - r.top) / r.height - 0.5); };
+    if (!reduced) window.addEventListener('pointermove', onMove, { passive: true });
+
+    function draw(now) {
+      const t = reduced ? 0 : now - t0;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      const yaw = -0.55 + Math.sin(t * 0.00018) * 0.42 + px * 0.5, pitch = 0.12 + py * 0.25;
+      const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+      const o = typeof opts.place === 'function' ? opts.place(W, H) : opts;
+      const size = Math.min(W, H) * (o.scale || 0.34), ox = W * (o.offsetX ?? 0.5), oy = o.cy != null ? o.cy : H * (o.offsetY ?? 0.5);
+      const proj = p => {
+        const x1 = p.x * cy + p.z * sy, z1 = -p.x * sy + p.z * cy;           // turn around the vertical axis
+        const y2 = p.y * cp - z1 * sp, z2 = p.y * sp + z1 * cp;               // tilt
+        const k = 3.4 / (3.4 + z2 * 0.9);
+        return { x: ox + x1 * size * k, y: oy - y2 * size * k, z: z2, k };
+      };
+      const P = G.pts.map(proj), dens = Math.max(0.75, Math.min(1.5, size / 240));
+      const fp = focusId != null ? G.pts[G.anchors[focusId]] : null;
+      const fcol = focusId != null ? (statusOf[focusId] || 'gold') : null;
+      ctx.globalCompositeOperation = 'lighter';
+      // synapses
+      ctx.lineWidth = 0.6;
+      for (const [a, b] of G.edges) {
+        const A = P[a], B = P[b], depth = (A.z + B.z) / 2;
+        ctx.strokeStyle = `rgba(178,141,240,${0.05 + Math.max(0, -depth) * 0.12})`;
+        ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+      }
+      // particles
+      for (let i = 0; i < P.length; i++) {
+        const p = G.pts[i], q = P[i];
+        let col = p.c, sz = (2.2 + p.s * 2.6) * q.k * dens, alpha = 0.35 + Math.max(0, -q.z) * 0.45 + 0.12 * Math.sin(t * 0.002 + p.tw);
+        if (fp) { const d = (p.x - fp.x) ** 2 + (p.y - fp.y) ** 2 + (p.z - fp.z) ** 2; if (d < 0.11) { col = fcol; sz *= 1.5; alpha = Math.min(1, alpha + 0.45); } else alpha *= 0.55; }
+        ctx.globalAlpha = Math.max(0.05, Math.min(1, alpha));
+        ctx.drawImage(S[col] || S.violet, q.x - sz, q.y - sz, sz * 2, sz * 2);
+      }
+      // links from anchors to the HTML labels, with pulses travelling along them
+      screen = {}; Object.entries(G.anchors).forEach(([id, i]) => { screen[id] = P[i]; });
+      const targets = typeof opts.targets === 'function' ? opts.targets() : [];
+      ctx.globalAlpha = 1;
+      for (const tg of targets) {
+        const a = screen[tg.id]; if (!a) continue;
+        const on = tg.id === focusId, c = COLORS[statusOf[tg.id] || 'lav'];
+        const mx = (a.x + tg.x) / 2, my = a.y;
+        ctx.strokeStyle = c; ctx.globalAlpha = on ? 0.95 : 0.32; ctx.lineWidth = on ? 1.6 : 1;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(mx, my, tg.x, tg.y); ctx.stroke();
+        ctx.globalAlpha = on ? 1 : 0.8; ctx.drawImage(S[statusOf[tg.id] || 'lav'], a.x - (on ? 9 : 6), a.y - (on ? 9 : 6), on ? 18 : 12, on ? 18 : 12);
+        if (!reduced) {
+          const u = ((t * (on ? 0.0011 : 0.0004) + tg.id.length * 0.13) % 1), iu = 1 - u;
+          const x = iu * iu * tg.x + 2 * iu * u * mx + u * u * a.x, y = iu * iu * tg.y + 2 * iu * u * my + u * u * a.y;
+          ctx.globalAlpha = 0.9; ctx.drawImage(S.white, x - 4, y - 4, 8, 8);
+        }
+      }
+      // random synapse firing
+      if (!reduced && Math.random() < 0.18) pulses.push({ e: G.edges[(Math.random() * G.edges.length) | 0], t: now });
+      for (let i = pulses.length - 1; i >= 0; i--) {
+        const pu = pulses[i], u = (now - pu.t) / 600; if (u > 1) { pulses.splice(i, 1); continue; }
+        const A = P[pu.e[0]], B = P[pu.e[1]];
+        ctx.globalAlpha = 1 - u; ctx.drawImage(S.gold, A.x + (B.x - A.x) * u - 5, A.y + (B.y - A.y) * u - 5, 10, 10);
+      }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    }
+    function loop(now) { if (!running) return; if (document.visibilityState !== 'hidden') draw(now); raf = requestAnimationFrame(loop); }
+    resize();
+    const api = {
+      start() { if (reduced) { draw(performance.now()); return; } if (!running) { running = true; raf = requestAnimationFrame(loop); } },
+      stop() { running = false; cancelAnimationFrame(raf); },
+      focus(id) { focusId = id; if (!running) draw(performance.now()); },
+      status(map) { statusOf = map || {}; if (!running) draw(performance.now()); },
+      redraw() { resize(); },
+      anchors: () => screen,
+      destroy() { this.stop(); ro ? ro.disconnect() : window.removeEventListener('resize', resize); window.removeEventListener('pointermove', onMove); }
+    };
+    canvas.__brain = api;
+    return api;
+  }
+  return { create, geometry, ANCHORS };
+})();
+if (typeof module !== 'undefined') module.exports = Brain;
+</script>
+<script>/* PM toolkit and PM brain tabs. Everything typed here goes through PM.clean (pm.js) before it is kept;
+   all text is escaped on output. Uses only the public App API from app.js. */
+const PMUI = (() => {
+  const STR = {
+    fr: { tabBrain: 'Cerveau PM', tabPm: 'Pilotage', brEyebrow: 'Le cerveau du chef de projet', brTitle: 'Tout ce que fait un chef de projet, branché sur votre projet',
+      brLead: 'Chaque zone est une fonction du métier (les 10 domaines du PMBOK). Sa couleur suit l’état réel du projet ; cliquez pour agir.',
+      brDoes: 'Le chef de projet', brOpen: 'Ouvrir', brGood: 'Sous contrôle', brWarn: 'À surveiller', brBad: 'Action requise',
+      pmAdd: 'Ajouter une ligne', pmDel: 'Supprimer la ligne', pmNew: 'Nouvel élément', pmEmptyT: 'Ce projet n’a pas encore de registres de pilotage',
+      pmEmptyL: 'Générez la charte, les parties prenantes, la matrice RACI, les risques, le plan de communication et les critères qualité à partir du planning. Tout reste modifiable.',
+      pmGen: 'Générer le kit du chef de projet', pmGenDone: 'Kit de pilotage généré.', pmRoles: 'Rôles (séparés par des virgules)', pmItem: 'Livrable',
+      pmCopy: 'Copier', pmDl: 'Télécharger (.txt)', pmCopied: 'Rapport copié.', pmReq: 'Champ obligatoire', pmRows: 'lignes', pmCount: 'élément(s)',
+      noProjT: 'Aucun projet ouvert', noProjL: 'Créez votre premier projet : décrivez-le en une phrase, et le planning, le budget, les documents et tout le kit du chef de projet sont préparés pour vous.' },
+    en: { tabBrain: 'PM brain', tabPm: 'PM toolkit', brEyebrow: 'The project manager’s brain', brTitle: 'Everything a project manager does, wired to your project',
+      brLead: 'Each area is one part of the job (the 10 PMBOK knowledge areas). Its colour follows the real state of the project; click to act.',
+      brDoes: 'The project manager', brOpen: 'Open', brGood: 'Under control', brWarn: 'Watch', brBad: 'Action needed',
+      pmAdd: 'Add a row', pmDel: 'Delete row', pmNew: 'New item', pmEmptyT: 'This project has no management registers yet',
+      pmEmptyL: 'Generate the charter, stakeholders, RACI matrix, risks, communication plan and quality criteria from the schedule. Everything stays editable.',
+      pmGen: 'Generate the project manager kit', pmGenDone: 'Management kit generated.', pmRoles: 'Roles (comma-separated)', pmItem: 'Deliverable',
+      pmCopy: 'Copy', pmDl: 'Download (.txt)', pmCopied: 'Report copied.', pmReq: 'Required field', pmRows: 'rows', pmCount: 'item(s)',
+      noProjT: 'No project open', noProjL: 'Create your first project: describe it in one sentence, and the schedule, budget, documents and the full project-manager kit are prepared for you.' }
+  };
+  const LONG = new Set(['response', 'rationale', 'criteria', 'notes', 'actions', 'lesson', 'action']);
+
+  function init(App) {
+    App.addStrings(STR.fr, STR.en);
+    const { t, esc } = App, $ = id => document.getElementById(id);
+    const L = () => PM.LBL[App.ui.lang];
+    if (!App.ui.pmSec || !PM.SECTIONS.includes(App.ui.pmSec)) App.ui.pmSec = 'charter';
+    const pBrain = $('tab-brain'), pPm = $('tab-pm');
+    if (!pBrain || !pPm) return;
+
+    /* ------------------------------ brain ------------------------------ */
+    pBrain.innerHTML = `<div class="brain">
+      <div class="brain-head"><p class="eyebrow" data-i="brEyebrow"></p><h2 class="brain-h" id="brTitle"></h2><p class="brain-lead" data-i="brLead"></p></div>
+      <div class="brain-stage" id="brainStage"><canvas class="brain-cv" id="brainCv" aria-hidden="true"></canvas>
+        <ul class="bn-col bn-l" id="bnL" role="list"></ul><ul class="bn-col bn-r" id="bnR" role="list"></ul></div>
+      <div class="brain-foot"><div class="card brain-detail" id="brainDetail" aria-live="polite"></div>
+        <ul class="brain-legend" aria-hidden="true"><li class="st-good" data-i="brGood"></li><li class="st-risk" data-i="brWarn"></li><li class="st-late" data-i="brBad"></li></ul></div></div>`;
+    const stage = $('brainStage'), cv = $('brainCv');
+    let areas = [], focusId = null, hoverId = null;
+    const narrow = () => window.innerWidth < 820;
+    const brain = Brain.create(cv, {
+      offsetX: 0.5, scale: 0.36, count: 2200,
+      targets() {
+        if (narrow()) return [];
+        const c = cv.getBoundingClientRect();
+        return [...stage.querySelectorAll('[data-area]')].map(b => {
+          const r = b.getBoundingClientRect(), left = b.closest('.bn-l');
+          return { id: b.dataset.area, x: (left ? r.right : r.left) - c.left, y: r.top + r.height / 2 - c.top };
+        });
+      }
+    });
+    const stCls = s => (s === 'good' ? 'st-good' : s === 'warn' ? 'st-risk' : 'st-late');
+    const ANCH = Brain.ANCHORS;
+    function renderBrain() {
+      const [h1, h2] = t('brTitle').split(/,\s*/);
+      $('brTitle').innerHTML = h2 ? `${esc(h1)}, <em>${esc(h2)}</em>` : esc(h1);
+      areas = PM.areas(App.project, App.today(), App.ui.lang);
+      const node = a => `<li><button type="button" class="bn ${stCls(a.status)}${a.id === focusId ? ' on' : ''}" data-area="${esc(a.id)}" aria-describedby="brainDetail">
+        <span class="bn-dot" aria-hidden="true"></span><span class="bn-t"><b>${esc(a.name)}</b><small>${esc(a.value)}</small></span></button></li>`;
+      const byY = (a, b) => ANCH[b.id][1] - ANCH[a.id][1];
+      $('bnR').innerHTML = areas.filter(a => ANCH[a.id][0] > 0).sort(byY).map(node).join('');
+      $('bnL').innerHTML = areas.filter(a => ANCH[a.id][0] <= 0).sort(byY).map(node).join('');
+      brain.status(Object.fromEntries(areas.map(a => [a.id, a.status])));
+      if (!focusId || !areas.some(a => a.id === focusId)) focusId = (areas.find(a => a.status === 'bad') || areas.find(a => a.status === 'warn') || areas[0]).id;
+      showDetail(hoverId || focusId);
+    }
+    function showDetail(id) {
+      const a = areas.find(x => x.id === id); if (!a) return;
+      stage.querySelectorAll('[data-area]').forEach(b => b.classList.toggle('on', b.dataset.area === id));
+      brain.focus(id);
+      const modName = a.go.startsWith('pm:') ? PM.LBL[App.ui.lang][a.go.slice(3)][0] : t({ tasks: 'tabTasks', gantt: 'tabGantt', budget: 'tabBudget' }[a.go]);
+      $('brainDetail').innerHTML = `<div class="bd-in"><span class="pill ${stCls(a.status)}">${esc(t(a.status === 'good' ? 'brGood' : a.status === 'warn' ? 'brWarn' : 'brBad'))}</span>
+        <h3>${esc(a.name)}</h3><p class="hint"><b>${esc(t('brDoes'))}</b> ${esc(a.does.charAt(0).toLowerCase() + a.does.slice(1))}.</p>
+        <p class="bd-val"><b>${esc(a.value)}</b><span>${esc(a.detail)}</span></p>
+        <button class="btn pri" type="button" data-go="${esc(a.id)}">${esc(t('brOpen'))} · ${esc(modName)} →</button></div>`;
+    }
+    function go(id) {
+      const a = areas.find(x => x.id === id); if (!a) return;
+      if (a.go.startsWith('pm:')) { App.ui.pmSec = a.go.slice(3); App.goTab('pm'); renderPm(); }
+      else App.goTab(a.go);
+    }
+    pBrain.addEventListener('click', ev => {
+      const b = ev.target.closest('[data-area]'); if (b) { if (focusId === b.dataset.area || narrow()) go(b.dataset.area); else { focusId = b.dataset.area; showDetail(focusId); } return; }
+      const g = ev.target.closest('[data-go]'); if (g) go(g.dataset.go);
+    });
+    pBrain.addEventListener('dblclick', ev => { const b = ev.target.closest('[data-area]'); if (b) go(b.dataset.area); });
+    const hover = id => { hoverId = id; showDetail(id || focusId); };
+    pBrain.addEventListener('pointerover', ev => { const b = ev.target.closest('[data-area]'); if (b && b.dataset.area !== hoverId) hover(b.dataset.area); });
+    pBrain.addEventListener('pointerleave', () => hover(null));
+    pBrain.addEventListener('focusin', ev => { const b = ev.target.closest('[data-area]'); if (b) { focusId = b.dataset.area; showDetail(focusId); } });
+
+    /* --------------------------- PM toolkit --------------------------- */
+    pPm.innerHTML = `<div class="pm-wrap"><nav class="pm-nav" id="pmNav" aria-label="${esc(t('tabPm'))}"></nav><div id="pmMain"></div></div>`;
+    const pm = () => App.project.pm;
+    let pending = null;
+    const flush = () => { if (!pending) return; clearTimeout(pending); pending = null; App.mutate(() => {}); };
+    const soon = () => { clearTimeout(pending); pending = setTimeout(() => { pending = null; App.mutate(() => {}); }, 450); };
+    const count = k => k === 'charter' ? (pm().charter.purpose ? 1 : 0) : k === 'raci' ? pm().raci.rows.length : k === 'report' ? '' : pm()[k].length;
+    const fmtD = v => v ? App.dLabel(App.Core.parseDate(v), true) : '';
+    function cell(reg, i, row, [k, type, lim, req]) {
+      const id = `pm-${reg}-${i}-${k}`, lab = esc(L().col[k] || k), v = row[k], ro = App.readOnly ? ' disabled' : '';
+      if (type === 'enum') return `<select id="${id}" data-reg="${reg}" data-row="${i}" data-col="${k}" aria-label="${lab}"${ro}>${lim.map(o => `<option value="${o}"${o === v ? ' selected' : ''}>${esc(L().en_[o] || o)}</option>`).join('')}</select>`;
+      if (type === 'int') return `<input id="${id}" type="number" class="pm-num" min="${lim[0]}" max="${lim[1]}" step="1" value="${esc(v)}" data-reg="${reg}" data-row="${i}" data-col="${k}" aria-label="${lab}"${ro}>`;
+      if (type === 'date') return `<input id="${id}" type="date" value="${esc(v)}" data-reg="${reg}" data-row="${i}" data-col="${k}" aria-label="${lab}"${ro}>`;
+      return `<textarea id="${id}" rows="1" class="grow${LONG.has(k) ? ' long' : ' short'}" maxlength="${lim}" data-reg="${reg}" data-row="${i}" data-col="${k}" aria-label="${lab}"${req ? ' data-req="1"' : ''}${ro}>${esc(v)}</textarea>`;
+    }
+    const scoreCls = s => (s >= 15 ? 'sc-bad' : s >= 10 ? 'sc-hi' : s >= 5 ? 'sc-mid' : 'sc-low');
+    function table(reg) {
+      const cols = PM.REG[reg], rows = pm()[reg];
+      const sc = r => `<td class="c-score" data-label="${esc(L().col.score)}"><span class="score ${scoreCls(r.p * r.i)}">${r.p * r.i}</span></td>`;
+      const head = (reg === 'stakeholders' ? '<th class="c-n">#</th>' : '') + cols.map(([k]) => `<th class="c-${k}">${esc(L().col[k] || k)}</th>${reg === 'risks' && k === 'i' ? `<th class="c-score">${esc(L().col.score)}</th>` : ''}`).join('') + '<th></th>';
+      const body = rows.map((r, i) => `<tr>${reg === 'stakeholders' ? `<td class="c-n"><span class="num-dot">${i + 1}</span></td>` : ''}${cols.map(c => `<td class="c-${c[0]}" data-label="${esc(L().col[c[0]] || c[0])}">${cell(reg, i, r, c)}</td>${reg === 'risks' && c[0] === 'i' ? sc(r) : ''}`).join('')}
+        <td class="r">${App.readOnly ? '' : `<button type="button" class="icon-btn" data-del="${i}" aria-label="${esc(t('pmDel'))} ${i + 1}">×</button>`}</td></tr>`).join('');
+      return `<div class="tbl-wrap pm-tbl"><table class="pm-t pm-cards t-${reg}"><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="${cols.length + 3}" class="hint empty-row">${esc(L().none)}</td></tr>`}</tbody></table></div>`;
+    }
+    function heatmap() {
+      const open = pm().risks.filter(r => r.status !== 'closed');
+      let h = `<div class="heat" role="img" aria-label="${esc(L().heat)}"><span class="heat-y">${esc(L().probability)}</span><div class="heat-g">`;
+      for (let p = 5; p >= 1; p--) for (let i = 1; i <= 5; i++) {
+        const here = open.filter(r => r.p === p && r.i === i);
+        h += `<div class="hc ${scoreCls(p * i)}${here.length ? ' has' : ''}" title="${p}×${i}=${p * i}">${here.length ? `<b>${here.length}</b>` : ''}</div>`;
+      }
+      return h + `</div><span class="heat-x">${esc(L().impact)}</span></div>`;
+    }
+    function grid() {
+      const q = L().grid;
+      return `<div class="pi-grid" role="img" aria-label="${esc(PM.LBL[App.ui.lang].stakeholders[0])}"><span class="pi-y">${esc(L().col.influence)} ↑</span>
+        <div class="pi-box"><div class="pi-q">${esc(q[0])}</div><div class="pi-q">${esc(q[1])}</div><div class="pi-q">${esc(q[2])}</div><div class="pi-q">${esc(q[3])}</div>
+        ${pm().stakeholders.map((s, n) => { const same = pm().stakeholders.slice(0, n).filter(o => o.interest === s.interest && o.influence === s.influence).length;
+          return `<span class="pi-dot" style="left:calc(${(s.interest - 1) / 4 * 76 + 12}% + ${same * 14}px);bottom:${(s.influence - 1) / 4 * 60 + 20}%" title="${esc(s.name)}">${n + 1}</span>`; }).join('')}</div>
+        <span class="pi-x">${esc(L().col.interest)} →</span></div>`;
+    }
+    function topRisks() {
+      const top = pm().risks.filter(r => r.status !== 'closed').sort((a, b) => b.p * b.i - a.p * a.i).slice(0, 4);
+      return `<ol class="pm-side">${top.map(r => `<li><span class="score ${scoreCls(r.p * r.i)}">${r.p * r.i}</span><span><b>${esc(r.title)}</b><small>${esc(r.response || '—')}</small></span></li>`).join('') || `<li class="hint">${esc(L().none)}</li>`}</ol>`;
+    }
+    function legendSh() {
+      return `<ol class="pm-side">${pm().stakeholders.map((s, n) => `<li><span class="num-dot">${n + 1}</span><span><b>${esc(s.name)}</b><small>${esc(L().en_[s.strategy] || s.strategy)} · ${esc(L().col.influence)} ${s.influence}/5 · ${esc(L().col.interest)} ${s.interest}/5</small></span></li>`).join('') || `<li class="hint">${esc(L().none)}</li>`}</ol>`;
+    }
+    function raci() {
+      const R = pm().raci, issues = new Map(PM.raciIssues(R, App.ui.lang).map(x => [x.id, x.msg])), ro = App.readOnly ? ' disabled' : '';
+      return `<p class="hint">${esc(L().raciLegend)}</p>
+        <div class="f pm-roles"><label for="pm-raci-roles">${esc(t('pmRoles'))}</label><input id="pm-raci-roles" maxlength="200" value="${esc(R.roles.join(', '))}"${ro}></div>
+        <div class="tbl-wrap pm-tbl"><table class="pm-t t-raci"><thead><tr><th>${esc(t('pmItem'))}</th>${R.roles.map(r => `<th class="c">${esc(r)}</th>`).join('')}<th></th></tr></thead><tbody>
+        ${R.rows.map((r, i) => `<tr><td><input id="pm-raci-item-${i}" data-raci-item="${i}" maxlength="120" value="${esc(r.item)}" aria-label="${esc(t('pmItem'))}"${ro}>${issues.has(r.id) ? `<span class="chip c-late raci-warn">${esc(issues.get(r.id))}</span>` : ''}</td>
+          ${R.roles.map(ro2 => { const v = R.cells[`${r.id}|${ro2}`] || ''; return `<td class="c"><select id="pm-raci-${i}-${esc(ro2)}" class="raci-sel rc-${v || 'n'}" data-raci="${esc(r.id)}|${esc(ro2)}" aria-label="${esc(r.item)} · ${esc(ro2)}"${ro}><option value="">·</option>${PM.RACI.map(x => `<option${x === v ? ' selected' : ''}>${x}</option>`).join('')}</select></td>`; }).join('')}
+          <td class="r">${App.readOnly ? '' : `<button type="button" class="icon-btn" data-raci-del="${i}" aria-label="${esc(t('pmDel'))} ${i + 1}">×</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+    }
+    function charter() {
+      const c = pm().charter, ro = App.readOnly ? ' disabled' : '', col = L().col;
+      const ta = k => `<div class="f wide"><label for="pm-ch-${k}">${esc(col[k])}</label><textarea id="pm-ch-${k}" class="doc-ta" data-ch="${k}" rows="3" maxlength="600"${ro}>${esc(c[k])}</textarea></div>`;
+      const inp = k => `<div class="f"><label for="pm-ch-${k}">${esc(col[k])}</label><input id="pm-ch-${k}" data-ch="${k}" maxlength="120" value="${esc(c[k])}"${ro}></div>`;
+      return `<div class="form pm-charter">${ta('purpose')}${inp('sponsor')}${inp('manager')}${ta('success')}
+        <div class="f"><label class="chk"><input type="checkbox" id="pm-ch-approved" data-ch="approved"${c.approved ? ' checked' : ''}${ro}> <span>${esc(col.approved)}</span></label></div>
+        <div class="f"><label for="pm-ch-approvedOn">${esc(col.approvedOn)}</label><input type="date" id="pm-ch-approvedOn" data-ch="approvedOn" value="${esc(c.approvedOn)}"${ro}></div></div>`;
+    }
+    function report() {
+      return `<textarea class="report-box" id="pmReport" readonly rows="18" aria-label="${esc(L().report[0])}">${esc(PM.statusReport(App.project, App.today(), App.ui.lang))}</textarea>
+        <div class="actions"><button class="btn pri" type="button" id="pmCopy">${esc(t('pmCopy'))}</button><button class="btn" type="button" id="pmDlRep">${esc(t('pmDl'))}</button></div>`;
+    }
+    function renderPm() {
+      const sec = App.ui.pmSec;
+      $('pmNav').innerHTML = PM.SECTIONS.map(k => { const n = count(k); return `<button type="button" data-sec="${k}" aria-current="${k === sec}">${esc(L()[k][0])}${n !== '' ? `<span class="n">${n}</span>` : ''}</button>`; }).join('');
+      if (PM.isEmpty(pm()) && App.project.tasks.length && !App.readOnly) {
+        $('pmMain').innerHTML = `<div class="card onboard pm-empty"><div class="card-b"><p class="eyebrow">${esc(t('tabPm'))}</p><h2 class="wiz-h">${esc(t('pmEmptyT'))}</h2><p class="hint">${esc(t('pmEmptyL'))}</p>
+          <div class="actions"><button class="btn pri" type="button" id="pmGen">${esc(t('pmGen'))}</button></div></div></div>`;
+        return;
+      }
+      const canAdd = !App.readOnly && !['charter', 'report'].includes(sec);
+      const body = sec === 'charter' ? charter() : sec === 'raci' ? raci() : sec === 'report' ? report()
+        : sec === 'risks' ? `<div class="pm-top">${heatmap()}${topRisks()}</div>${table('risks')}`
+        : sec === 'stakeholders' ? `<div class="pm-top">${grid()}${legendSh()}</div>${table('stakeholders')}` : table(sec);
+      queueMicrotask(autosize);
+      $('pmMain').innerHTML = `<div class="card pm-card"><div class="card-h"><div class="pm-h"><h2>${esc(L()[sec][0])}</h2><p class="hint">${esc(L()[sec][1])}</p></div>
+        ${canAdd ? `<button class="btn sm" type="button" id="pmAdd">+ ${esc(t('pmAdd'))}</button>` : ''}</div><div class="card-b">${body}</div></div>`;
+    }
+    function autosize(el) {
+      const list = el && el.nodeType ? [el] : pPm.querySelectorAll('textarea.grow');
+      list.forEach(t => { t.style.height = 'auto'; if (t.scrollHeight) t.style.height = t.scrollHeight + 2 + 'px'; });
+    }
+    pPm.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.matches && ev.target.matches('textarea.short')) ev.preventDefault(); });
+    function newRow(reg) {
+      const r = { id: 'n' + Date.now().toString(36).slice(-6) };
+      for (const [k, type, lim, req] of PM.REG[reg]) r[k] = type === 'enum' ? lim[0] : type === 'int' ? Math.max(lim[0], Math.min(lim[1], k === 'p' || k === 'i' || k === 'influence' || k === 'interest' ? 3 : 0)) : type === 'date' ? App.Core.fmt(App.today()) : req ? t('pmNew') : '';
+      return r;
+    }
+    pPm.addEventListener('click', ev => {
+      const s = ev.target.closest('[data-sec]');
+      if (s) { flush(); App.ui.pmSec = s.dataset.sec; App.persist(); renderPm(); document.querySelector(`#pmNav [data-sec="${s.dataset.sec}"]`)?.focus(); return; }
+      if (App.readOnly) { if (ev.target.closest('#pmCopy')) copyReport(); return; }
+      if (ev.target.closest('#pmGen')) { App.mutate(P => { P.pm = PM.generate(App.Core.validateProject(P).project, App.ui.lang, []); }); App.toast(t('pmGenDone')); return; }
+      if (ev.target.closest('#pmAdd')) {
+        const sec = App.ui.pmSec; flush();
+        App.mutate(P => { if (sec === 'raci') { const id = 'D' + Date.now().toString(36).slice(-5); P.pm.raci.rows.push({ id, item: t('pmNew') }); if (P.pm.raci.roles.includes('PM')) P.pm.raci.cells[`${id}|PM`] = 'A'; } else P.pm[sec].push(newRow(sec)); });
+        const last = pPm.querySelector('tbody tr:last-child input, tbody tr:last-child textarea'); last && (last.focus(), last.select && last.select());
+        return;
+      }
+      const d = ev.target.closest('[data-del]'); if (d) { flush(); const sec = App.ui.pmSec, i = +d.dataset.del; App.mutate(P => { P.pm[sec].splice(i, 1); }); return; }
+      const rd = ev.target.closest('[data-raci-del]'); if (rd) { flush(); const i = +rd.dataset.raciDel; App.mutate(P => { P.pm.raci.rows.splice(i, 1); }); return; }
+      if (ev.target.closest('#pmCopy')) copyReport();
+      if (ev.target.closest('#pmDlRep')) { const txt = $('pmReport').value; App.saveFile(new TextEncoder().encode(txt), `${(App.project.code || 'projet').replace(/[^\w-]+/g, '-')}-status.txt`, 'text/plain').then(r => r === 'saved' && App.toast(t('downloaded') + 'status.txt')); }
+    });
+    function copyReport() {
+      const box = $('pmReport'); if (!box) return;
+      try { navigator.clipboard.writeText(box.value).then(() => App.toast(t('pmCopied')), () => { box.focus(); box.select(); }); } catch { box.focus(); box.select(); }
+    }
+    function onEdit(ev, immediate) {
+      if (App.readOnly) return;
+      const el = ev.target, P = App.project;
+      if (el.dataset.reg) {
+        const row = P.pm[el.dataset.reg][+el.dataset.row]; if (!row) return;
+        const v = el.type === 'number' ? Number(el.value) : el.value;
+        if (el.dataset.req && !String(v).trim()) { el.setAttribute('aria-invalid', 'true'); el.title = t('pmReq'); return; }
+        el.removeAttribute('aria-invalid'); row[el.dataset.col] = v;
+      } else if (el.dataset.ch) P.pm.charter[el.dataset.ch] = el.type === 'checkbox' ? el.checked : el.value;
+      else if (el.dataset.raci) { const [rid, role] = el.dataset.raci.split('|'); if (el.value) P.pm.raci.cells[`${rid}|${role}`] = el.value; else delete P.pm.raci.cells[`${rid}|${role}`]; }
+      else if (el.dataset.raciItem) { const r = P.pm.raci.rows[+el.dataset.raciItem]; if (!r || !el.value.trim()) return; r.item = el.value; }
+      else if (el.id === 'pm-raci-roles') { P.pm.raci.roles = el.value.split(',').map(x => x.trim()).filter(Boolean); }
+      else return;
+      immediate ? (clearTimeout(pending), pending = null, App.mutate(() => {})) : soon();
+    }
+    pPm.addEventListener('input', ev => { if (ev.target.matches && ev.target.matches('textarea.grow')) autosize(ev.target); if (ev.target.tagName !== 'SELECT' && ev.target.type !== 'checkbox' && ev.target.type !== 'date') onEdit(ev, false); });
+    pPm.addEventListener('change', ev => { const el = ev.target; onEdit(ev, el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'date'); });
+
+    /* --------------------- render + empty state ---------------------- */
+    App.on('render', () => {
+      if (App.empty) return;
+      renderBrain();
+      if (!pending) renderPm();
+    });
+    App.on('tab', id => { if (id === 'brain' && !App.empty) { brain.redraw(); brain.start(); } else brain.stop(); });
+    window.addEventListener('resize', () => { if (App.ui.tab === 'brain') brain.redraw(); });
+    return { brain };
+  }
+  return { init, STR };
+})();
+if (typeof module !== 'undefined') module.exports = PMUI;
+</script>
 <script>/* Account layer: sign-in, workspaces, portfolio, team, client share links, activity, live saving.
    Runs only when the build provides CLOUD_CONFIG (Supabase URL + anon key) and supabase-js is loaded;
    otherwise the tracker stays in local demo mode, exactly as before. */
@@ -2346,6 +3255,7 @@ const CloudUI = (() => {
     fr: {
       tabProjects: 'Projets', tabTeam: 'Équipe', signIn: 'Se connecter', signUp: 'Créer un compte', signOut: 'Se déconnecter', account: 'Mon compte',
       localMode: 'Démo locale', email: 'E-mail', password: 'Mot de passe', fullName: 'Nom complet', orWith: 'ou continuer avec', google: 'Google', microsoft: 'Microsoft',
+      gateEyebrow: 'Espace chef de projet', gateH: 'Le cerveau, de tous vos projets.', gateLead: 'Décrivez un projet en une phrase : planning, burndown, budget, équipe, risques, RACI, documents et rapports sont prêts. Votre équipe et vos clients suivent tout en direct.', gateFeats: ['Gantt et burndown', 'Budget et équipe', 'Risques et RACI', 'Documents Word', 'Équipes et rôles', 'Liens client'], demo: 'Explorer la démo sans compte', loading: 'Connexion…', welcome: 'Bienvenue',
       forgot: 'Mot de passe oublié ?', resetSent: 'Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé.', skip: 'Continuer sans compte',
       authLead: 'Retrouvez vos projets sur tous vos appareils et travaillez en équipe.', checkMail: 'Compte créé. Ouvrez l’e-mail de confirmation pour l’activer, puis connectez-vous.',
       pwHint: '10 caractères minimum.', newPw: 'Nouveau mot de passe', setPw: 'Enregistrer le mot de passe', pwChanged: 'Mot de passe modifié.', recoverTitle: 'Choisissez un nouveau mot de passe',
@@ -2354,8 +3264,8 @@ const CloudUI = (() => {
       conflictLead: 'Quelqu’un a enregistré ce projet pendant que vous le modifiiez.', takeTheirs: 'Charger leur version', keepMine: 'Garder ma version',
       ws: 'Espace de travail', newWs: 'Nouvel espace…', wsName: 'Nom de l’espace (entreprise, équipe, startup)', createWs: 'Créer l’espace', wsLead: 'Un espace regroupe les projets et l’équipe d’une entreprise ou d’une startup.',
       wsNone: 'Créez votre premier espace de travail', portfolio: 'Portefeuille de projets', active: 'Projets actifs', atRisk: 'À risque ou en retard', totalBudget: 'Budget total', latestEnd: 'Fin la plus tardive',
-      newProject: 'Nouveau projet', importLocal: 'Importer le projet de ce navigateur', showArchived: 'Archivés', open: 'Ouvrir', opened: 'Ouvert', archive: 'Archiver', restore: 'Restaurer', del: 'Supprimer', confirmDel: 'Confirmer la suppression',
-      noProjects: 'Aucun projet pour l’instant. Créez-en un en une phrase avec l’Assistant, ou importez celui de ce navigateur.', noArchived: 'Aucun projet archivé.',
+      newProject: 'Nouveau projet', showArchived: 'Archivés', open: 'Ouvrir', opened: 'Ouvert', archive: 'Archiver', restore: 'Restaurer', del: 'Supprimer', confirmDel: 'Confirmer la suppression',
+      noProjects: 'Aucun projet pour l’instant.', firstProj: 'Créez votre premier projet', firstProjL: 'Décrivez-le en une phrase : l’assistant prépare le planning, le budget, l’équipe, les registres du chef de projet et les documents.', noArchived: 'Aucun projet archivé.',
       updatedBy: 'modifié', by: 'par', createdIn: 'Projet créé dans ', joined: 'Vous avez rejoint ', updatedByOther: 'Projet mis à jour par ', projectDeleted: 'Ce projet a été supprimé.',
       members: 'Membres', role: 'Rôle', since: 'Depuis', remove: 'Retirer', leave: 'Quitter l’espace', you: 'vous',
       r_owner: 'Propriétaire', r_pm: 'Chef de projet', r_member: 'Membre', r_viewer: 'Lecteur',
@@ -2387,6 +3297,7 @@ const CloudUI = (() => {
     en: {
       tabProjects: 'Projects', tabTeam: 'Team', signIn: 'Sign in', signUp: 'Create account', signOut: 'Sign out', account: 'My account',
       localMode: 'Local demo', email: 'E-mail', password: 'Password', fullName: 'Full name', orWith: 'or continue with', google: 'Google', microsoft: 'Microsoft',
+      gateEyebrow: 'Project manager workspace', gateH: 'The brain, behind all your projects.', gateLead: 'Describe a project in one sentence: schedule, burndown, budget, team, risks, RACI, documents and reports are ready. Your team and clients follow it all live.', gateFeats: ['Gantt and burndown', 'Budget and team', 'Risks and RACI', 'Word documents', 'Teams and roles', 'Client links'], demo: 'Explore the demo without an account', loading: 'Signing in…', welcome: 'Welcome',
       forgot: 'Forgot password?', resetSent: 'If an account exists for this address, a reset e-mail has just been sent.', skip: 'Continue without an account',
       authLead: 'Find your projects on every device and work as a team.', checkMail: 'Account created. Open the confirmation e-mail to activate it, then sign in.',
       pwHint: '10 characters minimum.', newPw: 'New password', setPw: 'Save password', pwChanged: 'Password changed.', recoverTitle: 'Choose a new password',
@@ -2395,8 +3306,8 @@ const CloudUI = (() => {
       conflictLead: 'Someone saved this project while you were editing it.', takeTheirs: 'Load their version', keepMine: 'Keep my version',
       ws: 'Workspace', newWs: 'New workspace…', wsName: 'Workspace name (company, team, startup)', createWs: 'Create workspace', wsLead: 'A workspace holds the projects and team of one company or startup.',
       wsNone: 'Create your first workspace', portfolio: 'Project portfolio', active: 'Active projects', atRisk: 'At risk or late', totalBudget: 'Total budget', latestEnd: 'Latest finish',
-      newProject: 'New project', importLocal: 'Import this browser’s project', showArchived: 'Archived', open: 'Open', opened: 'Open now', archive: 'Archive', restore: 'Restore', del: 'Delete', confirmDel: 'Confirm deletion',
-      noProjects: 'No projects yet. Create one in a sentence with the Assistant, or import this browser’s project.', noArchived: 'No archived projects.',
+      newProject: 'New project', showArchived: 'Archived', open: 'Open', opened: 'Open now', archive: 'Archive', restore: 'Restore', del: 'Delete', confirmDel: 'Confirm deletion',
+      noProjects: 'No projects yet.', firstProj: 'Create your first project', firstProjL: 'Describe it in one sentence: the assistant prepares the schedule, budget, team, the project manager’s registers and the documents.', noArchived: 'No archived projects.',
       updatedBy: 'updated', by: 'by', createdIn: 'Project created in ', joined: 'You joined ', updatedByOther: 'Project updated by ', projectDeleted: 'This project was deleted.',
       members: 'Members', role: 'Role', since: 'Since', remove: 'Remove', leave: 'Leave workspace', you: 'you',
       r_owner: 'Owner', r_pm: 'Project manager', r_member: 'Member', r_viewer: 'Viewer',
@@ -2461,12 +3372,12 @@ const CloudUI = (() => {
       if (S.shared) { root.innerHTML = ''; return; }
       if (!S.user) {
         root.innerHTML = `<span class="sync-pill s-local" title="${esc(t('localMode'))}">${esc(t('localMode'))}</span><button class="btn pri sm-pad" type="button" id="cuSignIn">${esc(t('signIn'))}</button>`;
-        $('cuSignIn').onclick = () => openAuth('in');
+        $('cuSignIn').onclick = () => openAuth('in');   // back to the sign-in screen
         return;
       }
       const statusTxt = { saved: t('saved'), saving: t('saving'), pending: t('pending'), offline: t('offline'), conflict: t('conflict'), error: t('saveError') }[S.status];
       const initials = ((S.profile && S.profile.display_name) || S.user.email || '?').split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
-      root.innerHTML = `${statusTxt && st.pid ? `<button type="button" class="sync-pill s-${S.status}" id="cuSync" aria-live="polite">${esc(statusTxt)}</button>` : ''}
+      root.innerHTML = `${statusTxt && st.pid ? `<button type="button" class="sync-pill s-${S.status}" id="cuSync" title="${esc(statusTxt)}" aria-live="polite">${esc(statusTxt)}</button>` : ''}
         ${S.wss.length ? `<label class="sr" for="cuWs">${esc(t('ws'))}</label>
         <select id="cuWs" class="ws-select">${S.wss.map(w => `<option value="${esc(w.id)}"${w.id === st.ws ? ' selected' : ''}>${esc(w.name)}</option>`).join('')}<option value="__new">${esc(t('newWs'))}</option></select>` : ''}
         <button type="button" class="avatar" id="cuAvatar" aria-label="${esc(t('account'))}" title="${esc(S.user.email)}">${esc(initials || '?')}</button>`;
@@ -2492,9 +3403,33 @@ const CloudUI = (() => {
     const msgEl = (id, text, ok) => { const el = $(id); if (el) { el.textContent = text; el.className = 'form-msg ' + (ok ? 'ok' : 'err'); } };
 
     /* ---------- authentication ---------- */
+    /* ---------- sign-in gate: the first screen in cloud mode ---------- */
+    const gate = $('gate'), gateCard = $('gateCard');
+    let gateBrain = null;
+    function renderGateCopy() {
+      const [h1, h2] = t('gateH').split(/,\s*/);
+      $('gateEyebrow').textContent = t('gateEyebrow');
+      $('gateH').innerHTML = h2 ? `${esc(h1)}, <em>${esc(h2)}</em>` : esc(h1);
+      $('gateLead').textContent = t('gateLead');
+      $('gateFeats').innerHTML = STR[App.ui.lang].gateFeats.map(f => `<li>${esc(f)}</li>`).join('');
+      gate.querySelectorAll('[data-glang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.glang === App.ui.lang));
+    }
+    function showGate(card) {
+      document.body.classList.add('gated'); gate.hidden = false; renderGateCopy();
+      if (card) { gateCard.innerHTML = card.html; card.bind && card.bind(); const f = gateCard.querySelector('input:not([type=hidden])'); f && f.focus({ preventScroll: true }); }
+      if (typeof Brain !== 'undefined' && !gateBrain) { gateBrain = Brain.create($('gateCv'), { count: 2400, place: (W, H) => W > 900 ? { offsetX: 0.57, offsetY: 0.5, scale: 0.34 } : { offsetX: 0.5, cy: 185, scale: 120 / Math.min(W, H) } }); }
+      gateBrain && (gateBrain.redraw(), gateBrain.start());
+    }
+    function hideGate() { document.body.classList.remove('gated'); gate.hidden = true; gateBrain && gateBrain.stop(); }
+    function gateLoading() { showGate({ html: `<p class="gate-load">${esc(t('loading'))}</p>` }); }
+    gate.addEventListener('click', ev => {
+      const l = ev.target.closest('[data-glang]'); if (!l) return;
+      App.ui.lang = l.dataset.glang; App.persist(); App.renderAll(); renderGateCopy();
+      const m = gateCard.querySelector('[data-mode][aria-pressed="true"]'); if (m) openAuth(m.dataset.mode);
+    });
     function openAuth(mode = 'in', note) {
       const up = mode === 'up';
-      modal(`<p class="eyebrow">${esc(t(up ? 'signUp' : 'signIn'))}</p><h2 id="cuMTitle" class="modal-h">${esc(up ? t('signUp') : t('signIn'))}</h2>
+      showGate({ html: `<p class="eyebrow">${esc(t(up ? 'signUp' : 'welcome'))}</p><h2 id="cuMTitle" class="modal-h">${esc(up ? t('signUp') : t('signIn'))}</h2>
         <p class="hint">${esc(note || t('authLead'))}</p>
         <div class="seg auth-seg" role="group"><button type="button" data-mode="in" aria-pressed="${!up}">${esc(t('signIn'))}</button><button type="button" data-mode="up" aria-pressed="${up}">${esc(t('signUp'))}</button></div>
         <form id="cuAuthForm" class="stack-sm" novalidate>
@@ -2506,30 +3441,33 @@ const CloudUI = (() => {
         </form>
         <p class="or">${esc(t('orWith'))}</p>
         <div class="oauth"><button class="btn" type="button" data-oauth="google">${esc(t('google'))}</button><button class="btn" type="button" data-oauth="azure">${esc(t('microsoft'))}</button></div>
-        <div class="modal-foot">${up ? '' : `<button type="button" class="linkish" id="cuForgot">${esc(t('forgot'))}</button>`}<button type="button" class="linkish" data-close>${esc(t('skip'))}</button></div>`, () => {
-        modalRoot.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => openAuth(b.dataset.mode, note));
-        modalRoot.querySelectorAll('[data-oauth]').forEach(b => b.onclick = async () => { busy(b, true); try { await cloud.signInOAuth(b.dataset.oauth); } catch (e) { msgEl('cuAuthMsg', E(e)); busy(b, false); } });
+        <div class="modal-foot">${up ? '<span></span>' : `<button type="button" class="linkish" id="cuForgot">${esc(t('forgot'))}</button>`}<button type="button" class="linkish" id="cuDemo">${esc(t('demo'))}</button></div>`,
+      bind() {
+        gateCard.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => openAuth(b.dataset.mode, note));
+        gateCard.querySelectorAll('[data-oauth]').forEach(b => b.onclick = async () => { busy(b, true); try { await cloud.signInOAuth(b.dataset.oauth); } catch (e) { msgEl('cuAuthMsg', E(e)); busy(b, false); } });
         if ($('cuForgot')) $('cuForgot').onclick = async () => { try { await cloud.resetPassword($('cuEmail').value.trim()); msgEl('cuAuthMsg', t('resetSent'), true); } catch (e) { msgEl('cuAuthMsg', E(e)); } };
+        $('cuDemo').onclick = () => { S.demo = true; hideGate(); App.setProject(App.sample(), { tab: 'brain' }); renderHeader(); };
         $('cuAuthForm').onsubmit = async ev => {
           ev.preventDefault(); const go = $('cuAuthGo'); busy(go, true); msgEl('cuAuthMsg', '');
           try {
             if (up) { const r = await cloud.signUp($('cuEmail').value.trim(), $('cuPw').value, $('cuName').value.trim()); if (r.needsConfirmation) { msgEl('cuAuthMsg', t('checkMail'), true); busy(go, false); return; } }
             else await cloud.signIn($('cuEmail').value.trim(), $('cuPw').value);
-            closeModal(); await afterSignIn();
+            await afterSignIn();
           } catch (e) { msgEl('cuAuthMsg', E(e)); busy(go, false); }
         };
-      });
+      } });
     }
     function openMfaChallenge() {
-      modal(`<p class="eyebrow">${esc(t('security'))}</p><h2 id="cuMTitle" class="modal-h">${esc(t('mfaTitle'))}</h2><p class="hint">${esc(t('mfaLead'))}</p>
+      showGate({ html: `<p class="eyebrow">${esc(t('security'))}</p><h2 id="cuMTitle" class="modal-h">${esc(t('mfaTitle'))}</h2><p class="hint">${esc(t('mfaLead'))}</p>
         <form id="cuMfaForm" class="stack-sm" novalidate><div class="f"><label for="cuCode">${esc(t('code'))}</label><input id="cuCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" class="code-in"></div>
-        <button class="btn pri wide-btn" type="submit" id="cuMfaGo">${esc(t('verify'))}</button><p class="form-msg" id="cuMfaMsg" role="alert"></p></form>`, () => {
+        <button class="btn pri wide-btn" type="submit" id="cuMfaGo">${esc(t('verify'))}</button><p class="form-msg" id="cuMfaMsg" role="alert"></p></form>`,
+      bind() {
         $('cuMfaForm').onsubmit = async ev => {
           ev.preventDefault(); const go = $('cuMfaGo'); busy(go, true);
-          try { const f = (await cloud.mfaFactors())[0]; await cloud.mfaVerify(f.id, $('cuCode').value.trim()); closeModal(); await afterSignIn(); }
+          try { const f = (await cloud.mfaFactors())[0]; await cloud.mfaVerify(f.id, $('cuCode').value.trim()); await afterSignIn(); }
           catch (e) { msgEl('cuMfaMsg', E(e)); busy(go, false); }
         };
-      });
+      } });
     }
     function openRecovery() {
       modal(`<h2 id="cuMTitle" class="modal-h">${esc(t('recoverTitle'))}</h2><form id="cuRecForm" class="stack-sm" novalidate>
@@ -2543,19 +3481,21 @@ const CloudUI = (() => {
     function afterSignIn() { if (!signInRun) signInRun = doAfterSignIn().finally(() => { signInRun = null; }); return signInRun; }
     async function doAfterSignIn() {
       try {
-        await cloud.session(); S.user = cloud.user(); if (!S.user) return;
+        await cloud.session(); S.user = cloud.user(); if (!S.user) { openAuth('in'); return; }
         if (await cloud.mfaNeeded()) { openMfaChallenge(); return; }
+        if (S.demo) { S.demo = false; App.clearLocal(); }
         S.profile = await cloud.profile();
         const inv = ssGet('pendingInvite');
         if (inv) { ssSet('pendingInvite', null); try { const r = await cloud.acceptInvitation(inv); if (r) { st.ws = r.workspace_id; st.pid = null; keep(); App.toast(t('joined') + r.workspace_name); } } catch (e) { App.toast(E(e), true); } }
         S.wss = await cloud.workspaces();
         if (!S.wss.some(w => w.id === st.ws)) { st.ws = S.wss[0] ? S.wss[0].id : null; st.pid = null; keep(); }
         App.setExtraTabs([['projects', 'tabProjects']], [['team', 'tabTeam']]);
-        renderHeader();
+        if (!st.pid) App.setEmpty(true);              // a new account starts blank: no sample, no other user's data
+        hideGate(); renderHeader();
         if (!st.ws) { App.goTab('projects'); renderProjects(true); return; }
         await loadWs();
         if (st.pid) await openProject(st.pid, { resume: true }); else App.goTab('projects');
-      } catch (e) { App.toast(E(e), true); }
+      } catch (e) { App.toast(E(e), true); if (!S.user) openAuth('in'); else hideGate(); }
     }
 
     async function loadWs() {
@@ -2566,7 +3506,7 @@ const CloudUI = (() => {
       renderProjects(); renderTeam(); renderHeader();
     }
     async function switchWs(id) {
-      detach(); st.ws = id; st.pid = null; st.version = null; keep(); App.setReadOnly(false);
+      detach(); st.ws = id; st.pid = null; st.version = null; keep(); App.setReadOnly(false); App.setEmpty(true);
       try { await loadWs(); App.goTab('projects'); } catch (e) { App.toast(E(e), true); }
     }
 
@@ -2575,7 +3515,7 @@ const CloudUI = (() => {
     async function openProject(pid, { resume = false } = {}) {
       detach();
       const row = await cloud.project(pid).catch(e => { App.toast(E(e), true); return null; });
-      if (!row) { st.pid = null; keep(); App.goTab('projects'); renderProjects(); return; }
+      if (!row) { st.pid = null; keep(); App.setEmpty(true); App.goTab('projects'); renderProjects(); return; }
       const localDirty = resume && st.dirty && st.pid === pid;
       st.pid = pid; S.shares = [];
       if (localDirty && row.version === st.version) {
@@ -2588,10 +3528,10 @@ const CloudUI = (() => {
       S.unwatch = cloud.watchProject(pid, onRemote);
       if (canManage()) cloud.shares(pid).then(s => { S.shares = s; renderTeam(); }).catch(() => {});
       renderProjects(); renderTeam();
-      if (!resume) App.goTab('burndown');
+      if (!resume) App.goTab('brain');
     }
     async function onRemote(ev, row) {
-      if (ev === 'DELETE') { App.toast(t('projectDeleted'), true); st.pid = null; keep(); detach(); App.setReadOnly(false); App.goTab('projects'); loadWs().catch(() => {}); return; }
+      if (ev === 'DELETE') { App.toast(t('projectDeleted'), true); st.pid = null; keep(); detach(); App.setReadOnly(false); App.setEmpty(true); App.goTab('projects'); loadWs().catch(() => {}); return; }
       if (!row || !(row.version > st.version)) return;          // our own save echoing back
       if (st.dirty) { setStatus('conflict'); return; }
       const data = row.data || ((await cloud.project(st.pid).catch(() => null)) || {}).data;
@@ -2627,15 +3567,19 @@ const CloudUI = (() => {
     }
 
     App.on('commit', p => {
-      if (!S.user || S.shared || App.readOnly) return;
+      if (!S.user || S.shared || App.readOnly || App.empty) return;
+      if (S.creating) return;               // the first save is on its way; later edits follow it
       if (S.pendingCreate) {
         if (!st.ws || !canEdit()) return;
-        S.pendingCreate = false;
-        cloud.createProject(st.ws, p).then(r => {
-          S.undoPid = r.id; st.pid = r.id; st.version = r.version; st.dirty = false; S.lastSaved = JSON.stringify(p); keep();
+        S.pendingCreate = false; S.creating = true;
+        const json = JSON.stringify(p);
+        cloud.createProject(st.ws, JSON.parse(json)).then(r => {
+          S.creating = false;
+          S.undoPid = r.id; st.pid = r.id; st.version = r.version; st.dirty = false; S.lastSaved = json; keep();
           detach(); S.unwatch = cloud.watchProject(r.id, onRemote); setStatus('saved');
           App.toast(t('createdIn') + ((wsObj() || {}).name || '')); loadWs().catch(() => {});
-        }).catch(e => App.toast(E(e), true));
+          scheduleSave(0);                  // anything edited while the project was being created
+        }).catch(e => { S.creating = false; S.pendingCreate = true; App.toast(E(e), true); });
         return;
       }
       if (!st.pid) return;                 // a local project nobody asked to put online
@@ -2676,7 +3620,7 @@ const CloudUI = (() => {
       const tile = (k, v, cls = '') => `<div class="kpi ${cls}"><div class="k">${esc(t(k))}</div><div class="v" style="font-size:22px">${esc(v)}</div></div>`;
       const pill = s => `<span class="pill st-${s}">${esc(t(s))}</span>`;
       panelP.innerHTML = `<div class="port-head"><div><p class="eyebrow">${esc(t('portfolio'))}</p><h2 class="port-title">${esc((wsObj() || {}).name || '')} <span class="role-badge">${esc(t('r_' + S.role))}</span></h2></div>
-        <div class="actions" style="margin:0">${canEdit() ? `<button class="btn pri" type="button" id="cuNewProj">+ ${esc(t('newProject'))}</button><button class="btn" type="button" id="cuImportLocal">${esc(t('importLocal'))}</button>` : ''}
+        <div class="actions" style="margin:0">${canEdit() ? `<button class="btn pri" type="button" id="cuNewProj">+ ${esc(t('newProject'))}</button>` : ''}
         <label class="g-tools"><input type="checkbox" id="cuArch"${S.archived ? ' checked' : ''}> <span>${esc(t('showArchived'))}</span></label></div></div>
         ${S.archived ? '' : `<div class="kpis port-kpis">${tile('active', String(items.length))}${tile('atRisk', String(atRisk), atRisk ? 'warn-tile' : '')}${tile('totalBudget', App.eur(total))}${tile('latestEnd', latest ? App.dLabel(C.parseDate(latest), true) : '—')}</div>`}
         <div class="proj-grid">${items.length ? items.map(({ row, p, h, budget }) => `<article class="card proj-card${row.id === st.pid ? ' is-open' : ''}">
@@ -2688,34 +3632,26 @@ const CloudUI = (() => {
           <div class="row-actions" style="justify-content:flex-start">${row.id === st.pid ? `<span class="chip c-inprog">${esc(t('opened'))}</span>` : `<button class="btn pri sm" type="button" data-open="${esc(row.id)}">${esc(t('open'))}</button>`}
           ${canEdit() ? `<button class="btn sm" type="button" data-arch="${esc(row.id)}">${esc(t(S.archived ? 'restore' : 'archive'))}</button>` : ''}
           ${canManage() ? `<button class="btn sm danger" type="button" data-del="${esc(row.id)}">${esc(t('del'))}</button>` : ''}</div></div></article>`).join('')
-          : `<p class="hint empty">${esc(t(S.archived ? 'noArchived' : 'noProjects'))}</p>`}</div>`;
-      if ($('cuNewProj')) $('cuNewProj').onclick = () => { S.pendingCreate = true; flushSave(); detach(); st.pid = null; keep(); App.setReadOnly(false); App.goTab('assistant'); setTimeout(() => $('wz-desc') && $('wz-desc').focus(), 0); };
-      if ($('cuImportLocal')) $('cuImportLocal').onclick = () => { detach(); st.pid = null; keep(); App.setReadOnly(false); emitCommit(); };
+          : S.archived || !canEdit() ? `<p class="hint empty">${esc(t(S.archived ? 'noArchived' : 'noProjects'))}</p>`
+          : `<div class="card onboard first-proj"><div class="card-b"><p class="eyebrow">${esc(t('noProjects'))}</p><h2 class="wiz-h">${esc(t('firstProj'))}</h2><p class="hint">${esc(t('firstProjL'))}</p>
+            <div class="actions"><button class="btn pri wiz-go" type="button" id="cuFirstProj">+ ${esc(t('newProject'))}</button></div></div></div>`}</div>`;
+      const startNew = () => { S.pendingCreate = true; flushSave(); detach(); st.pid = null; keep(); App.setReadOnly(false); App.setEmpty(true); App.goTab('assistant'); setTimeout(() => $('wz-desc') && $('wz-desc').focus(), 0); };
+      if ($('cuNewProj')) $('cuNewProj').onclick = startNew;
+      if ($('cuFirstProj')) $('cuFirstProj').onclick = startNew;
       $('cuArch').onchange = async ev => { S.archived = ev.target.checked; try { S.projects = await cloud.projects(st.ws, S.archived); } catch (e) { App.toast(E(e), true); } renderProjects(); };
       let armed = null;
       panelP.onclick = async ev => {
         const o = ev.target.closest('[data-open]'), a = ev.target.closest('[data-arch]'), d = ev.target.closest('[data-del]');
         try {
           if (o) { await flushSave(); await openProject(o.dataset.open); }
-          else if (a) { await cloud.archiveProject(a.dataset.arch, !S.archived); if (a.dataset.arch === st.pid) { detach(); st.pid = null; keep(); App.setReadOnly(false); } await loadWs(); }
+          else if (a) { await cloud.archiveProject(a.dataset.arch, !S.archived); if (a.dataset.arch === st.pid) { detach(); st.pid = null; keep(); App.setReadOnly(false); App.setEmpty(true); } await loadWs(); }
           else if (d) {
             if (armed !== d.dataset.del) { armed = d.dataset.del; d.textContent = t('confirmDel'); return; }
-            await cloud.deleteProject(d.dataset.del); if (d.dataset.del === st.pid) { detach(); st.pid = null; keep(); App.setReadOnly(false); } await loadWs();
+            await cloud.deleteProject(d.dataset.del); if (d.dataset.del === st.pid) { detach(); st.pid = null; keep(); App.setReadOnly(false); App.setEmpty(true); } await loadWs();
           }
         } catch (e) { App.toast(E(e), true); }
       };
     }
-    // "Import this browser's project": create the cloud copy from the project currently in the tracker
-    function emitCommit() {
-      if (!st.ws || !canEdit()) return;
-      S.pendingCreate = false;
-      cloud.createProject(st.ws, App.project).then(r => {
-        st.pid = r.id; st.version = r.version; st.dirty = false; S.lastSaved = JSON.stringify(App.project); keep();
-        S.unwatch = cloud.watchProject(r.id, onRemote); setStatus('saved'); App.toast(t('createdIn') + ((wsObj() || {}).name || '')); loadWs().catch(() => {});
-      }).catch(e => App.toast(E(e), true));
-    }
-
-    /* ---------- Team tab: members, invitations, client links, activity ---------- */
     function linkBox(id, url, label) {
       return `<div class="link-box"><label class="lbl" for="${id}">${esc(label)}</label><div class="link-row"><input id="${id}" readonly value="${esc(url)}"><button class="btn sm" type="button" data-copy="${id}">${esc(t('copy'))}</button></div></div>`;
     }
@@ -2832,8 +3768,9 @@ const CloudUI = (() => {
     function signedOut() {
       detach(); S.user = null; S.profile = null; S.wss = []; S.role = null; S.projects = []; S.members = []; S.activity = [];
       st.pid = null; st.version = null; st.dirty = false; keep();
-      App.setExtraTabs([], []); App.setReadOnly(false); renderHeader();
+      App.setExtraTabs([], []); App.setReadOnly(false); App.clearLocal(); App.setEmpty(true); renderHeader();
       if (panelP) panelP.innerHTML = ''; if (panelT) panelT.innerHTML = '';
+      openAuth('in');
     }
 
     /* ---------- client share view (no account) ---------- */
@@ -2849,6 +3786,7 @@ const CloudUI = (() => {
 
     App.on('render', () => {
       renderHeader();
+      const smp = $('btnSample'); if (smp) smp.hidden = !!S.user;
       const banner = $('roBanner');
       if (!S.shared && banner) { const viewer = S.user && st.pid && S.role === 'viewer'; banner.hidden = !viewer; if (viewer) banner.textContent = t('viewerBanner'); }
     });
@@ -2860,13 +3798,13 @@ const CloudUI = (() => {
     const share = params.get('share'), invite = params.get('invite');
     if (invite && /^[0-9a-f]{64}$/.test(invite)) { ssSet('pendingInvite', invite); params.delete('invite'); history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : '') + location.hash); }
     if (share) { openSharedView(share); return; }
-    renderHeader();
+    renderHeader(); gateLoading();
     cloud.onAuth((ev) => {
       if (ev === 'PASSWORD_RECOVERY') openRecovery();
       else if (ev === 'SIGNED_IN' && !S.user) afterSignIn();
       else if (ev === 'SIGNED_OUT' && S.user) signedOut();
     });
-    cloud.session().then(s => { if (s) afterSignIn(); else if (ssGet('pendingInvite')) openAuth('in'); }).catch(() => {});
+    cloud.session().then(s => { if (s) afterSignIn(); else openAuth('in'); }).catch(() => openAuth('in'));
   }
   return { init };
 })();
@@ -3003,11 +3941,13 @@ const I18N = {
 const load = () => { try { return JSON.parse(localStorage.getItem(STORE) || 'null'); } catch { return null; } };
 // a shared (read-only) project is never written over the viewer's own saved project
 const persist = () => { if (typeof RO !== 'undefined' && RO) return; try { localStorage.setItem(STORE, JSON.stringify({ project: P, ui: UI })); } catch { /* storage unavailable: session-only */ } };
-const hooks = { commit: [], render: [], replace: [], undo: [] };
+const hooks = { commit: [], render: [], replace: [], undo: [], tab: [] };
 const emit = (ev, arg) => hooks[ev].forEach(f => { try { f(arg); } catch (e) { console.warn(ev, e); } });
 const saved = load();
-let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
-const UI = Object.assign({ lang: 'fr', tab: 'assistant', wzSize: 'medium', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
+// the demo sample comes with its project-management kit, generated from its own schedule
+const sampleProject = () => { const p = C.validateProject(SAMPLE).project; if (PM.isEmpty(p.pm)) p.pm = PM.generate(p, 'fr', []); return p; };
+let P = (saved && C.validateProject(saved.project).project) || sampleProject();
+const UI = Object.assign({ lang: 'fr', tab: 'brain', wzSize: 'medium', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
 let editing = null, lastBurndown = null;
 const t = k => I18N[UI.lang][k] ?? k;
 const nm = o => (UI.lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
@@ -3025,15 +3965,17 @@ function taskStatus(k, now) {
 const statusKey = { done: 'sDone', late: 'sLate', inprog: 'sInprog', todo: 'sTodo' };
 
 /* ---------- chrome ---------- */
-const BASE_TABS = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['budget', 'tabBudget'], ['project', 'tabProject']];
-const ALL_TABS = ['projects', 'assistant', 'burndown', 'gantt', 'tasks', 'budget', 'project', 'team'];
-let extraTabs = { before: [], after: [] }, RO = false;
-const visibleTabs = () => [...extraTabs.before, ...BASE_TABS.filter(([id]) => !RO || !['assistant', 'project'].includes(id)), ...extraTabs.after];
+const BASE_TABS = [['brain', 'tabBrain'], ['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['pm', 'tabPm'], ['budget', 'tabBudget'], ['project', 'tabProject']];
+const ALL_TABS = ['projects', 'brain', 'assistant', 'burndown', 'gantt', 'tasks', 'pm', 'budget', 'project', 'team'];
+let extraTabs = { before: [], after: [] }, RO = false, EMPTY = false;   // EMPTY: signed in, no project open yet
+const visibleTabs = () => [...extraTabs.before, ...BASE_TABS.filter(([id]) => EMPTY ? id === 'assistant' : !RO || !['assistant', 'project'].includes(id)), ...extraTabs.after];
 function renderChrome() {
   document.documentElement.lang = UI.lang;
   document.querySelectorAll('[data-i]').forEach(el => { el.textContent = t(el.dataset.i); });
   $('eyebrow').textContent = t('eyebrow') + (P.code ? ' · ' + P.code : '');
-  $('pName').textContent = P.name;
+  $('pName').textContent = EMPTY ? t('noProjT') : P.name;
+  document.body.classList.toggle('noproj', EMPTY);
+  $('emptyNote').hidden = !EMPTY;
   $('pMeta').textContent = `${dLabel(C.parseDate(P.start), true)} → ${dLabel(C.parseDate(P.end), true)} · ${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
   ['fr', 'en'].forEach(l => $('lang-' + l).setAttribute('aria-pressed', UI.lang === l));
   const tabs = visibleTabs();
@@ -3041,12 +3983,13 @@ function renderChrome() {
   document.body.classList.toggle('ro', RO);
   $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
   ALL_TABS.forEach(id => { const el = $('tab-' + id); if (el) el.hidden = UI.tab !== id; });
-  $('kpis').hidden = UI.tab === 'assistant' || UI.tab === 'projects' || UI.tab === 'team';
-  $('hero').hidden = UI.tab === 'projects' || UI.tab === 'team';
+  $('kpis').hidden = EMPTY || ['assistant', 'projects', 'team', 'brain'].includes(UI.tab);
+  $('hero').hidden = EMPTY || UI.tab === 'projects' || UI.tab === 'team';
   $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
   $('g-summary').setAttribute('aria-pressed', UI.gMode === 'summary'); $('g-master').setAttribute('aria-pressed', UI.gMode === 'master');
   document.querySelectorAll('#gZoom button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.z === UI.zoom));
   $('optDeps').checked = UI.deps; $('optCrit').checked = UI.crit;
+  emit('tab', UI.tab);
 }
 
 function renderKpis() {
@@ -3414,7 +4357,7 @@ function renderProject() {
 const phaseRow = (p, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ph-id" value="${esc(p.id)}" maxlength="16"><input aria-label="FR" class="ph-fr" value="${esc(p.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ph-en" value="${esc(p.en)}" maxlength="80" placeholder="EN"><input aria-label="Color" class="ph-color" type="color" value="${esc(p.color)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
 const msRow = (m, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ms-id" value="${esc(m.id)}" maxlength="16"><input aria-label="FR" class="ms-fr" value="${esc(m.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ms-en" value="${esc(m.en)}" maxlength="80" placeholder="EN"><input aria-label="Date" class="ms-date" type="date" value="${esc(m.date)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
 ['phaseRows', 'msRows'].forEach(id => $(id).addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) ev.target.closest('.edit-row').remove(); }));
-$('addPhase').addEventListener('click', () => $('phaseRows').insertAdjacentHTML('beforeend', phaseRow({ id: nextId('P', [...document.querySelectorAll('.ph-id')].map(x => ({ id: x.value }))), fr: '', en: '', color: '#4f6bed' }, 0)));
+$('addPhase').addEventListener('click', () => $('phaseRows').insertAdjacentHTML('beforeend', phaseRow({ id: nextId('P', [...document.querySelectorAll('.ph-id')].map(x => ({ id: x.value }))), fr: '', en: '', color: '#8556F7' }, 0)));
 $('addMs').addEventListener('click', () => $('msRows').insertAdjacentHTML('beforeend', msRow({ id: nextId('M', [...document.querySelectorAll('.ms-id')].map(x => ({ id: x.value }))), fr: '', en: '', date: C.fmt(nowT()) }, 0)));
 $('savePhases').addEventListener('click', () => {
   const phases = [...document.querySelectorAll('#phaseRows .edit-row')].map(r => ({ id: r.querySelector('.ph-id').value.trim(), fr: r.querySelector('.ph-fr').value, en: r.querySelector('.ph-en').value, color: r.querySelector('.ph-color').value }));
@@ -3464,7 +4407,8 @@ function importText(txt) {
   const r = C.validateProject(raw);
   if (!r.project || (fmt === 'json' && !r.ok)) return msg(t('eInvalid') + r.errors.slice(0, 8).join(', '), false);
   if (!r.project.tasks.length) return msg(t('eNoTasks'), false);
-  emit('replace', 'import');
+  emit('replace', 'import'); EMPTY = false;
+  if (PM.isEmpty(r.project.pm) && r.project.tasks.length) r.project.pm = PM.generate(r.project, UI.lang, []);
   P = r.project; editing = null; UI.tab = 'gantt'; commit(); toast(t('imported'));
   const skipped = (raw.tasks || []).length - P.tasks.length;
   msg(`${t('importedN')}${t({ json: 'fmtJson', csv: 'fmtCsv', mermaid: 'fmtMermaid' }[fmt])} · ${P.tasks.length} ${t('kTasks')}${skipped > 0 ? ` (−${skipped})` : ''}${r.errors.includes('cycle') ? ' · ' + t('eCycle') : ''}`, true);
@@ -3481,19 +4425,19 @@ const twoStep = (btn, fn) => btn.addEventListener('click', () => {
   if (armed !== btn) { armed = btn; msg(t('sure'), false); setTimeout(() => { if (armed === btn) { armed = null; msg('', true); } }, 4000); return; }
   armed = null; fn();
 });
-twoStep($('btnSample'), () => { emit('replace', 'sample'); P = C.validateProject(SAMPLE).project; editing = null; commit(); msg(t('imported'), true); });
+twoStep($('btnSample'), () => { emit('replace', 'sample'); EMPTY = false; P = sampleProject(); editing = null; commit(); msg(t('imported'), true); });
 twoStep($('btnBlank'), () => {
-  emit('replace', 'blank');
+  emit('replace', 'blank'); EMPTY = false;
   const s = nowT();
   P = C.validateProject({ name: t('blankName'), code: '', start: C.fmt(s), end: C.fmt(C.addDays(s, 56)), statusDate: '', workingDays: true,
-    phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#4f6bed' }], milestones: [], tasks: [] }).project;
+    phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#8556F7' }], milestones: [], tasks: [] }).project;
   editing = null; commit(); msg(t('saved'), true);
 });
 
 
 /* ---------- document downloads ---------- */
-const LIGHT = { bg: '#ffffff', surface: '#ffffff', sunk: '#f7f8fb', ink: '#142033', muted: '#596579', line: '#d7dde6', grid: '#e9edf3', accent: '#1f56f0',
-  'accent-soft': 'rgba(31,86,240,.10)', ideal: '#8f9bb0', good: '#16865a', warn: '#b86e00', bad: '#c42f3a', 'good-soft': 'rgba(22,134,90,.12)',
+const LIGHT = { bg: '#ffffff', surface: '#ffffff', sunk: '#f7f8fb', ink: '#141112', muted: '#5E585A', line: '#d7dde6', grid: '#e9edf3', accent: '#6B3FE0',
+  'accent-soft': 'rgba(107,63,224,.10)', ideal: '#8f9bb0', good: '#16865a', warn: '#b86e00', bad: '#c42f3a', 'good-soft': 'rgba(22,134,90,.12)',
   'warn-soft': 'rgba(184,110,0,.13)', 'bad-soft': 'rgba(196,47,58,.12)', 'f-display': 'Arial, Helvetica, sans-serif', 'f-body': 'Arial, Helvetica, sans-serif', 'f-mono': 'Consolas, Courier New, monospace' };
 const literal = s => s.replace(/var\(--([a-z-]+)\)/g, (m, k) => LIGHT[k] || '#142033');
 function ganttSvg(mode) {
@@ -3634,7 +4578,7 @@ $('wzGo').addEventListener('click', async () => {
     const r = C.validateProject(out.project);
     if (!r.ok) throw new Error(r.errors.join(','));
     emit('replace', 'assistant');
-    prevProject = P; lastGen = out.type; P = r.project; editing = null;
+    prevProject = EMPTY ? null : P; EMPTY = false; lastGen = out.type; P = r.project; editing = null;
     commit(); renderResult(); toast(t('wzDone') + P.name);
     $('wzResult').scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   } catch (e) { console.warn('generation failed', e); msgEl.textContent = t('dlError'); msgEl.className = 'err'; }
@@ -3642,6 +4586,7 @@ $('wzGo').addEventListener('click', async () => {
 });
 $('wzUndo').addEventListener('click', () => { if (!prevProject) return; emit('undo'); P = prevProject; prevProject = null; lastGen = null; $('wzResult').hidden = true; commit(); $('wzMsg').textContent = t('wzUndone'); $('wzMsg').className = 'ok'; });
 $('wzResult').addEventListener('click', ev => { const b = ev.target.closest('[data-wdl]'); if (b) download(b.dataset.wdl, $('wzDlStatus')); });
+$('wzSeeBrain').addEventListener('click', () => { UI.tab = 'brain'; persist(); renderChrome(); });
 $('wzSeeGantt').addEventListener('click', () => { UI.tab = 'gantt'; UI.gMode = 'master'; persist(); renderChrome(); renderGantt(); });
 $('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); renderChrome(); $('doc-context')?.focus(); });
 $('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); });
@@ -3658,9 +4603,10 @@ const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent |
 let cmdItems = [], cmdSel = 0, cmdReturn = null;
 function cmdActions() {
   const go = (id, k, ic) => ({ label: `${t('cmdGo')} ${t(k)}`, ic, run: () => { UI.tab = id; if (id === 'burndown') animateBd = true; persist(); renderChrome(); if (id === 'burndown') renderBurndown(); } });
+  if (EMPTY) return [{ label: t('newProject'), ic: '+', run: () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); } }, ...extraTabs.before.concat(extraTabs.after).map(([id, k]) => go(id, k, '·')), { label: t('cmdLang'), ic: UI.lang === 'fr' ? 'EN' : 'FR', run: () => { UI.lang = UI.lang === 'fr' ? 'en' : 'fr'; persist(); renderAll(); } }];
   return [
     ...(RO ? [] : [{ label: t('newProject'), ic: '+', hint: '', run: () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); } }]),
-    ...(RO ? [] : [go('assistant', 'tabAssistant', 'A')]), go('burndown', 'tabBurndown', 'B'), go('gantt', 'tabGantt', 'G'), go('tasks', 'tabTasks', 'T'), go('budget', 'tabBudget', '€'), ...(RO ? [] : [go('project', 'tabProject', 'P')]), ...extraTabs.before.concat(extraTabs.after).map(([id, k]) => go(id, k, k[3] || '·')),
+    go('brain', 'tabBrain', '◎'), ...(RO ? [] : [go('assistant', 'tabAssistant', 'A')]), go('burndown', 'tabBurndown', 'B'), go('gantt', 'tabGantt', 'G'), go('tasks', 'tabTasks', 'T'), go('pm', 'tabPm', 'R'), go('budget', 'tabBudget', '€'), ...(RO ? [] : [go('project', 'tabProject', 'P')]), ...extraTabs.before.concat(extraTabs.after).map(([id, k]) => go(id, k, k[3] || '·')),
     ...[['needs', 'dlNeeds', '.docx'], ['technical', 'dlTech', '.docx'], ['report', 'dlReport', '.docx'], ['gs', 'dlGs', '.png'], ['gm', 'dlGm', '.png'], ['bd', 'dlBd', '.png'], ['csv', 'dlCsv', '.csv'], ['json', 'dlJson', '.json']]
       .map(([kind, k, ext]) => ({ label: `${t('download')} · ${t(k)}`, ic: '↓', hint: ext, run: () => download(kind) })),
     { label: t('cmdLang'), ic: UI.lang === 'fr' ? 'EN' : 'FR', run: () => { UI.lang = UI.lang === 'fr' ? 'en' : 'fr'; commit(); } },
@@ -3722,7 +4668,7 @@ function lockReadOnly() {
 function renderAllInner() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); lockReadOnly(); hooks.render.forEach(f => f()); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() {
-  if (RO) { renderAll(); return; }
+  if (RO || EMPTY) { renderAll(); return; }
   P.history = C.recordHistory(P, nowT()); persist(); renderAll(); emit('commit', P);
 }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; persist(); renderAll(); }));
@@ -3746,15 +4692,21 @@ const App = {
   addStrings(fr, en) { Object.assign(I18N.fr, fr); Object.assign(I18N.en, en); },
   setProject(p, opts = {}) {
     const r = C.validateProject(p); if (!r.project) return false;
-    P = r.project; editing = null; prevProject = null; lastGen = null;
+    P = r.project; editing = null; prevProject = null; lastGen = null; EMPTY = false;
     if (opts.tab) UI.tab = opts.tab;
     persist(); renderAll(); return true;
   },
   setExtraTabs(before, after) { extraTabs = { before: before || [], after: after || [] }; renderChrome(); },
   setReadOnly(on) { RO = !!on; renderAll(); },
+  get empty() { return EMPTY; },
+  setEmpty(on) { EMPTY = !!on; if (EMPTY) { UI.tab = 'assistant'; prevProject = null; lastGen = null; $('wzResult').hidden = true; } renderAll(); },
+  mutate(fn) { if (RO || EMPTY) return; fn(P); const r = C.validateProject(P); if (r.project) P = r.project; commit(); },
+  clearLocal() { try { localStorage.removeItem(STORE); } catch { /* storage unavailable */ } },
+  sample: () => sampleProject(),
   goTab(id) { UI.tab = id; persist(); renderChrome(); if (id === 'burndown') { animateBd = true; renderBurndown(); } },
   renderAll: () => renderAll()
 };
+if (typeof PMUI !== 'undefined') PMUI.init(App);
 if (typeof CloudUI !== 'undefined') CloudUI.init(App);
 const hash = (location.hash || '').slice(1);
 if (ALL_TABS.includes(hash)) UI.tab = hash;

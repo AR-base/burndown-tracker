@@ -26,22 +26,29 @@ function page(url = 'https://app.test/') {
   /* ---- Ana creates an account, a workspace, and puts her project online ---- */
   let A = page();
   await sleep(30);
-  check('signed out: header offers sign-in, demo still works', A.$('cuSignIn') && A.tabs().join() === 'assistant,burndown,gantt,tasks,budget,project');
+  check('signed out: the sign-in screen comes first, the tracker is hidden', A.d.body.classList.contains('gated') && !A.$('gate').hidden && !!A.$('cuAuthForm'));
+  check('sign-in screen offers Google and Microsoft', A.$('gate').querySelectorAll('[data-oauth]').length === 2);
+  A.click(A.$('cuDemo')); await sleep(20);
+  check('demo link opens the local demo without an account', !A.d.body.classList.contains('gated') && A.tabs().join() === 'brain,assistant,burndown,gantt,tasks,pm,budget,project' && !!A.$('cuSignIn'));
   A.click(A.$('cuSignIn'));
-  check('sign-in dialog opens with Google and Microsoft', !A.$('cloudModal').hidden && A.d.querySelectorAll('[data-oauth]').length === 2);
-  A.click(A.d.querySelector('[data-mode="up"]'));
+  check('header sign-in returns to the sign-in screen', A.d.body.classList.contains('gated'));
+  A.click(A.d.querySelector('#gate [data-mode="up"]'));
   A.$('cuName').value = 'Ana Martin'; A.$('cuEmail').value = 'ana@acme.fr'; A.$('cuPw').value = 'short';
   A.submit(A.$('cuAuthForm')); await sleep(30);
   check('weak password refused with a clear message', /10/.test(A.$('cuAuthMsg').textContent));
   A.$('cuPw').value = 'correct-horse-battery'; A.submit(A.$('cuAuthForm')); await sleep(80);
-  check('after sign-up: Projects and Team tabs appear', A.tabs()[0] === 'projects' && A.tabs().at(-1) === 'team');
+  check('after sign-up: sign-in screen closes, Projects and Team tabs appear', !A.d.body.classList.contains('gated') && A.tabs()[0] === 'projects' && A.tabs().at(-1) === 'team');
+  check('a new account starts blank: no sample project anywhere', A.tabs().join() === 'projects,assistant,team' && !/ESAIP/.test(A.$('pName').textContent) && A.d.body.classList.contains('noproj'));
   check('no workspace yet: onboarding form shown', !!A.$('cuNewWsName'));
   A.$('cuNewWsName').value = 'ACME <img src=x onerror=alert(1)>'; A.submit(A.$('cuNewWs')); await sleep(80);
   check('workspace created and selected', A.$('cuWs') && /ACME/.test(A.$('cuWs').selectedOptions[0].textContent));
   check('workspace name is escaped everywhere', !A.d.querySelector('#tab-projects img, #acct img, #tab-team img'));
-  check('owner sees create + import buttons', !!A.$('cuNewProj') && !!A.$('cuImportLocal'));
-  A.click(A.$('cuImportLocal')); await sleep(120);
-  check('browser project imported into the workspace', fake._db.projects.length === 1 && A.d.querySelectorAll('.proj-card').length === 1);
+  check('empty workspace invites to create the first project (no browser import)', !!A.$('cuFirstProj') && !A.$('cuImportLocal'));
+  A.click(A.$('cuFirstProj')); await sleep(10);
+  check('first project starts in the assistant', A.d.querySelector('#tabs [aria-selected="true"]').dataset.tab === 'assistant' && !A.$('emptyNote').hidden);
+  A.type(A.$('wz-desc'), 'Je veux vendre mes vêtements en ligne'); A.click(A.$('wzGo')); await sleep(150);
+  check('generated project is saved to the workspace with its PM kit', fake._db.projects.length === 1 && fake._db.projects[0].data.pm.risks.length > 2 && fake._db.projects[0].data.pm.raci.rows.length > 2 && A.d.querySelectorAll('.proj-card').length === 1);
+  check('all project views appear once a project exists', ['brain', 'burndown', 'gantt', 'tasks', 'pm', 'budget'].every(x => A.tabs().includes(x)) && !A.d.body.classList.contains('noproj'));
   check('portfolio shows health and budget', /SPI/.test(A.$('tab-projects').textContent) && /€/.test(A.$('tab-projects').textContent));
   check('save status shows Saved', /Enregistré/.test(A.$('acct').textContent));
   /* edit a task -> autosave */
@@ -85,7 +92,7 @@ function page(url = 'https://app.test/') {
   A.$('cuDelWord').value = 'nope'; A.submit(A.$('cuDelForm')); await sleep(20);
   check('account deletion requires typing the confirmation word', /SUPPRIMER/.test(A.$('cuDelMsg').textContent));
   A.click(A.$('cuOut')); await sleep(60);
-  check('sign-out returns to demo mode', !!A.$('cuSignIn') && A.tabs()[0] === 'assistant');
+  check('sign-out returns to the sign-in screen and wipes the local copy', A.d.body.classList.contains('gated') && !A.w.localStorage.getItem('burndown-tracker-v1'));
   check('no runtime errors for Ana', A.errors.length === 0); if (A.errors.length) console.log(A.errors);
 
   /* ---- a client opens the share link: read-only, no account ---- */
@@ -100,8 +107,8 @@ function page(url = 'https://app.test/') {
   /* ---- Bob accepts the invitation ---- */
   const B = page(inviteUrl); await sleep(40);
   check('invite token is removed from the address bar', !B.w.location.search.includes('invite='));
-  check('sign-in opens automatically for a pending invitation', !B.$('cloudModal').hidden);
-  B.click(B.d.querySelector('[data-mode="up"]'));
+  check('sign-in screen shows for a pending invitation', B.d.body.classList.contains('gated') && !!B.$('cuAuthForm'));
+  B.click(B.d.querySelector('#gate [data-mode="up"]'));
   B.$('cuName').value = 'Bob'; B.$('cuEmail').value = 'bob@acme.fr'; B.$('cuPw').value = 'correct-horse-battery'; B.submit(B.$('cuAuthForm')); await sleep(150);
   check('Bob joins ACME as a member', B.$('cuWs') && /ACME/.test(B.$('cuWs').textContent) && fake._db.workspace_members.some(m => m.role === 'member'));
   check('a member does not get invite or client-link controls', (B.click(B.d.querySelector('[data-tab="team"]')), !B.$('cuInvForm') && !B.$('cuShareForm')));
@@ -109,7 +116,7 @@ function page(url = 'https://app.test/') {
   /* Bob downgraded to viewer -> read-only */
   fake._db.workspace_members.find(m => m.role === 'member').role = 'viewer';
   B.click(B.$('cuAvatar')); await sleep(20); B.click(B.$('cuOut')); await sleep(40);
-  B.click(B.$('cuSignIn')); B.$('cuEmail').value = 'bob@acme.fr'; B.$('cuPw').value = 'correct-horse-battery'; B.submit(B.$('cuAuthForm')); await sleep(150);
+  B.$('cuEmail').value = 'bob@acme.fr'; B.$('cuPw').value = 'correct-horse-battery'; B.submit(B.$('cuAuthForm')); await sleep(150);
   B.click(B.d.querySelector('[data-tab="projects"]')); B.click(B.d.querySelector('[data-open]')); await sleep(80);
   check('a viewer opens projects read-only with a banner', B.d.body.classList.contains('ro') && !B.$('roBanner').hidden);
   check('no runtime errors for client and Bob', Cl.errors.length + B.errors.length + Bad.errors.length === 0); if (Cl.errors.length + B.errors.length) console.log(Cl.errors, B.errors);

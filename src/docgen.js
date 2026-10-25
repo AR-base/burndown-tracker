@@ -36,13 +36,13 @@ const DocGen = (() => {
   /* ---------- docx parts ---------- */
   const NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
   const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:color w:val="142033"/><w:lang w:val="%LANG%"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:color w:val="141112"/><w:lang w:val="%LANG%"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
-<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="44"/><w:color w:val="142033"/></w:rPr></w:style>
-<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="240"/></w:pPr><w:rPr><w:sz w:val="24"/><w:color w:val="596579"/></w:rPr></w:style>
-<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="320" w:after="120"/><w:outlineLvl w:val="0"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="1F56F0"/></w:pBdr></w:pPr><w:rPr><w:b/><w:sz w:val="30"/><w:color w:val="1F56F0"/></w:rPr></w:style>
-<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="142033"/></w:rPr></w:style>
-<w:style w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/><w:basedOn w:val="Normal"/><w:qFormat/><w:rPr><w:i/><w:sz w:val="17"/><w:color w:val="596579"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="44"/><w:color w:val="141112"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="240"/></w:pPr><w:rPr><w:sz w:val="24"/><w:color w:val="5E585A"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="320" w:after="120"/><w:outlineLvl w:val="0"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="6B3FE0"/></w:pBdr></w:pPr><w:rPr><w:b/><w:sz w:val="30"/><w:color w:val="6B3FE0"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="141112"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/><w:basedOn w:val="Normal"/><w:qFormat/><w:rPr><w:i/><w:sz w:val="17"/><w:color w:val="5E585A"/></w:rPr></w:style>
 </w:styles>`;
 
   function runs(text, base = '') {
@@ -57,7 +57,7 @@ const DocGen = (() => {
     if (!rows.length) return '';
     const cols = Math.max(...rows.map(r => r.length));
     const border = '<w:tblBorders>' + ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(b => `<w:${b} w:val="single" w:sz="4" w:space="0" w:color="C9D1DD"/>`).join('') + '</w:tblBorders>';
-    const cell = (v, head, i) => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/>${head ? '<w:shd w:val="clear" w:color="auto" w:fill="E8EEFC"/>' : ''}${opts.fills && opts.fills[i] ? `<w:shd w:val="clear" w:color="auto" w:fill="${opts.fills[i]}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${runs(v, `<w:sz w:val="17"/>${head ? '<w:b/>' : ''}`)}</w:p></w:tc>`;
+    const cell = (v, head, i) => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/>${head ? '<w:shd w:val="clear" w:color="auto" w:fill="EFE8FE"/>' : ''}${opts.fills && opts.fills[i] ? `<w:shd w:val="clear" w:color="auto" w:fill="${opts.fills[i]}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${runs(v, `<w:sz w:val="17"/>${head ? '<w:b/>' : ''}`)}</w:p></w:tc>`;
     return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${border}<w:tblCellMar><w:top w:w="40" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>` +
       rows.map((r, i) => `<w:tr>${i === 0 ? '<w:trPr><w:tblHeader/></w:trPr>' : ''}${Array.from({ length: cols }, (_, j) => cell(r[j] ?? '', i === 0, j)).join('')}</w:tr>`).join('') + '</w:tbl><w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>';
   }
@@ -239,6 +239,15 @@ const DocGen = (() => {
       out.push({ k: 'p', t: `**${T.crit} :** ${crit.join(' · ') || T.none}. ${T.critTxt}.` });
     }
     if (spec.fields.includes('risks')) textSection('risks');
+    // project-management registers (charter, stakeholders, RACI, risks, quality…) kept in the PM toolkit
+    const PMx = typeof PM !== 'undefined' ? PM : (typeof require === 'function' ? require('./pm.js') : null);
+    if (PMx && P.pm && !PMx.isEmpty(P.pm)) {
+      const D = PMx.docTables(P, kind, lang);
+      if (D.sections.length) {
+        H1(D.title); out.push({ k: 'p', t: D.lead });
+        D.sections.forEach(x => { out.push({ k: 'h2', t: x.title }); out.push({ k: 'p', t: x.lead }); if (x.rows) out.push({ k: 'table', rows: x.rows }); else out.push({ k: 'note', t: D.none }); if (x.text) out.push({ k: 'note', t: x.text }); });
+      }
+    }
     if (spec.status) {
       H1(T.statusT);
       out.push({ k: 'table', rows: [[T.metric, T.value],

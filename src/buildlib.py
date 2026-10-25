@@ -1,8 +1,8 @@
 """Shared assembly of the single-page tracker (used by build.py)."""
 import hashlib, base64, re, json, sys, os
 
-PARTS = [('CORE', 'core.js'), ('IO', 'io.js'), ('DOCGEN', 'docgen.js'), ('BUDGET', 'budget.js'), ('KB', 'kb.js'), ('GEN', 'generator.js'),
-         ('SAMPLE', 'sample.js'), ('CLOUD', 'cloud.js'), ('CLOUDUI', 'cloud-ui.js'), ('APP', 'app.js')]
+PARTS = [('CORE', 'core.js'), ('IO', 'io.js'), ('DOCGEN', 'docgen.js'), ('BUDGET', 'budget.js'), ('PM', 'pm.js'), ('KB', 'kb.js'), ('GEN', 'generator.js'),
+         ('SAMPLE', 'sample.js'), ('BRAIN', 'brain.js'), ('PMUI', 'pm-ui.js'), ('CLOUD', 'cloud.js'), ('CLOUDUI', 'cloud-ui.js'), ('APP', 'app.js')]
 URL_RE = re.compile(r'^https://[a-z0-9-]{6,40}\.supabase\.co$')
 KEY_RE = re.compile(r'^[A-Za-z0-9._-]{20,1200}$')
 

@@ -129,11 +129,13 @@ const I18N = {
 const load = () => { try { return JSON.parse(localStorage.getItem(STORE) || 'null'); } catch { return null; } };
 // a shared (read-only) project is never written over the viewer's own saved project
 const persist = () => { if (typeof RO !== 'undefined' && RO) return; try { localStorage.setItem(STORE, JSON.stringify({ project: P, ui: UI })); } catch { /* storage unavailable: session-only */ } };
-const hooks = { commit: [], render: [], replace: [], undo: [] };
+const hooks = { commit: [], render: [], replace: [], undo: [], tab: [] };
 const emit = (ev, arg) => hooks[ev].forEach(f => { try { f(arg); } catch (e) { console.warn(ev, e); } });
 const saved = load();
-let P = (saved && C.validateProject(saved.project).project) || C.validateProject(SAMPLE).project;
-const UI = Object.assign({ lang: 'fr', tab: 'assistant', wzSize: 'medium', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
+// the demo sample comes with its project-management kit, generated from its own schedule
+const sampleProject = () => { const p = C.validateProject(SAMPLE).project; if (PM.isEmpty(p.pm)) p.pm = PM.generate(p, 'fr', []); return p; };
+let P = (saved && C.validateProject(saved.project).project) || sampleProject();
+const UI = Object.assign({ lang: 'fr', tab: 'brain', wzSize: 'medium', gMode: 'master', zoom: 14, deps: true, crit: true }, saved && saved.ui || {});
 let editing = null, lastBurndown = null;
 const t = k => I18N[UI.lang][k] ?? k;
 const nm = o => (UI.lang === 'fr' ? o.fr : o.en) || o.fr || o.en || o.id;
@@ -151,15 +153,17 @@ function taskStatus(k, now) {
 const statusKey = { done: 'sDone', late: 'sLate', inprog: 'sInprog', todo: 'sTodo' };
 
 /* ---------- chrome ---------- */
-const BASE_TABS = [['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['budget', 'tabBudget'], ['project', 'tabProject']];
-const ALL_TABS = ['projects', 'assistant', 'burndown', 'gantt', 'tasks', 'budget', 'project', 'team'];
-let extraTabs = { before: [], after: [] }, RO = false;
-const visibleTabs = () => [...extraTabs.before, ...BASE_TABS.filter(([id]) => !RO || !['assistant', 'project'].includes(id)), ...extraTabs.after];
+const BASE_TABS = [['brain', 'tabBrain'], ['assistant', 'tabAssistant'], ['burndown', 'tabBurndown'], ['gantt', 'tabGantt'], ['tasks', 'tabTasks'], ['pm', 'tabPm'], ['budget', 'tabBudget'], ['project', 'tabProject']];
+const ALL_TABS = ['projects', 'brain', 'assistant', 'burndown', 'gantt', 'tasks', 'pm', 'budget', 'project', 'team'];
+let extraTabs = { before: [], after: [] }, RO = false, EMPTY = false;   // EMPTY: signed in, no project open yet
+const visibleTabs = () => [...extraTabs.before, ...BASE_TABS.filter(([id]) => EMPTY ? id === 'assistant' : !RO || !['assistant', 'project'].includes(id)), ...extraTabs.after];
 function renderChrome() {
   document.documentElement.lang = UI.lang;
   document.querySelectorAll('[data-i]').forEach(el => { el.textContent = t(el.dataset.i); });
   $('eyebrow').textContent = t('eyebrow') + (P.code ? ' · ' + P.code : '');
-  $('pName').textContent = P.name;
+  $('pName').textContent = EMPTY ? t('noProjT') : P.name;
+  document.body.classList.toggle('noproj', EMPTY);
+  $('emptyNote').hidden = !EMPTY;
   $('pMeta').textContent = `${dLabel(C.parseDate(P.start), true)} → ${dLabel(C.parseDate(P.end), true)} · ${P.tasks.length} ${t('kTasks')} · ${C.totalPoints(P)} ${t('pts')}`;
   ['fr', 'en'].forEach(l => $('lang-' + l).setAttribute('aria-pressed', UI.lang === l));
   const tabs = visibleTabs();
@@ -167,12 +171,13 @@ function renderChrome() {
   document.body.classList.toggle('ro', RO);
   $('tabs').innerHTML = tabs.map(([id, k]) => `<button type="button" role="tab" id="tb-${id}" data-tab="${id}" aria-selected="${UI.tab === id}" aria-controls="tab-${id}">${esc(t(k))}</button>`).join('');
   ALL_TABS.forEach(id => { const el = $('tab-' + id); if (el) el.hidden = UI.tab !== id; });
-  $('kpis').hidden = UI.tab === 'assistant' || UI.tab === 'projects' || UI.tab === 'team';
-  $('hero').hidden = UI.tab === 'projects' || UI.tab === 'team';
+  $('kpis').hidden = EMPTY || ['assistant', 'projects', 'team', 'brain'].includes(UI.tab);
+  $('hero').hidden = EMPTY || UI.tab === 'projects' || UI.tab === 'team';
   $('g-summary').textContent = t('summary'); $('g-master').textContent = t('master');
   $('g-summary').setAttribute('aria-pressed', UI.gMode === 'summary'); $('g-master').setAttribute('aria-pressed', UI.gMode === 'master');
   document.querySelectorAll('#gZoom button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.z === UI.zoom));
   $('optDeps').checked = UI.deps; $('optCrit').checked = UI.crit;
+  emit('tab', UI.tab);
 }
 
 function renderKpis() {
@@ -540,7 +545,7 @@ function renderProject() {
 const phaseRow = (p, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ph-id" value="${esc(p.id)}" maxlength="16"><input aria-label="FR" class="ph-fr" value="${esc(p.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ph-en" value="${esc(p.en)}" maxlength="80" placeholder="EN"><input aria-label="Color" class="ph-color" type="color" value="${esc(p.color)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
 const msRow = (m, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ms-id" value="${esc(m.id)}" maxlength="16"><input aria-label="FR" class="ms-fr" value="${esc(m.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ms-en" value="${esc(m.en)}" maxlength="80" placeholder="EN"><input aria-label="Date" class="ms-date" type="date" value="${esc(m.date)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
 ['phaseRows', 'msRows'].forEach(id => $(id).addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) ev.target.closest('.edit-row').remove(); }));
-$('addPhase').addEventListener('click', () => $('phaseRows').insertAdjacentHTML('beforeend', phaseRow({ id: nextId('P', [...document.querySelectorAll('.ph-id')].map(x => ({ id: x.value }))), fr: '', en: '', color: '#4f6bed' }, 0)));
+$('addPhase').addEventListener('click', () => $('phaseRows').insertAdjacentHTML('beforeend', phaseRow({ id: nextId('P', [...document.querySelectorAll('.ph-id')].map(x => ({ id: x.value }))), fr: '', en: '', color: '#8556F7' }, 0)));
 $('addMs').addEventListener('click', () => $('msRows').insertAdjacentHTML('beforeend', msRow({ id: nextId('M', [...document.querySelectorAll('.ms-id')].map(x => ({ id: x.value }))), fr: '', en: '', date: C.fmt(nowT()) }, 0)));
 $('savePhases').addEventListener('click', () => {
   const phases = [...document.querySelectorAll('#phaseRows .edit-row')].map(r => ({ id: r.querySelector('.ph-id').value.trim(), fr: r.querySelector('.ph-fr').value, en: r.querySelector('.ph-en').value, color: r.querySelector('.ph-color').value }));
@@ -590,7 +595,8 @@ function importText(txt) {
   const r = C.validateProject(raw);
   if (!r.project || (fmt === 'json' && !r.ok)) return msg(t('eInvalid') + r.errors.slice(0, 8).join(', '), false);
   if (!r.project.tasks.length) return msg(t('eNoTasks'), false);
-  emit('replace', 'import');
+  emit('replace', 'import'); EMPTY = false;
+  if (PM.isEmpty(r.project.pm) && r.project.tasks.length) r.project.pm = PM.generate(r.project, UI.lang, []);
   P = r.project; editing = null; UI.tab = 'gantt'; commit(); toast(t('imported'));
   const skipped = (raw.tasks || []).length - P.tasks.length;
   msg(`${t('importedN')}${t({ json: 'fmtJson', csv: 'fmtCsv', mermaid: 'fmtMermaid' }[fmt])} · ${P.tasks.length} ${t('kTasks')}${skipped > 0 ? ` (−${skipped})` : ''}${r.errors.includes('cycle') ? ' · ' + t('eCycle') : ''}`, true);
@@ -607,19 +613,19 @@ const twoStep = (btn, fn) => btn.addEventListener('click', () => {
   if (armed !== btn) { armed = btn; msg(t('sure'), false); setTimeout(() => { if (armed === btn) { armed = null; msg('', true); } }, 4000); return; }
   armed = null; fn();
 });
-twoStep($('btnSample'), () => { emit('replace', 'sample'); P = C.validateProject(SAMPLE).project; editing = null; commit(); msg(t('imported'), true); });
+twoStep($('btnSample'), () => { emit('replace', 'sample'); EMPTY = false; P = sampleProject(); editing = null; commit(); msg(t('imported'), true); });
 twoStep($('btnBlank'), () => {
-  emit('replace', 'blank');
+  emit('replace', 'blank'); EMPTY = false;
   const s = nowT();
   P = C.validateProject({ name: t('blankName'), code: '', start: C.fmt(s), end: C.fmt(C.addDays(s, 56)), statusDate: '', workingDays: true,
-    phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#4f6bed' }], milestones: [], tasks: [] }).project;
+    phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#8556F7' }], milestones: [], tasks: [] }).project;
   editing = null; commit(); msg(t('saved'), true);
 });
 
 
 /* ---------- document downloads ---------- */
-const LIGHT = { bg: '#ffffff', surface: '#ffffff', sunk: '#f7f8fb', ink: '#142033', muted: '#596579', line: '#d7dde6', grid: '#e9edf3', accent: '#1f56f0',
-  'accent-soft': 'rgba(31,86,240,.10)', ideal: '#8f9bb0', good: '#16865a', warn: '#b86e00', bad: '#c42f3a', 'good-soft': 'rgba(22,134,90,.12)',
+const LIGHT = { bg: '#ffffff', surface: '#ffffff', sunk: '#f7f8fb', ink: '#141112', muted: '#5E585A', line: '#d7dde6', grid: '#e9edf3', accent: '#6B3FE0',
+  'accent-soft': 'rgba(107,63,224,.10)', ideal: '#8f9bb0', good: '#16865a', warn: '#b86e00', bad: '#c42f3a', 'good-soft': 'rgba(22,134,90,.12)',
   'warn-soft': 'rgba(184,110,0,.13)', 'bad-soft': 'rgba(196,47,58,.12)', 'f-display': 'Arial, Helvetica, sans-serif', 'f-body': 'Arial, Helvetica, sans-serif', 'f-mono': 'Consolas, Courier New, monospace' };
 const literal = s => s.replace(/var\(--([a-z-]+)\)/g, (m, k) => LIGHT[k] || '#142033');
 function ganttSvg(mode) {
@@ -760,7 +766,7 @@ $('wzGo').addEventListener('click', async () => {
     const r = C.validateProject(out.project);
     if (!r.ok) throw new Error(r.errors.join(','));
     emit('replace', 'assistant');
-    prevProject = P; lastGen = out.type; P = r.project; editing = null;
+    prevProject = EMPTY ? null : P; EMPTY = false; lastGen = out.type; P = r.project; editing = null;
     commit(); renderResult(); toast(t('wzDone') + P.name);
     $('wzResult').scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   } catch (e) { console.warn('generation failed', e); msgEl.textContent = t('dlError'); msgEl.className = 'err'; }
@@ -768,6 +774,7 @@ $('wzGo').addEventListener('click', async () => {
 });
 $('wzUndo').addEventListener('click', () => { if (!prevProject) return; emit('undo'); P = prevProject; prevProject = null; lastGen = null; $('wzResult').hidden = true; commit(); $('wzMsg').textContent = t('wzUndone'); $('wzMsg').className = 'ok'; });
 $('wzResult').addEventListener('click', ev => { const b = ev.target.closest('[data-wdl]'); if (b) download(b.dataset.wdl, $('wzDlStatus')); });
+$('wzSeeBrain').addEventListener('click', () => { UI.tab = 'brain'; persist(); renderChrome(); });
 $('wzSeeGantt').addEventListener('click', () => { UI.tab = 'gantt'; UI.gMode = 'master'; persist(); renderChrome(); renderGantt(); });
 $('wzEdit').addEventListener('click', () => { UI.tab = 'project'; persist(); renderChrome(); $('doc-context')?.focus(); });
 $('newBtn').addEventListener('click', () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); });
@@ -784,9 +791,10 @@ const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent |
 let cmdItems = [], cmdSel = 0, cmdReturn = null;
 function cmdActions() {
   const go = (id, k, ic) => ({ label: `${t('cmdGo')} ${t(k)}`, ic, run: () => { UI.tab = id; if (id === 'burndown') animateBd = true; persist(); renderChrome(); if (id === 'burndown') renderBurndown(); } });
+  if (EMPTY) return [{ label: t('newProject'), ic: '+', run: () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); } }, ...extraTabs.before.concat(extraTabs.after).map(([id, k]) => go(id, k, '·')), { label: t('cmdLang'), ic: UI.lang === 'fr' ? 'EN' : 'FR', run: () => { UI.lang = UI.lang === 'fr' ? 'en' : 'fr'; persist(); renderAll(); } }];
   return [
     ...(RO ? [] : [{ label: t('newProject'), ic: '+', hint: '', run: () => { UI.tab = 'assistant'; persist(); renderChrome(); $('wz-desc').focus(); } }]),
-    ...(RO ? [] : [go('assistant', 'tabAssistant', 'A')]), go('burndown', 'tabBurndown', 'B'), go('gantt', 'tabGantt', 'G'), go('tasks', 'tabTasks', 'T'), go('budget', 'tabBudget', '€'), ...(RO ? [] : [go('project', 'tabProject', 'P')]), ...extraTabs.before.concat(extraTabs.after).map(([id, k]) => go(id, k, k[3] || '·')),
+    go('brain', 'tabBrain', '◎'), ...(RO ? [] : [go('assistant', 'tabAssistant', 'A')]), go('burndown', 'tabBurndown', 'B'), go('gantt', 'tabGantt', 'G'), go('tasks', 'tabTasks', 'T'), go('pm', 'tabPm', 'R'), go('budget', 'tabBudget', '€'), ...(RO ? [] : [go('project', 'tabProject', 'P')]), ...extraTabs.before.concat(extraTabs.after).map(([id, k]) => go(id, k, k[3] || '·')),
     ...[['needs', 'dlNeeds', '.docx'], ['technical', 'dlTech', '.docx'], ['report', 'dlReport', '.docx'], ['gs', 'dlGs', '.png'], ['gm', 'dlGm', '.png'], ['bd', 'dlBd', '.png'], ['csv', 'dlCsv', '.csv'], ['json', 'dlJson', '.json']]
       .map(([kind, k, ext]) => ({ label: `${t('download')} · ${t(k)}`, ic: '↓', hint: ext, run: () => download(kind) })),
     { label: t('cmdLang'), ic: UI.lang === 'fr' ? 'EN' : 'FR', run: () => { UI.lang = UI.lang === 'fr' ? 'en' : 'fr'; commit(); } },
@@ -848,7 +856,7 @@ function lockReadOnly() {
 function renderAllInner() { renderChrome(); renderKpis(); renderBurndown(); renderFocus(); renderGantt(); renderTasks(); renderProject(); renderDocsEditor(); renderAssistant(); renderBudget(); if (!editing) fillFormSilent(); lockReadOnly(); hooks.render.forEach(f => f()); }
 function fillFormSilent() { const keep = editing; if (!keep && !$('tf-fr').value) { $('tf-id').value = nextId('T', P.tasks); $('tf-id').readOnly = false; } }
 function commit() {
-  if (RO) { renderAll(); return; }
+  if (RO || EMPTY) { renderAll(); return; }
   P.history = C.recordHistory(P, nowT()); persist(); renderAll(); emit('commit', P);
 }
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { UI.lang = b.dataset.lang; persist(); renderAll(); }));
@@ -872,15 +880,21 @@ const App = {
   addStrings(fr, en) { Object.assign(I18N.fr, fr); Object.assign(I18N.en, en); },
   setProject(p, opts = {}) {
     const r = C.validateProject(p); if (!r.project) return false;
-    P = r.project; editing = null; prevProject = null; lastGen = null;
+    P = r.project; editing = null; prevProject = null; lastGen = null; EMPTY = false;
     if (opts.tab) UI.tab = opts.tab;
     persist(); renderAll(); return true;
   },
   setExtraTabs(before, after) { extraTabs = { before: before || [], after: after || [] }; renderChrome(); },
   setReadOnly(on) { RO = !!on; renderAll(); },
+  get empty() { return EMPTY; },
+  setEmpty(on) { EMPTY = !!on; if (EMPTY) { UI.tab = 'assistant'; prevProject = null; lastGen = null; $('wzResult').hidden = true; } renderAll(); },
+  mutate(fn) { if (RO || EMPTY) return; fn(P); const r = C.validateProject(P); if (r.project) P = r.project; commit(); },
+  clearLocal() { try { localStorage.removeItem(STORE); } catch { /* storage unavailable */ } },
+  sample: () => sampleProject(),
   goTab(id) { UI.tab = id; persist(); renderChrome(); if (id === 'burndown') { animateBd = true; renderBurndown(); } },
   renderAll: () => renderAll()
 };
+if (typeof PMUI !== 'undefined') PMUI.init(App);
 if (typeof CloudUI !== 'undefined') CloudUI.init(App);
 const hash = (location.hash || '').slice(1);
 if (ALL_TABS.includes(hash)) UI.tab = hash;

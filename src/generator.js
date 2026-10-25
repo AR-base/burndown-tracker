@@ -4,8 +4,8 @@ const Generator = (() => {
   const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
   const K = (typeof KB !== 'undefined') ? KB : require('./kb.js');
   const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/[^a-z0-9+\- ]/g, ' ').replace(/\s+/g, ' ').trim();
-  const PHASES = [['P1', 'Cadrage', 'Initiation', '#D66853'], ['P2', 'Conception', 'Design', '#E9A27F'], ['P3', 'Réalisation', 'Build', '#C98896'],
-    ['P4', 'Tests et recette', 'Testing and acceptance', '#8FA6D1'], ['P5', 'Mise en service', 'Go-live', '#B7A3D9'], ['P6', 'Clôture', 'Closure', '#9AA7BD']];
+  const PHASES = [['P1', 'Cadrage', 'Initiation', '#8556F7'], ['P2', 'Conception', 'Design', '#CEAE31'], ['P3', 'Réalisation', 'Build', '#D3AFFE'],
+    ['P4', 'Tests et recette', 'Testing and acceptance', '#4FD1E8'], ['P5', 'Mise en service', 'Go-live', '#F28DC7'], ['P6', 'Clôture', 'Closure', '#B28DF0']];
   const SIZES = { small: { f: 0.7, prios: ['M'], lanes: 2 }, medium: { f: 1, prios: ['M', 'S'], lanes: 2 }, large: { f: 1.35, prios: ['M', 'S', 'C'], lanes: 2 } };
 
   /* ---- detection: weighted keyword match on the normalised text ---- */
@@ -102,6 +102,12 @@ const Generator = (() => {
       docs: { fr: docs({ description, client, author, lang: 'fr', tp, feats, tasks, milestones, name, size }),
               en: docs({ description, client, author, lang: 'en', tp, feats, tasks, milestones, name, size }) }
     };
+    // the project manager's registers (charter, stakeholders, RACI, risks, communication plan…), written for this project
+    const PMx = typeof PM !== 'undefined' ? PM : (typeof require === 'function' ? require('./pm.js') : null);
+    if (PMx) {
+      const base = C.validateProject(project).project, fr = lang === 'fr';
+      project.pm = PMx.generate(base, lang, (tp.risks || []).map(r => [fr ? r[0] : r[1], r[2], r[3], fr ? r[4] : r[5]]));
+    }
     return { project, type: tp, detection: det };
   }
 

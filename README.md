@@ -62,6 +62,13 @@ Without configuration the tool stays a local demo. With Supabase it becomes mult
 Ne mettez **jamais** la clé `service_role` dans ce fichier : le build la refuse. La clé anon est publique par conception ; la sécurité vient des règles RLS de `db/schema.sql`, testées par `tests/db.test.mjs` (17 scénarios : autre entreprise, visiteur anonyme, membre, lecteur, liens expirés, suppression de compte…).
 Never put the `service_role` key in this file: the build refuses it. The anon key is public by design; security comes from the RLS rules in `db/schema.sql`, tested by `tests/db.test.mjs`.
 
+## 0 quater. Cerveau PM et pilotage / PM brain and toolkit
+
+- **Connexion d’abord / Sign-in first** — en mode cloud, la première page est l’écran de connexion (e-mail, Google, Microsoft, 2FA). Un nouveau compte démarre **vide** : aucun projet d’exemple, aucune donnée d’un autre utilisateur ; la copie locale est effacée à la déconnexion. Un lien discret « Explorer la démo sans compte » ouvre l’exemple ESAIP en local. / In cloud mode the first page is the sign-in screen; new accounts start blank, the local copy is wiped on sign-out, and a discreet demo link opens the ESAIP sample locally.
+- **Pilotage / PM toolkit** — chaque projet généré reçoit tous les registres d’un chef de projet, modifiables en direct et enregistrés avec le projet : charte, parties prenantes (grille influence × intérêt), matrice RACI (contrôle : un seul A, au moins un R), registre des risques (carte de chaleur 5×5), plan de communication, qualité et recette, achats, problèmes, décisions, demandes de changement (jours / €), réunions, retours d’expérience, et un **rapport hebdomadaire** rédigé à partir des données. Les documents Word incluent ces registres. / Every generated project gets the full set of PM registers, editable live, saved with the project and included in the Word documents, plus an auto-written weekly status report.
+- **Cerveau PM / PM brain** — un cerveau en particules animé (canvas) relié aux 10 domaines du PMBOK ; chaque zone affiche une mesure en direct et passe au vert / orange / rouge selon l’état réel du projet ; un clic ouvre le module correspondant. Boutons HTML accessibles, mouvement réduit respecté. / An animated particle brain wired to the 10 PMBOK knowledge areas, each with a live metric and status colour; clicking opens the matching module.
+- Toutes les saisies passent par `PM.clean` (types, bornes, listes fermées, longueurs, 300 lignes max) et tout le texte est échappé à l’affichage. / All input goes through `PM.clean`; all text is escaped on output.
+
 ## 1. Déployer / Deploy
 
 ### Option A — Vercel + GitHub (recommandé / recommended)

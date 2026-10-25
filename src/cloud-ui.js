@@ -6,6 +6,7 @@ const CloudUI = (() => {
     fr: {
       tabProjects: 'Projets', tabTeam: 'Équipe', signIn: 'Se connecter', signUp: 'Créer un compte', signOut: 'Se déconnecter', account: 'Mon compte',
       localMode: 'Démo locale', email: 'E-mail', password: 'Mot de passe', fullName: 'Nom complet', orWith: 'ou continuer avec', google: 'Google', microsoft: 'Microsoft',
+      gateEyebrow: 'Espace chef de projet', gateH: 'Le cerveau, de tous vos projets.', gateLead: 'Décrivez un projet en une phrase : planning, burndown, budget, équipe, risques, RACI, documents et rapports sont prêts. Votre équipe et vos clients suivent tout en direct.', gateFeats: ['Gantt et burndown', 'Budget et équipe', 'Risques et RACI', 'Documents Word', 'Équipes et rôles', 'Liens client'], demo: 'Explorer la démo sans compte', loading: 'Connexion…', welcome: 'Bienvenue',
       forgot: 'Mot de passe oublié ?', resetSent: 'Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé.', skip: 'Continuer sans compte',
       authLead: 'Retrouvez vos projets sur tous vos appareils et travaillez en équipe.', checkMail: 'Compte créé. Ouvrez l’e-mail de confirmation pour l’activer, puis connectez-vous.',
       pwHint: '10 caractères minimum.', newPw: 'Nouveau mot de passe', setPw: 'Enregistrer le mot de passe', pwChanged: 'Mot de passe modifié.', recoverTitle: 'Choisissez un nouveau mot de passe',
@@ -14,8 +15,8 @@ const CloudUI = (() => {
       conflictLead: 'Quelqu’un a enregistré ce projet pendant que vous le modifiiez.', takeTheirs: 'Charger leur version', keepMine: 'Garder ma version',
       ws: 'Espace de travail', newWs: 'Nouvel espace…', wsName: 'Nom de l’espace (entreprise, équipe, startup)', createWs: 'Créer l’espace', wsLead: 'Un espace regroupe les projets et l’équipe d’une entreprise ou d’une startup.',
       wsNone: 'Créez votre premier espace de travail', portfolio: 'Portefeuille de projets', active: 'Projets actifs', atRisk: 'À risque ou en retard', totalBudget: 'Budget total', latestEnd: 'Fin la plus tardive',
-      newProject: 'Nouveau projet', importLocal: 'Importer le projet de ce navigateur', showArchived: 'Archivés', open: 'Ouvrir', opened: 'Ouvert', archive: 'Archiver', restore: 'Restaurer', del: 'Supprimer', confirmDel: 'Confirmer la suppression',
-      noProjects: 'Aucun projet pour l’instant. Créez-en un en une phrase avec l’Assistant, ou importez celui de ce navigateur.', noArchived: 'Aucun projet archivé.',
+      newProject: 'Nouveau projet', showArchived: 'Archivés', open: 'Ouvrir', opened: 'Ouvert', archive: 'Archiver', restore: 'Restaurer', del: 'Supprimer', confirmDel: 'Confirmer la suppression',
+      noProjects: 'Aucun projet pour l’instant.', firstProj: 'Créez votre premier projet', firstProjL: 'Décrivez-le en une phrase : l’assistant prépare le planning, le budget, l’équipe, les registres du chef de projet et les documents.', noArchived: 'Aucun projet archivé.',
       updatedBy: 'modifié', by: 'par', createdIn: 'Projet créé dans ', joined: 'Vous avez rejoint ', updatedByOther: 'Projet mis à jour par ', projectDeleted: 'Ce projet a été supprimé.',
       members: 'Membres', role: 'Rôle', since: 'Depuis', remove: 'Retirer', leave: 'Quitter l’espace', you: 'vous',
       r_owner: 'Propriétaire', r_pm: 'Chef de projet', r_member: 'Membre', r_viewer: 'Lecteur',
@@ -47,6 +48,7 @@ const CloudUI = (() => {
     en: {
       tabProjects: 'Projects', tabTeam: 'Team', signIn: 'Sign in', signUp: 'Create account', signOut: 'Sign out', account: 'My account',
       localMode: 'Local demo', email: 'E-mail', password: 'Password', fullName: 'Full name', orWith: 'or continue with', google: 'Google', microsoft: 'Microsoft',
+      gateEyebrow: 'Project manager workspace', gateH: 'The brain, behind all your projects.', gateLead: 'Describe a project in one sentence: schedule, burndown, budget, team, risks, RACI, documents and reports are ready. Your team and clients follow it all live.', gateFeats: ['Gantt and burndown', 'Budget and team', 'Risks and RACI', 'Word documents', 'Teams and roles', 'Client links'], demo: 'Explore the demo without an account', loading: 'Signing in…', welcome: 'Welcome',
       forgot: 'Forgot password?', resetSent: 'If an account exists for this address, a reset e-mail has just been sent.', skip: 'Continue without an account',
       authLead: 'Find your projects on every device and work as a team.', checkMail: 'Account created. Open the confirmation e-mail to activate it, then sign in.',
       pwHint: '10 characters minimum.', newPw: 'New password', setPw: 'Save password', pwChanged: 'Password changed.', recoverTitle: 'Choose a new password',
@@ -55,8 +57,8 @@ const CloudUI = (() => {
       conflictLead: 'Someone saved this project while you were editing it.', takeTheirs: 'Load their version', keepMine: 'Keep my version',
       ws: 'Workspace', newWs: 'New workspace…', wsName: 'Workspace name (company, team, startup)', createWs: 'Create workspace', wsLead: 'A workspace holds the projects and team of one company or startup.',
       wsNone: 'Create your first workspace', portfolio: 'Project portfolio', active: 'Active projects', atRisk: 'At risk or late', totalBudget: 'Total budget', latestEnd: 'Latest finish',
-      newProject: 'New project', importLocal: 'Import this browser’s project', showArchived: 'Archived', open: 'Open', opened: 'Open now', archive: 'Archive', restore: 'Restore', del: 'Delete', confirmDel: 'Confirm deletion',
-      noProjects: 'No projects yet. Create one in a sentence with the Assistant, or import this browser’s project.', noArchived: 'No archived projects.',
+      newProject: 'New project', showArchived: 'Archived', open: 'Open', opened: 'Open now', archive: 'Archive', restore: 'Restore', del: 'Delete', confirmDel: 'Confirm deletion',
+      noProjects: 'No projects yet.', firstProj: 'Create your first project', firstProjL: 'Describe it in one sentence: the assistant prepares the schedule, budget, team, the project manager’s registers and the documents.', noArchived: 'No archived projects.',
       updatedBy: 'updated', by: 'by', createdIn: 'Project created in ', joined: 'You joined ', updatedByOther: 'Project updated by ', projectDeleted: 'This project was deleted.',
       members: 'Members', role: 'Role', since: 'Since', remove: 'Remove', leave: 'Leave workspace', you: 'you',
       r_owner: 'Owner', r_pm: 'Project manager', r_member: 'Member', r_viewer: 'Viewer',
@@ -121,12 +123,12 @@ const CloudUI = (() => {
       if (S.shared) { root.innerHTML = ''; return; }
       if (!S.user) {
         root.innerHTML = `<span class="sync-pill s-local" title="${esc(t('localMode'))}">${esc(t('localMode'))}</span><button class="btn pri sm-pad" type="button" id="cuSignIn">${esc(t('signIn'))}</button>`;
-        $('cuSignIn').onclick = () => openAuth('in');
+        $('cuSignIn').onclick = () => openAuth('in');   // back to the sign-in screen
         return;
       }
       const statusTxt = { saved: t('saved'), saving: t('saving'), pending: t('pending'), offline: t('offline'), conflict: t('conflict'), error: t('saveError') }[S.status];
       const initials = ((S.profile && S.profile.display_name) || S.user.email || '?').split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
-      root.innerHTML = `${statusTxt && st.pid ? `<button type="button" class="sync-pill s-${S.status}" id="cuSync" aria-live="polite">${esc(statusTxt)}</button>` : ''}
+      root.innerHTML = `${statusTxt && st.pid ? `<button type="button" class="sync-pill s-${S.status}" id="cuSync" title="${esc(statusTxt)}" aria-live="polite">${esc(statusTxt)}</button>` : ''}
         ${S.wss.length ? `<label class="sr" for="cuWs">${esc(t('ws'))}</label>
         <select id="cuWs" class="ws-select">${S.wss.map(w => `<option value="${esc(w.id)}"${w.id === st.ws ? ' selected' : ''}>${esc(w.name)}</option>`).join('')}<option value="__new">${esc(t('newWs'))}</option></select>` : ''}
         <button type="button" class="avatar" id="cuAvatar" aria-label="${esc(t('account'))}" title="${esc(S.user.email)}">${esc(initials || '?')}</button>`;
@@ -152,9 +154,33 @@ const CloudUI = (() => {
     const msgEl = (id, text, ok) => { const el = $(id); if (el) { el.textContent = text; el.className = 'form-msg ' + (ok ? 'ok' : 'err'); } };
 
     /* ---------- authentication ---------- */
+    /* ---------- sign-in gate: the first screen in cloud mode ---------- */
+    const gate = $('gate'), gateCard = $('gateCard');
+    let gateBrain = null;
+    function renderGateCopy() {
+      const [h1, h2] = t('gateH').split(/,\s*/);
+      $('gateEyebrow').textContent = t('gateEyebrow');
+      $('gateH').innerHTML = h2 ? `${esc(h1)}, <em>${esc(h2)}</em>` : esc(h1);
+      $('gateLead').textContent = t('gateLead');
+      $('gateFeats').innerHTML = STR[App.ui.lang].gateFeats.map(f => `<li>${esc(f)}</li>`).join('');
+      gate.querySelectorAll('[data-glang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.glang === App.ui.lang));
+    }
+    function showGate(card) {
+      document.body.classList.add('gated'); gate.hidden = false; renderGateCopy();
+      if (card) { gateCard.innerHTML = card.html; card.bind && card.bind(); const f = gateCard.querySelector('input:not([type=hidden])'); f && f.focus({ preventScroll: true }); }
+      if (typeof Brain !== 'undefined' && !gateBrain) { gateBrain = Brain.create($('gateCv'), { count: 2400, place: (W, H) => W > 900 ? { offsetX: 0.57, offsetY: 0.5, scale: 0.34 } : { offsetX: 0.5, cy: 185, scale: 120 / Math.min(W, H) } }); }
+      gateBrain && (gateBrain.redraw(), gateBrain.start());
+    }
+    function hideGate() { document.body.classList.remove('gated'); gate.hidden = true; gateBrain && gateBrain.stop(); }
+    function gateLoading() { showGate({ html: `<p class="gate-load">${esc(t('loading'))}</p>` }); }
+    gate.addEventListener('click', ev => {
+      const l = ev.target.closest('[data-glang]'); if (!l) return;
+      App.ui.lang = l.dataset.glang; App.persist(); App.renderAll(); renderGateCopy();
+      const m = gateCard.querySelector('[data-mode][aria-pressed="true"]'); if (m) openAuth(m.dataset.mode);
+    });
     function openAuth(mode = 'in', note) {
       const up = mode === 'up';
-      modal(`<p class="eyebrow">${esc(t(up ? 'signUp' : 'signIn'))}</p><h2 id="cuMTitle" class="modal-h">${esc(up ? t('signUp') : t('signIn'))}</h2>
+      showGate({ html: `<p class="eyebrow">${esc(t(up ? 'signUp' : 'welcome'))}</p><h2 id="cuMTitle" class="modal-h">${esc(up ? t('signUp') : t('signIn'))}</h2>
         <p class="hint">${esc(note || t('authLead'))}</p>
         <div class="seg auth-seg" role="group"><button type="button" data-mode="in" aria-pressed="${!up}">${esc(t('signIn'))}</button><button type="button" data-mode="up" aria-pressed="${up}">${esc(t('signUp'))}</button></div>
         <form id="cuAuthForm" class="stack-sm" novalidate>
@@ -166,30 +192,33 @@ const CloudUI = (() => {
         </form>
         <p class="or">${esc(t('orWith'))}</p>
         <div class="oauth"><button class="btn" type="button" data-oauth="google">${esc(t('google'))}</button><button class="btn" type="button" data-oauth="azure">${esc(t('microsoft'))}</button></div>
-        <div class="modal-foot">${up ? '' : `<button type="button" class="linkish" id="cuForgot">${esc(t('forgot'))}</button>`}<button type="button" class="linkish" data-close>${esc(t('skip'))}</button></div>`, () => {
-        modalRoot.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => openAuth(b.dataset.mode, note));
-        modalRoot.querySelectorAll('[data-oauth]').forEach(b => b.onclick = async () => { busy(b, true); try { await cloud.signInOAuth(b.dataset.oauth); } catch (e) { msgEl('cuAuthMsg', E(e)); busy(b, false); } });
+        <div class="modal-foot">${up ? '<span></span>' : `<button type="button" class="linkish" id="cuForgot">${esc(t('forgot'))}</button>`}<button type="button" class="linkish" id="cuDemo">${esc(t('demo'))}</button></div>`,
+      bind() {
+        gateCard.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => openAuth(b.dataset.mode, note));
+        gateCard.querySelectorAll('[data-oauth]').forEach(b => b.onclick = async () => { busy(b, true); try { await cloud.signInOAuth(b.dataset.oauth); } catch (e) { msgEl('cuAuthMsg', E(e)); busy(b, false); } });
         if ($('cuForgot')) $('cuForgot').onclick = async () => { try { await cloud.resetPassword($('cuEmail').value.trim()); msgEl('cuAuthMsg', t('resetSent'), true); } catch (e) { msgEl('cuAuthMsg', E(e)); } };
+        $('cuDemo').onclick = () => { S.demo = true; hideGate(); App.setProject(App.sample(), { tab: 'brain' }); renderHeader(); };
         $('cuAuthForm').onsubmit = async ev => {
           ev.preventDefault(); const go = $('cuAuthGo'); busy(go, true); msgEl('cuAuthMsg', '');
           try {
             if (up) { const r = await cloud.signUp($('cuEmail').value.trim(), $('cuPw').value, $('cuName').value.trim()); if (r.needsConfirmation) { msgEl('cuAuthMsg', t('checkMail'), true); busy(go, false); return; } }
             else await cloud.signIn($('cuEmail').value.trim(), $('cuPw').value);
-            closeModal(); await afterSignIn();
+            await afterSignIn();
           } catch (e) { msgEl('cuAuthMsg', E(e)); busy(go, false); }
         };
-      });
+      } });
     }
     function openMfaChallenge() {
-      modal(`<p class="eyebrow">${esc(t('security'))}</p><h2 id="cuMTitle" class="modal-h">${esc(t('mfaTitle'))}</h2><p class="hint">${esc(t('mfaLead'))}</p>
+      showGate({ html: `<p class="eyebrow">${esc(t('security'))}</p><h2 id="cuMTitle" class="modal-h">${esc(t('mfaTitle'))}</h2><p class="hint">${esc(t('mfaLead'))}</p>
         <form id="cuMfaForm" class="stack-sm" novalidate><div class="f"><label for="cuCode">${esc(t('code'))}</label><input id="cuCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" class="code-in"></div>
-        <button class="btn pri wide-btn" type="submit" id="cuMfaGo">${esc(t('verify'))}</button><p class="form-msg" id="cuMfaMsg" role="alert"></p></form>`, () => {
+        <button class="btn pri wide-btn" type="submit" id="cuMfaGo">${esc(t('verify'))}</button><p class="form-msg" id="cuMfaMsg" role="alert"></p></form>`,
+      bind() {
         $('cuMfaForm').onsubmit = async ev => {
           ev.preventDefault(); const go = $('cuMfaGo'); busy(go, true);
-          try { const f = (await cloud.mfaFactors())[0]; await cloud.mfaVerify(f.id, $('cuCode').value.trim()); closeModal(); await afterSignIn(); }
+          try { const f = (await cloud.mfaFactors())[0]; await cloud.mfaVerify(f.id, $('cuCode').value.trim()); await afterSignIn(); }
           catch (e) { msgEl('cuMfaMsg', E(e)); busy(go, false); }
         };
-      });
+      } });
     }
     function openRecovery() {
       modal(`<h2 id="cuMTitle" class="modal-h">${esc(t('recoverTitle'))}</h2><form id="cuRecForm" class="stack-sm" novalidate>
@@ -203,19 +232,21 @@ const CloudUI = (() => {
     function afterSignIn() { if (!signInRun) signInRun = doAfterSignIn().finally(() => { signInRun = null; }); return signInRun; }
     async function doAfterSignIn() {
       try {
-        await cloud.session(); S.user = cloud.user(); if (!S.user) return;
+        await cloud.session(); S.user = cloud.user(); if (!S.user) { openAuth('in'); return; }
         if (await cloud.mfaNeeded()) { openMfaChallenge(); return; }
+        if (S.demo) { S.demo = false; App.clearLocal(); }
         S.profile = await cloud.profile();
         const inv = ssGet('pendingInvite');
         if (inv) { ssSet('pendingInvite', null); try { const r = await cloud.acceptInvitation(inv); if (r) { st.ws = r.workspace_id; st.pid = null; keep(); App.toast(t('joined') + r.workspace_name); } } catch (e) { App.toast(E(e), true); } }
         S.wss = await cloud.workspaces();
         if (!S.wss.some(w => w.id === st.ws)) { st.ws = S.wss[0] ? S.wss[0].id : null; st.pid = null; keep(); }
         App.setExtraTabs([['projects', 'tabProjects']], [['team', 'tabTeam']]);
-        renderHeader();
+        if (!st.pid) App.setEmpty(true);              // a new account starts blank: no sample, no other user's data
+        hideGate(); renderHeader();
         if (!st.ws) { App.goTab('projects'); renderProjects(true); return; }
         await loadWs();
         if (st.pid) await openProject(st.pid, { resume: true }); else App.goTab('projects');
-      } catch (e) { App.toast(E(e), true); }
+      } catch (e) { App.toast(E(e), true); if (!S.user) openAuth('in'); else hideGate(); }
     }
 
     async function loadWs() {
@@ -226,7 +257,7 @@ const CloudUI = (() => {
       renderProjects(); renderTeam(); renderHeader();
     }
     async function switchWs(id) {
-      detach(); st.ws = id; st.pid = null; st.version = null; keep(); App.setReadOnly(false);
+      detach(); st.ws = id; st.pid = null; st.version = null; keep(); App.setReadOnly(false); App.setEmpty(true);
       try { await loadWs(); App.goTab('projects'); } catch (e) { App.toast(E(e), true); }
     }
 
@@ -235,7 +266,7 @@ const CloudUI = (() => {
     async function openProject(pid, { resume = false } = {}) {
       detach();
       const row = await cloud.project(pid).catch(e => { App.toast(E(e), true); return null; });
-      if (!row) { st.pid = null; keep(); App.goTab('projects'); renderProjects(); return; }
+      if (!row) { st.pid = null; keep(); App.setEmpty(true); App.goTab('projects'); renderProjects(); return; }
       const localDirty = resume && st.dirty && st.pid === pid;
       st.pid = pid; S.shares = [];
       if (localDirty && row.version === st.version) {
@@ -248,10 +279,10 @@ const CloudUI = (() => {
       S.unwatch = cloud.watchProject(pid, onRemote);
       if (canManage()) cloud.shares(pid).then(s => { S.shares = s; renderTeam(); }).catch(() => {});
       renderProjects(); renderTeam();
-      if (!resume) App.goTab('burndown');
+      if (!resume) App.goTab('brain');
     }
     async function onRemote(ev, row) {
-      if (ev === 'DELETE') { App.toast(t('projectDeleted'), true); st.pid = null; keep(); detach(); App.setReadOnly(false); App.goTab('projects'); loadWs().catch(() => {}); return; }
+      if (ev === 'DELETE') { App.toast(t('projectDeleted'), true); st.pid = null; keep(); detach(); App.setReadOnly(false); App.setEmpty(true); App.goTab('projects'); loadWs().catch(() => {}); return; }
       if (!row || !(row.version > st.version)) return;          // our own save echoing back
       if (st.dirty) { setStatus('conflict'); return; }
       const data = row.data || ((await cloud.project(st.pid).catch(() => null)) || {}).data;
@@ -287,15 +318,19 @@ const CloudUI = (() => {
     }
 
     App.on('commit', p => {
-      if (!S.user || S.shared || App.readOnly) return;
+      if (!S.user || S.shared || App.readOnly || App.empty) return;
+      if (S.creating) return;               // the first save is on its way; later edits follow it
       if (S.pendingCreate) {
         if (!st.ws || !canEdit()) return;
-        S.pendingCreate = false;
-        cloud.createProject(st.ws, p).then(r => {
-          S.undoPid = r.id; st.pid = r.id; st.version = r.version; st.dirty = false; S.lastSaved = JSON.stringify(p); keep();
+        S.pendingCreate = false; S.creating = true;
+        const json = JSON.stringify(p);
+        cloud.createProject(st.ws, JSON.parse(json)).then(r => {
+          S.creating = false;
+          S.undoPid = r.id; st.pid = r.id; st.version = r.version; st.dirty = false; S.lastSaved = json; keep();
           detach(); S.unwatch = cloud.watchProject(r.id, onRemote); setStatus('saved');
           App.toast(t('createdIn') + ((wsObj() || {}).name || '')); loadWs().catch(() => {});
-        }).catch(e => App.toast(E(e), true));
+          scheduleSave(0);                  // anything edited while the project was being created
+        }).catch(e => { S.creating = false; S.pendingCreate = true; App.toast(E(e), true); });
         return;
       }
       if (!st.pid) return;                 // a local project nobody asked to put online
@@ -336,7 +371,7 @@ const CloudUI = (() => {
       const tile = (k, v, cls = '') => `<div class="kpi ${cls}"><div class="k">${esc(t(k))}</div><div class="v" style="font-size:22px">${esc(v)}</div></div>`;
       const pill = s => `<span class="pill st-${s}">${esc(t(s))}</span>`;
       panelP.innerHTML = `<div class="port-head"><div><p class="eyebrow">${esc(t('portfolio'))}</p><h2 class="port-title">${esc((wsObj() || {}).name || '')} <span class="role-badge">${esc(t('r_' + S.role))}</span></h2></div>
-        <div class="actions" style="margin:0">${canEdit() ? `<button class="btn pri" type="button" id="cuNewProj">+ ${esc(t('newProject'))}</button><button class="btn" type="button" id="cuImportLocal">${esc(t('importLocal'))}</button>` : ''}
+        <div class="actions" style="margin:0">${canEdit() ? `<button class="btn pri" type="button" id="cuNewProj">+ ${esc(t('newProject'))}</button>` : ''}
         <label class="g-tools"><input type="checkbox" id="cuArch"${S.archived ? ' checked' : ''}> <span>${esc(t('showArchived'))}</span></label></div></div>
         ${S.archived ? '' : `<div class="kpis port-kpis">${tile('active', String(items.length))}${tile('atRisk', String(atRisk), atRisk ? 'warn-tile' : '')}${tile('totalBudget', App.eur(total))}${tile('latestEnd', latest ? App.dLabel(C.parseDate(latest), true) : '—')}</div>`}
         <div class="proj-grid">${items.length ? items.map(({ row, p, h, budget }) => `<article class="card proj-card${row.id === st.pid ? ' is-open' : ''}">
@@ -348,34 +383,26 @@ const CloudUI = (() => {
           <div class="row-actions" style="justify-content:flex-start">${row.id === st.pid ? `<span class="chip c-inprog">${esc(t('opened'))}</span>` : `<button class="btn pri sm" type="button" data-open="${esc(row.id)}">${esc(t('open'))}</button>`}
           ${canEdit() ? `<button class="btn sm" type="button" data-arch="${esc(row.id)}">${esc(t(S.archived ? 'restore' : 'archive'))}</button>` : ''}
           ${canManage() ? `<button class="btn sm danger" type="button" data-del="${esc(row.id)}">${esc(t('del'))}</button>` : ''}</div></div></article>`).join('')
-          : `<p class="hint empty">${esc(t(S.archived ? 'noArchived' : 'noProjects'))}</p>`}</div>`;
-      if ($('cuNewProj')) $('cuNewProj').onclick = () => { S.pendingCreate = true; flushSave(); detach(); st.pid = null; keep(); App.setReadOnly(false); App.goTab('assistant'); setTimeout(() => $('wz-desc') && $('wz-desc').focus(), 0); };
-      if ($('cuImportLocal')) $('cuImportLocal').onclick = () => { detach(); st.pid = null; keep(); App.setReadOnly(false); emitCommit(); };
+          : S.archived || !canEdit() ? `<p class="hint empty">${esc(t(S.archived ? 'noArchived' : 'noProjects'))}</p>`
+          : `<div class="card onboard first-proj"><div class="card-b"><p class="eyebrow">${esc(t('noProjects'))}</p><h2 class="wiz-h">${esc(t('firstProj'))}</h2><p class="hint">${esc(t('firstProjL'))}</p>
+            <div class="actions"><button class="btn pri wiz-go" type="button" id="cuFirstProj">+ ${esc(t('newProject'))}</button></div></div></div>`}</div>`;
+      const startNew = () => { S.pendingCreate = true; flushSave(); detach(); st.pid = null; keep(); App.setReadOnly(false); App.setEmpty(true); App.goTab('assistant'); setTimeout(() => $('wz-desc') && $('wz-desc').focus(), 0); };
+      if ($('cuNewProj')) $('cuNewProj').onclick = startNew;
+      if ($('cuFirstProj')) $('cuFirstProj').onclick = startNew;
       $('cuArch').onchange = async ev => { S.archived = ev.target.checked; try { S.projects = await cloud.projects(st.ws, S.archived); } catch (e) { App.toast(E(e), true); } renderProjects(); };
       let armed = null;
       panelP.onclick = async ev => {
         const o = ev.target.closest('[data-open]'), a = ev.target.closest('[data-arch]'), d = ev.target.closest('[data-del]');
         try {
           if (o) { await flushSave(); await openProject(o.dataset.open); }
-          else if (a) { await cloud.archiveProject(a.dataset.arch, !S.archived); if (a.dataset.arch === st.pid) { detach(); st.pid = null; keep(); App.setReadOnly(false); } await loadWs(); }
+          else if (a) { await cloud.archiveProject(a.dataset.arch, !S.archived); if (a.dataset.arch === st.pid) { detach(); st.pid = null; keep(); App.setReadOnly(false); App.setEmpty(true); } await loadWs(); }
           else if (d) {
             if (armed !== d.dataset.del) { armed = d.dataset.del; d.textContent = t('confirmDel'); return; }
-            await cloud.deleteProject(d.dataset.del); if (d.dataset.del === st.pid) { detach(); st.pid = null; keep(); App.setReadOnly(false); } await loadWs();
+            await cloud.deleteProject(d.dataset.del); if (d.dataset.del === st.pid) { detach(); st.pid = null; keep(); App.setReadOnly(false); App.setEmpty(true); } await loadWs();
           }
         } catch (e) { App.toast(E(e), true); }
       };
     }
-    // "Import this browser's project": create the cloud copy from the project currently in the tracker
-    function emitCommit() {
-      if (!st.ws || !canEdit()) return;
-      S.pendingCreate = false;
-      cloud.createProject(st.ws, App.project).then(r => {
-        st.pid = r.id; st.version = r.version; st.dirty = false; S.lastSaved = JSON.stringify(App.project); keep();
-        S.unwatch = cloud.watchProject(r.id, onRemote); setStatus('saved'); App.toast(t('createdIn') + ((wsObj() || {}).name || '')); loadWs().catch(() => {});
-      }).catch(e => App.toast(E(e), true));
-    }
-
-    /* ---------- Team tab: members, invitations, client links, activity ---------- */
     function linkBox(id, url, label) {
       return `<div class="link-box"><label class="lbl" for="${id}">${esc(label)}</label><div class="link-row"><input id="${id}" readonly value="${esc(url)}"><button class="btn sm" type="button" data-copy="${id}">${esc(t('copy'))}</button></div></div>`;
     }
@@ -492,8 +519,9 @@ const CloudUI = (() => {
     function signedOut() {
       detach(); S.user = null; S.profile = null; S.wss = []; S.role = null; S.projects = []; S.members = []; S.activity = [];
       st.pid = null; st.version = null; st.dirty = false; keep();
-      App.setExtraTabs([], []); App.setReadOnly(false); renderHeader();
+      App.setExtraTabs([], []); App.setReadOnly(false); App.clearLocal(); App.setEmpty(true); renderHeader();
       if (panelP) panelP.innerHTML = ''; if (panelT) panelT.innerHTML = '';
+      openAuth('in');
     }
 
     /* ---------- client share view (no account) ---------- */
@@ -509,6 +537,7 @@ const CloudUI = (() => {
 
     App.on('render', () => {
       renderHeader();
+      const smp = $('btnSample'); if (smp) smp.hidden = !!S.user;
       const banner = $('roBanner');
       if (!S.shared && banner) { const viewer = S.user && st.pid && S.role === 'viewer'; banner.hidden = !viewer; if (viewer) banner.textContent = t('viewerBanner'); }
     });
@@ -520,13 +549,13 @@ const CloudUI = (() => {
     const share = params.get('share'), invite = params.get('invite');
     if (invite && /^[0-9a-f]{64}$/.test(invite)) { ssSet('pendingInvite', invite); params.delete('invite'); history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : '') + location.hash); }
     if (share) { openSharedView(share); return; }
-    renderHeader();
+    renderHeader(); gateLoading();
     cloud.onAuth((ev) => {
       if (ev === 'PASSWORD_RECOVERY') openRecovery();
       else if (ev === 'SIGNED_IN' && !S.user) afterSignIn();
       else if (ev === 'SIGNED_OUT' && S.user) signedOut();
     });
-    cloud.session().then(s => { if (s) afterSignIn(); else if (ssGet('pendingInvite')) openAuth('in'); }).catch(() => {});
+    cloud.session().then(s => { if (s) afterSignIn(); else openAuth('in'); }).catch(() => openAuth('in'));
   }
   return { init };
 })();
