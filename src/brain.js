@@ -3,7 +3,7 @@
    project manager's work; the caller draws its labels in HTML and gets the anchors' screen positions
    back to link them. Decorative only (aria-hidden): every action lives in real buttons. */
 const Brain = (() => {
-  const COLORS = { violet: '#8556F7', lav: '#D3AFFE', white: '#F9FAFA', gold: '#EBCA4C', pink: '#F28DC7', cyan: '#4FD1E8', good: '#5DD6A6', warn: '#F0A840', bad: '#F25F7A' };
+  const COLORS = { violet: '#141A16', lav: '#2F4A3A', white: '#4A554D', gold: '#3F5E4B', pink: '#7A4B57', cyan: '#2C6E7A', good: '#1E7547', warn: '#9A5800', bad: '#B0262F' };
   // where each knowledge area sits on the brain (x forward, y up), roughly following what that part of the brain does
   const ANCHORS = {
     integration: [0.98, 0.18], scope: [0.62, 0.62], schedule: [0.1, 0.8], cost: [-0.42, 0.66], quality: [-0.92, 0.2],
@@ -108,12 +108,12 @@ const Brain = (() => {
       const P = G.pts.map(proj), dens = Math.max(0.75, Math.min(1.5, size / 240));
       const fp = focusId != null ? G.pts[G.anchors[focusId]] : null;
       const fcol = focusId != null ? (statusOf[focusId] || 'gold') : null;
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = 'source-over';
       // synapses
       ctx.lineWidth = 0.6;
       for (const [a, b] of G.edges) {
         const A = P[a], B = P[b], depth = (A.z + B.z) / 2;
-        ctx.strokeStyle = `rgba(178,141,240,${0.05 + Math.max(0, -depth) * 0.12})`;
+        ctx.strokeStyle = `rgba(20,30,22,${0.05 + Math.max(0, -depth) * 0.12})`;
         ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
       }
       // particles

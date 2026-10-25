@@ -545,7 +545,7 @@ function renderProject() {
 const phaseRow = (p, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ph-id" value="${esc(p.id)}" maxlength="16"><input aria-label="FR" class="ph-fr" value="${esc(p.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ph-en" value="${esc(p.en)}" maxlength="80" placeholder="EN"><input aria-label="Color" class="ph-color" type="color" value="${esc(p.color)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
 const msRow = (m, i) => `<div class="edit-row" data-row="${i}"><input aria-label="ID" class="ms-id" value="${esc(m.id)}" maxlength="16"><input aria-label="FR" class="ms-fr" value="${esc(m.fr)}" maxlength="80" placeholder="FR"><input aria-label="EN" class="ms-en" value="${esc(m.en)}" maxlength="80" placeholder="EN"><input aria-label="Date" class="ms-date" type="date" value="${esc(m.date)}"><button class="btn sm danger" type="button" data-rm>${esc(t('remove'))}</button></div>`;
 ['phaseRows', 'msRows'].forEach(id => $(id).addEventListener('click', ev => { if (ev.target.closest('[data-rm]')) ev.target.closest('.edit-row').remove(); }));
-$('addPhase').addEventListener('click', () => $('phaseRows').insertAdjacentHTML('beforeend', phaseRow({ id: nextId('P', [...document.querySelectorAll('.ph-id')].map(x => ({ id: x.value }))), fr: '', en: '', color: '#8556F7' }, 0)));
+$('addPhase').addEventListener('click', () => $('phaseRows').insertAdjacentHTML('beforeend', phaseRow({ id: nextId('P', [...document.querySelectorAll('.ph-id')].map(x => ({ id: x.value }))), fr: '', en: '', color: '#1F2A24' }, 0)));
 $('addMs').addEventListener('click', () => $('msRows').insertAdjacentHTML('beforeend', msRow({ id: nextId('M', [...document.querySelectorAll('.ms-id')].map(x => ({ id: x.value }))), fr: '', en: '', date: C.fmt(nowT()) }, 0)));
 $('savePhases').addEventListener('click', () => {
   const phases = [...document.querySelectorAll('#phaseRows .edit-row')].map(r => ({ id: r.querySelector('.ph-id').value.trim(), fr: r.querySelector('.ph-fr').value, en: r.querySelector('.ph-en').value, color: r.querySelector('.ph-color').value }));
@@ -618,14 +618,14 @@ twoStep($('btnBlank'), () => {
   emit('replace', 'blank'); EMPTY = false;
   const s = nowT();
   P = C.validateProject({ name: t('blankName'), code: '', start: C.fmt(s), end: C.fmt(C.addDays(s, 56)), statusDate: '', workingDays: true,
-    phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#8556F7' }], milestones: [], tasks: [] }).project;
+    phases: [{ id: 'P1', fr: 'Phase 1', en: 'Phase 1', color: '#1F2A24' }], milestones: [], tasks: [] }).project;
   editing = null; commit(); msg(t('saved'), true);
 });
 
 
 /* ---------- document downloads ---------- */
-const LIGHT = { bg: '#ffffff', surface: '#ffffff', sunk: '#f7f8fb', ink: '#141112', muted: '#5E585A', line: '#d7dde6', grid: '#e9edf3', accent: '#6B3FE0',
-  'accent-soft': 'rgba(107,63,224,.10)', ideal: '#8f9bb0', good: '#16865a', warn: '#b86e00', bad: '#c42f3a', 'good-soft': 'rgba(22,134,90,.12)',
+const LIGHT = { bg: '#ffffff', surface: '#ffffff', sunk: '#f7f8fb', ink: '#141112', muted: '#5E585A', line: '#d7dde6', grid: '#e9edf3', accent: '#2F4A3A',
+  'accent-soft': 'rgba(47,74,58,.10)', ideal: '#8f9bb0', good: '#16865a', warn: '#b86e00', bad: '#c42f3a', 'good-soft': 'rgba(22,134,90,.12)',
   'warn-soft': 'rgba(184,110,0,.13)', 'bad-soft': 'rgba(196,47,58,.12)', 'f-display': 'Arial, Helvetica, sans-serif', 'f-body': 'Arial, Helvetica, sans-serif', 'f-mono': 'Consolas, Courier New, monospace' };
 const literal = s => s.replace(/var\(--([a-z-]+)\)/g, (m, k) => LIGHT[k] || '#142033');
 function ganttSvg(mode) {

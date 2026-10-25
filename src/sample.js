@@ -180,12 +180,12 @@ R5 | AI cost | 3 | 3 | 9 | Monthly cap and cache`,
     }
   },
   phases: [
-    { id: 'P1', fr: 'Initialisation', en: 'Initiation', color: '#8556F7' },
-    { id: 'P2', fr: 'Conception', en: 'Design', color: '#CEAE31' },
-    { id: 'P3', fr: 'Développement', en: 'Build', color: '#D3AFFE' },
-    { id: 'P4', fr: 'Tests et recette', en: 'Test and UAT', color: '#4FD1E8' },
-    { id: 'P5', fr: 'Déploiement', en: 'Deployment', color: '#F28DC7' },
-    { id: 'P6', fr: 'Clôture', en: 'Closure', color: '#B28DF0' }
+    { id: 'P1', fr: 'Initialisation', en: 'Initiation', color: '#1F2A24' },
+    { id: 'P2', fr: 'Conception', en: 'Design', color: '#3F5E4B' },
+    { id: 'P3', fr: 'Développement', en: 'Build', color: '#6E8B74' },
+    { id: 'P4', fr: 'Tests et recette', en: 'Test and UAT', color: '#8C6A3F' },
+    { id: 'P5', fr: 'Déploiement', en: 'Deployment', color: '#4D6A86' },
+    { id: 'P6', fr: 'Clôture', en: 'Closure', color: '#7A4E5A' }
   ],
   milestones: [
     { id: 'M1', fr: 'Cahier des charges validé', en: 'Spec signed off', date: '2026-10-09' },
