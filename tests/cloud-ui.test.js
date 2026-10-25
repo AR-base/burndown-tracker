@@ -106,6 +106,11 @@ function page(url = 'https://app.test/') {
   A.click(A.d.querySelector('[data-open="' + pRow.id + '"]')); await sleep(60);
   /* Stripe: checkout from the plan bar, return from Stripe, customer portal */
   A.click(A.d.querySelector('[data-tab="projects"]')); await sleep(20);
+  fake._failCheckout = true; const navBefore = navigated.length;
+  A.click(A.d.querySelector('.plan-bar [data-checkout="pro"]')); await sleep(40);
+  const perr = A.d.querySelector('.plan-bar .plan-err');
+  check('a checkout failure is explained right under the button (not only in a toast)', !!perr && perr.getAttribute('role') === 'alert' && perr.textContent.length > 10 && navigated.length === navBefore && !A.d.querySelector('.plan-bar [data-checkout="pro"]').disabled);
+  fake._failCheckout = false;
   A.click(A.d.querySelector('.plan-bar [data-checkout="pro"]')); await sleep(40);
   check('“Upgrade to Pro” asks the server for a Stripe Checkout page and goes there', fake._invoked.some(x => x.name === 'create-checkout' && x.body.plan === 'pro' && x.body.workspace_id === fake._db.workspaces.find(w => /ACME/.test(w.name)).id) && /^https:\/\/checkout\.stripe\.com\//.test(navigated.at(-1)));
   Object.assign(fake._db.workspaces.find(w => /ACME/.test(w.name)), { plan: 'pro', stripe_customer_id: 'cus_1', subscription_status: 'active', plan_renews_at: '2026-12-25T00:00:00Z' });

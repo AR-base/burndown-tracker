@@ -161,6 +161,7 @@ function createFakeSupabase(opts = {}) {
     _invoked: [],
     functions: { async invoke(name, { body } = {}) {
       if (!me()) return err('permission denied'); client._invoked.push({ name, body });
+      if (name === 'create-checkout' && client._failCheckout) return err('Edge Function returned a non-2xx status code');
       if (name === 'create-checkout') return { data: { url: 'https://checkout.stripe.com/c/pay/cs_test_123' }, error: null };
       if (name === 'billing-portal') return { data: { url: 'https://billing.stripe.com/p/session/test_123' }, error: null };
       return err('Edge Function returned a non-2xx status code');

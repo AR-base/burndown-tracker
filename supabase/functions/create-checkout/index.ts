@@ -33,6 +33,11 @@ async function handler(req) {
   const { data: w } = await admin.from('workspaces').select('id, name, stripe_customer_id').eq('id', body.workspace_id).single();
   const stripe = new Stripe(env('STRIPE_SECRET_KEY'), { httpClient: Stripe.createFetchHttpClient() });
   let customer = w.stripe_customer_id;
+  // a stored customer can be stale (deleted, or created under another Stripe account/key): start a fresh one
+  if (customer) {
+    try { if ((await stripe.customers.retrieve(customer)).deleted) customer = null; }
+    catch (e) { if (e && e.code === 'resource_missing') customer = null; else throw e; }
+  }
   if (!customer) {
     customer = (await stripe.customers.create({ email: user.email, name: w.name, metadata: { workspace_id: w.id } })).id;
     await admin.from('workspaces').update({ stripe_customer_id: customer }).eq('id', w.id);

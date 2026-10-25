@@ -233,7 +233,12 @@ const CloudUI = (() => {
     const navigate = url => (window.__testNavigate || (u => location.assign(u)))(url);
     async function goBilling(btn, fn) {
       busy(btn, true);
-      try { navigate(await fn()); } catch (e) { App.toast(E(e), true); busy(btn, false); }
+      document.querySelectorAll('.plan-err').forEach(x => x.remove());
+      try { navigate(await fn()); } catch (e) {
+        App.toast(E(e), true); busy(btn, false);
+        // also say it right under the button: a toast can go unnoticed while the plans window is open
+        if (btn && btn.parentNode) { const p = document.createElement('p'); p.className = 'plan-err'; p.setAttribute('role', 'alert'); p.textContent = E(e); btn.insertAdjacentElement('afterend', p); }
+      }
     }
     document.addEventListener('click', ev => {
       const c = ev.target.closest('[data-checkout]'), pt = ev.target.closest('[data-portal]');
