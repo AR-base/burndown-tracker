@@ -18,10 +18,15 @@ body = assemble(str(root / 'src'), config)
 page = ('<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
         '<meta name="description" content="The Manager — bilingual FR/EN project-management SaaS: burndown, Gantt, budget, team workspaces and documents for any project">\n'
+        '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">\n'
+        '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n<meta name="theme-color" content="#C2CCC4">\n'
         '<style>[hidden]{display:none!important}img{max-width:100%}</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n')
 (root / 'index.html').write_text(page, encoding='utf-8')
 (root / 'public').mkdir(exist_ok=True)
 (root / 'public' / 'index.html').write_text(page, encoding='utf-8')
+import shutil
+for icon in ('favicon.svg', 'favicon-32.png', 'apple-touch-icon.png'):   # tab icon, served from the site itself
+    shutil.copyfile(root / 'brand' / icon, root / 'public' / icon)
 for legal in ('privacy', 'terms'):   # static pages linked from the Google sign-in consent screen
     (root / 'public' / (legal + '.html')).write_text((root / 'src' / 'legal' / (legal + '.html')).read_text(encoding='utf-8'), encoding='utf-8')
 
