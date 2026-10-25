@@ -4,3 +4,4 @@ node_modules/
 public/
 tests/test-cloud.html
 src/__pycache__/
+tests/test-local.html

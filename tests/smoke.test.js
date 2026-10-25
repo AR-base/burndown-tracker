@@ -1,6 +1,6 @@
 const { JSDOM } = require('jsdom');
 const fs = require('fs');
-const html = fs.readFileSync(require('path').join(__dirname,'..','index.html'), 'utf8');
+const html = fs.readFileSync(require('path').join(__dirname,'test-local.html'), 'utf8');
 const errors = [];
 const dom = new JSDOM(html, { runScripts: 'dangerously', url: 'https://example.test/', pretendToBeVisual: true,
   beforeParse(w) { w.TextEncoder = require('util').TextEncoder; w.addEventListener('error', e => errors.push(e.message)); w.console.error = (...a) => errors.push(a.join(' ')); } });

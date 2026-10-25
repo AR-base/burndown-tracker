@@ -40,6 +40,8 @@ headers = [
 print(f'index.html {len(page)} bytes · cloud {"ON (" + config["url"] + ")" if config else "off (local demo)"} · CSP updated')
 
 if '--test-cloud' in sys.argv:
+    # interface tests run on the demo build (no network library) and on a cloud build wired to a fake backend
+    (root / 'tests' / 'test-local.html').write_text(assemble(str(root / 'src'), None), encoding='utf-8')
     test = assemble(str(root / 'src'), {'url': 'https://abcdefghijkl.supabase.co', 'anonKey': 'eyJhbGciOiJIUzI1NiJ9.test-anon-key',
                                         'vendor': 'window.supabase = window.__fakeSupabase;'})
     (root / 'tests' / 'test-cloud.html').write_text(test, encoding='utf-8')
