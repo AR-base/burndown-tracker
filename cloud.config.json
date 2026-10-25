@@ -3,5 +3,6 @@
   "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3ZnRtb253b3lwb3dsdGNkdG11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5MDgyNTIsImV4cCI6MjEwODQ4NDI1Mn0.jL6IWPwOtl-r7i24fxJpVor70KSYv5Hvl10U2L8eyjg",
   "oauth": [
     "google"
-  ]
+  ],
+  "billing": true
 }
