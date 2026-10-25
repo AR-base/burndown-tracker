@@ -235,7 +235,7 @@ const CloudUI = (() => {
           <div class="lp-grid">${L.lpFeats.map(([ic, h, d]) => `<article class="lp-feat"><span class="lp-ic" aria-hidden="true">${esc(ic)}</span><h3>${esc(h)}</h3><p>${esc(d)}</p></article>`).join('')}</div></section>
         <section class="wrap lp-sec" id="lp-how">${head('lpHowEy', 'lpHowH')}<ol class="lp-steps">${L.lpHow.map(([b, d]) => `<li><b>${esc(b)}</b><span>${esc(d)}</span></li>`).join('')}</ol></section>
         <section class="wrap lp-sec" id="lp-pricing">${head('lpPriceEy', 'lpPriceH', 'lpPriceL')}${pricingHtml(null)}</section>
-        <footer class="wrap lp-foot"><span>© ${new Date().getFullYear()} Burndown PM</span><span>${esc(t('footNote'))}</span></footer>`;
+        <footer class="wrap lp-foot"><span>© ${new Date().getFullYear()} The Manager</span><span>${esc(t('footNote'))}</span></footer>`;
       gate.querySelectorAll('[data-glang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.glang === App.ui.lang));
     }
     function showGate(card) {

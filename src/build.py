@@ -17,7 +17,7 @@ if config and ('service_role' in json.dumps(config) or 'secret' in json.dumps(co
 body = assemble(str(root / 'src'), config)
 page = ('<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-        '<meta name="description" content="Bilingual FR/EN project tracker: burndown, Gantt, budget, team workspaces and documents for any project">\n'
+        '<meta name="description" content="The Manager — bilingual FR/EN project-management SaaS: burndown, Gantt, budget, team workspaces and documents for any project">\n'
         '<style>[hidden]{display:none!important}img{max-width:100%}</style>\n</head>\n<body>\n' + body + '\n</body>\n</html>\n')
 (root / 'index.html').write_text(page, encoding='utf-8')
 (root / 'public').mkdir(exist_ok=True)
