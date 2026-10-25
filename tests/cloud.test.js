@@ -72,5 +72,16 @@ const rejects = async (p, code) => { try { await p; } catch (e) { assert.strictE
     await c.mfaVerify('f1', '123456');
     await rejects(c.mfaVerify('f1', '000000'), 'bad_code');
   });
+  await ok('billing only ever redirects to Stripe-hosted pages', async () => {
+    const { c, fake } = mk();
+    await c.signUp('ana@acme.fr', 'correct-horse-1'); const w = await c.createWorkspace('ACME');
+    if (!(await c.checkout(w.id, 'pro')).startsWith('https://checkout.stripe.com/')) throw new Error('checkout url');
+    await rejects(c.checkout(w.id, 'free'), 'invalid');
+    fake.functions.invoke = async () => ({ data: { url: 'https://evil.example/phish' }, error: null });
+    await rejects(c.checkout(w.id, 'team'), 'billing_unavailable');
+    await rejects(c.billingPortal(w.id), 'billing_unavailable');
+    fake.functions.invoke = async () => ({ data: null, error: { message: 'Edge Function returned a non-2xx status code' } });
+    await rejects(c.checkout(w.id, 'pro'), 'billing_unavailable');
+  });
   console.log(`\n${n} tests passed`);
 })().catch(e => { console.error(e); process.exit(1); });

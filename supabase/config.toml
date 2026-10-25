@@ -1,0 +1,4 @@
+# Only the settings this repository needs. The Stripe webhook is called by Stripe (no user token):
+# it authenticates every request with the Stripe signature instead of a Supabase JWT.
+[functions.stripe-webhook]
+verify_jwt = false

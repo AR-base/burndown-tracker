@@ -21,6 +21,7 @@ const Cloud = (() => {
     if (/rate limit|too many/i.test(msg) || status === 429) return 'rate_limited';
     if (/invalid totp|invalid code|mfa/i.test(msg) && /invalid|expired/i.test(msg)) return 'bad_code';
     if (/provider is not enabled|unsupported provider/i.test(msg)) return 'provider_disabled';
+    if (/edge function/i.test(msg)) return 'billing_unavailable';
     if (/failed to fetch|networkerror|network request failed|load failed/i.test(msg)) return 'offline';
     if (/row-level security|permission denied/i.test(msg) || status === 403 || err.code === '42501') return 'forbidden';
     if (/check constraint|violates/i.test(msg)) return 'invalid';
@@ -91,6 +92,18 @@ const Cloud = (() => {
       /* ---- plans (db/saas.sql); null when the database has no plans yet ---- */
       async usage(ws) { try { const r = await rpc('workspace_usage', { ws }); return (r && r[0]) || null; } catch (e) { if (e.code === 'offline') throw e; return null; } },
       startTrial: ws => rpc('start_trial', { ws }),
+      /* ---- Stripe (supabase/functions): only ever returns a Stripe-hosted page to go to ---- */
+      async checkout(ws, plan) {
+        if (!['pro', 'team'].includes(plan)) throw new CloudError('invalid');
+        const r = await call(sb.functions.invoke('create-checkout', { body: { workspace_id: ws, plan } }));
+        if (!r || !/^https:\/\/checkout\.stripe\.com\//.test(String(r.url))) throw new CloudError('billing_unavailable');
+        return r.url;
+      },
+      async billingPortal(ws) {
+        const r = await call(sb.functions.invoke('billing-portal', { body: { workspace_id: ws } }));
+        if (!r || !/^https:\/\/billing\.stripe\.com\//.test(String(r.url))) throw new CloudError('billing_unavailable');
+        return r.url;
+      },
 
       /* ---- members and invitations ---- */
       members: ws => rpc('list_members', { ws }),

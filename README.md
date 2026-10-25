@@ -82,6 +82,23 @@ Never put the `service_role` key in this file: the build refuses it. The anon ke
 3. Boutons affichés : `"oauth": ["google"]` dans `cloud.config.json` (ajouter `"azure"` pour Microsoft une fois configuré).
 4. Passer un espace en Pro / Team à la main : `update public.workspaces set plan = 'pro' where name = '…';` (SQL Editor).
 
+## 0 sexies. Paiement Stripe / Stripe billing
+
+Le paiement passe **uniquement** par trois fonctions serveur (Supabase Edge Functions, dossier `supabase/functions`) ; la clé secrète Stripe n’est jamais dans le navigateur ni dans ce dépôt. / Payment runs only in three server functions; the Stripe secret key never reaches the browser or this repo.
+
+- `create-checkout` : le propriétaire de l’espace choisit Pro ou Team → page de paiement Stripe.
+- `billing-portal` : « Gérer l’abonnement » (carte, factures, résiliation, changement d’offre).
+- `stripe-webhook` : Stripe confirme le paiement → l’offre de l’espace change dans la base (seul endroit qui peut le faire ; signature Stripe vérifiée).
+
+### Mise en place (mode test d’abord)
+1. **Stripe** (dashboard.stripe.com, mode *Test*) → *Product catalog* → créer **The Manager Pro** (19 €/mois, récurrent) et **The Manager Team** (49 €/mois). Copier les deux **Price ID** (`price_…`). Activer le **Customer portal** (*Settings → Billing → Customer portal*).
+2. **Supabase SQL Editor** → exécuter `db/billing.sql`.
+3. **Supabase → Edge Functions** → déployer les trois fonctions (CLI : `supabase functions deploy create-checkout`, `… billing-portal`, `supabase functions deploy stripe-webhook --no-verify-jwt`). Le webhook doit avoir **JWT verification désactivée**.
+4. **Supabase → Edge Functions → Secrets** : `STRIPE_SECRET_KEY` (`sk_test_…`), `STRIPE_PRICE_PRO`, `STRIPE_PRICE_TEAM`, `SITE_URL` (`https://burndown-tracker.vercel.app`, plusieurs adresses séparées par des virgules), puis `STRIPE_WEBHOOK_SECRET` (étape 5).
+5. **Stripe → Developers → Webhooks → Add endpoint** : `https://<ref>.supabase.co/functions/v1/stripe-webhook`, événements `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`. Copier le *Signing secret* (`whsec_…`) dans `STRIPE_WEBHOOK_SECRET`.
+6. `cloud.config.json` : `"billing": true`, puis pousser. Les boutons « Passer à Pro / Team » et « Gérer l’abonnement » apparaissent pour le propriétaire.
+7. Tester avec la carte `4242 4242 4242 4242`, date future, CVC quelconque. Passer en mode *Live* = refaire 1, 4 et 5 avec les clés live.
+
 ## 1. Déployer / Deploy
 
 ### Option A — Vercel + GitHub (recommandé / recommended)

@@ -3,13 +3,14 @@ const fs = require('fs'), path = require('path');
 const createFake = require('./fake-supabase.js');
 const html = fs.readFileSync(path.join(__dirname, 'test-cloud.html'), 'utf8');
 const fake = createFake();
+const navigated = [];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let n = 0, failed = 0;
 const check = (name, cond) => { if (cond) { n++; console.log('✓', name); } else { failed++; console.log('✗', name); } };
 function page(url = 'https://app.test/') {
   const errors = [], saved = [];
   const dom = new JSDOM(html, { runScripts: 'dangerously', url, pretendToBeVisual: true, beforeParse(w) {
-    w.TextEncoder = require('util').TextEncoder; w.__fakeSupabase = { createClient: () => fake };
+    w.TextEncoder = require('util').TextEncoder; w.__fakeSupabase = { createClient: () => fake }; w.__testNavigate = u => navigated.push(u);
     w.addEventListener('error', e => errors.push(e.message)); w.console.error = (...a) => errors.push(a.join(' '));
     w.URL.createObjectURL = b => { saved.push(b); return 'blob:x'; }; w.URL.revokeObjectURL = () => {};
     w.HTMLAnchorElement.prototype.click = function () { saved.push(this.download); };
@@ -103,6 +104,16 @@ function page(url = 'https://app.test/') {
   A.click(A.$('cloudModal').querySelector('[data-trial]')); await sleep(80);
   check('the owner starts the 14-day Pro trial: limits lifted', A.$('cloudModal').hidden && /Pro/.test(A.d.querySelector('.plan-bar .plan-chip').textContent) && /3 \/ 25/.test(A.d.querySelector('.plan-bar').textContent) && !A.d.querySelector('.plan-bar [data-trial]'));
   A.click(A.d.querySelector('[data-open="' + pRow.id + '"]')); await sleep(60);
+  /* Stripe: checkout from the plan bar, return from Stripe, customer portal */
+  A.click(A.d.querySelector('[data-tab="projects"]')); await sleep(20);
+  A.click(A.d.querySelector('.plan-bar [data-checkout="pro"]')); await sleep(40);
+  check('“Upgrade to Pro” asks the server for a Stripe Checkout page and goes there', fake._invoked.some(x => x.name === 'create-checkout' && x.body.plan === 'pro' && x.body.workspace_id === fake._db.workspaces.find(w => /ACME/.test(w.name)).id) && /^https:\/\/checkout\.stripe\.com\//.test(navigated.at(-1)));
+  Object.assign(fake._db.workspaces.find(w => /ACME/.test(w.name)), { plan: 'pro', stripe_customer_id: 'cus_1', subscription_status: 'active', plan_renews_at: '2026-12-25T00:00:00Z' });
+  const R = page('https://app.test/?checkout=success'); await sleep(250);
+  check('back from Stripe: the plan is confirmed and the address cleaned', R.$('toasts').textContent.includes('Pro') && !R.w.location.search.includes('checkout') && /Pro/.test(R.d.querySelector('.plan-bar .plan-chip').textContent));
+  R.click(R.d.querySelector('.plan-bar [data-portal]')); await sleep(40);
+  check('paying owners manage their subscription in the Stripe portal', /^https:\/\/billing\.stripe\.com\//.test(navigated.at(-1)) && /Renouvellement/.test(R.d.querySelector('.plan-bar').textContent));
+  check('no runtime errors in billing', R.errors.length === 0);
   /* account dialog: export + sign out */
   A.click(A.$('cuAvatar')); await sleep(30);
   check('account dialog: profile, 2-step, GDPR export and deletion', !!A.$('cuMfaOn') && !!A.$('cuExport') && !!A.$('cuDelForm'));

@@ -14,6 +14,9 @@ const CloudUI = (() => {
       pf_pro: ['25 projets actifs', '10 personnes', '20 liens client par projet', 'Tout le plan Free', 'Support prioritaire'],
       pf_team: ['500 projets actifs', '50 personnes', '20 liens client par projet', 'Tout le plan Pro', 'Accompagnement au déploiement'],
       ctaFree: 'Commencer gratuitement', ctaPro: 'Essai gratuit 14 jours', ctaTeam: 'Commencer l’essai', footNote: 'Projet ESAIP · Données hébergées dans l’Union européenne',
+      upgradeTo: 'Passer à', manageSub: 'Gérer l’abonnement', changePlan: 'Changer d’offre', renews: 'Renouvellement le', orTrial: 'ou essayer 14 jours gratuitement',
+      payOk: 'Paiement reçu : activation de votre offre…', payDone: 'Offre activée : ', payCancel: 'Paiement annulé.', payLead: 'Paiement sécurisé par Stripe. Sans engagement, résiliable à tout moment depuis « Gérer l’abonnement ».',
+      e_billing_unavailable: 'Le paiement en ligne n’est pas encore configuré. Réessayez plus tard.',
       plans: 'Abonnement', plansLead: 'Les limites s’appliquent à tout l’espace de travail. Le paiement en ligne arrive bientôt ; l’essai Pro ne demande aucune carte.',
       startTrial: 'Essayer Pro 14 jours', trialOn: 'Essai Pro actif', trialDays: 'j restants', trialStarted: 'Essai Pro activé jusqu’au ', trialUsed: 'Essai déjà utilisé', ownerOnly: 'Seul le propriétaire de l’espace peut lancer l’essai.', seePlans: 'Voir les offres', soon: 'Paiement en ligne bientôt',
       uProjects: 'Projets actifs', uPeople: 'Personnes', limitT: 'Limite de votre plan atteinte', limitProjects: 'Votre plan permet {n} projets actifs. Archivez un projet terminé, ou passez à Pro pour en avoir 25.', limitMembers: 'Votre plan permet {n} personnes (membres et invitations en attente).',
@@ -71,6 +74,9 @@ const CloudUI = (() => {
       pf_pro: ['25 active projects', '10 people', '20 client links per project', 'Everything in Free', 'Priority support'],
       pf_team: ['500 active projects', '50 people', '20 client links per project', 'Everything in Pro', 'Onboarding assistance'],
       ctaFree: 'Start for free', ctaPro: 'Free 14-day trial', ctaTeam: 'Start the trial', footNote: 'ESAIP project · Data hosted in the European Union',
+      upgradeTo: 'Upgrade to', manageSub: 'Manage subscription', changePlan: 'Change plan', renews: 'Renews on', orTrial: 'or try it free for 14 days',
+      payOk: 'Payment received: activating your plan…', payDone: 'Plan active: ', payCancel: 'Payment cancelled.', payLead: 'Secure payment by Stripe. No commitment, cancel any time from “Manage subscription”.',
+      e_billing_unavailable: 'Online payment is not set up yet. Try again later.',
       plans: 'Subscription', plansLead: 'Limits apply to the whole workspace. Online payment is coming soon; the Pro trial needs no card.',
       startTrial: 'Try Pro for 14 days', trialOn: 'Pro trial active', trialDays: 'days left', trialStarted: 'Pro trial active until ', trialUsed: 'Trial already used', ownerOnly: 'Only the workspace owner can start the trial.', seePlans: 'See plans', soon: 'Online payment soon',
       uProjects: 'Active projects', uPeople: 'People', limitT: 'Your plan’s limit is reached', limitProjects: 'Your plan allows {n} active projects. Archive a finished project, or move to Pro for 25.', limitMembers: 'Your plan allows {n} people (members and pending invitations).',
@@ -135,6 +141,7 @@ const CloudUI = (() => {
     const E = e => { const c = (e && e.code) || 'unknown'; return (STR[App.ui.lang]['e_' + c] ? t('e_' + c) : t('e_unknown')) + (c === 'transfer_ownership_first' ? (e.detail || '').split(':').slice(1).join(':') : ''); };
     const redirect = location.origin + location.pathname;
     const OAUTH = (Array.isArray(cfg.oauth) ? cfg.oauth : ['google']).filter(p => p === 'google' || p === 'azure');
+    const BILLING = cfg.billing === true;
     const G_ICON = '<svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
     const MS_ICON = '<svg width="15" height="15" viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>';
     let cloud;
@@ -192,7 +199,12 @@ const CloudUI = (() => {
     // u: workspace usage in the app, null on the public landing page
     function pricingHtml(u) {
       const cur = u ? u.effective_plan : null, trialRunning = u && u.plan === 'free' && u.effective_plan === 'pro';
+      const owner = isOwner(), paid = u && u.has_billing && u.plan !== 'free';
       const cta = p => {
+        if (u && BILLING && owner) {
+          if (paid) return p.id === u.plan ? `<button class="btn" type="button" data-portal>${esc(t('manageSub'))}</button>` : p.id === 'free' ? '' : `<button class="btn" type="button" data-portal>${esc(t('changePlan'))}</button>`;
+          if (p.id !== 'free') return `<button class="btn${p.hot ? ' pri' : ''}" type="button" data-checkout="${p.id}">${esc(t('upgradeTo'))} ${esc(t('plan_' + p.id))}</button>${p.id === 'pro' && !u.trial_used ? `<button class="linkish" type="button" data-trial>${esc(t('orTrial'))}</button>` : ''}`;
+        }
         if (!u) return `<button class="btn${p.hot ? ' pri' : ''}" type="button" data-cta="${p.id}">${esc(t(p.id === 'free' ? 'ctaFree' : p.id === 'pro' ? 'ctaPro' : 'ctaTeam'))}</button>`;
         if (p.id === u.plan && !trialRunning) return `<button class="btn" type="button" disabled>${esc(t('currentPlan'))}</button>`;
         if (p.id === 'pro' && u.plan === 'free') {
@@ -210,7 +222,7 @@ const CloudUI = (() => {
     const daysLeft = u => Math.max(0, Math.ceil((Date.parse(u.trial_ends_at) - Date.now()) / 864e5));
     function openPlans(note) {
       modal(`<p class="eyebrow">${esc((wsObj() || {}).name || '')}</p><h2 id="cuMTitle" class="modal-h">${esc(note ? t('limitT') : t('plans'))}</h2>
-        <p class="hint">${esc(note || t('plansLead'))}</p><div style="margin-top:18px">${pricingHtml(S.usage || { plan: 'free', effective_plan: 'free', trial_used: false })}</div>${note ? `<p class="plan-note">${esc(t('plansLead'))}</p>` : ''}`, null, 'wide');
+        <p class="hint">${esc(note || t(BILLING ? 'payLead' : 'plansLead'))}</p><div style="margin-top:18px">${pricingHtml(S.usage || { plan: 'free', effective_plan: 'free', trial_used: false })}</div>${note ? `<p class="plan-note">${esc(t(BILLING ? 'payLead' : 'plansLead'))}</p>` : ''}`, null, 'wide');
     }
     async function startTrial() {
       try { const ends = await cloud.startTrial(st.ws); App.toast(t('trialStarted') + fmtDate(ends)); if (!modalRoot.hidden) closeModal(); await loadWs(); }
@@ -218,7 +230,29 @@ const CloudUI = (() => {
     }
     const limitNote = (what, u) => t(what === 'projects' ? 'limitProjects' : 'limitMembers').replace('{n}', String(u ? (what === 'projects' ? u.max_projects : u.max_people) : 3));
     const atLimit = what => S.usage && (what === 'projects' ? S.usage.projects >= S.usage.max_projects : S.usage.people >= S.usage.max_people);
-    document.addEventListener('click', ev => { if (ev.target.closest('[data-trial]')) startTrial(); else if (ev.target.closest('[data-plans]')) openPlans(); });
+    const navigate = url => (window.__testNavigate || (u => location.assign(u)))(url);
+    async function goBilling(btn, fn) {
+      busy(btn, true);
+      try { navigate(await fn()); } catch (e) { App.toast(E(e), true); busy(btn, false); }
+    }
+    document.addEventListener('click', ev => {
+      const c = ev.target.closest('[data-checkout]'), pt = ev.target.closest('[data-portal]');
+      if (c && S.user && st.ws) goBilling(c, () => cloud.checkout(st.ws, c.dataset.checkout));
+      else if (pt && S.user && st.ws) goBilling(pt, () => cloud.billingPortal(st.ws));
+      else if (ev.target.closest('[data-trial]')) startTrial(); else if (ev.target.closest('[data-plans]')) openPlans();
+    });
+    // back from Stripe: the webhook updates the plan a few seconds later, so wait for it
+    async function afterCheckout(kind) {
+      if (kind === 'cancel') { App.toast(t('payCancel'), true); return; }
+      if (kind !== 'success' || !st.ws) { await loadWs().catch(() => {}); return; }
+      App.toast(t('payOk'));
+      for (let i = 0; i < 8; i++) {
+        await new Promise(r => setTimeout(r, i ? 2500 : 0));
+        try { S.usage = await cloud.usage(st.ws); } catch { /* retry */ }
+        if (S.usage && S.usage.plan !== 'free') { App.toast(t('payDone') + t('plan_' + S.usage.plan)); break; }
+      }
+      await loadWs().catch(() => {});
+    }
 
     /* ---------- sign-in gate: the first screen in cloud mode ---------- */
     const gate = $('gate'), gateCard = $('gateCard');
@@ -343,6 +377,7 @@ const CloudUI = (() => {
         if (!st.ws) { App.goTab('projects'); renderProjects(true); return; }
         await loadWs();
         if (st.pid) await openProject(st.pid, { resume: true }); else App.goTab('projects');
+        if (payBack) { const k = payBack; payBack = null; App.goTab('projects'); afterCheckout(k); }
       } catch (e) { App.toast(E(e), true); if (!S.user) openAuth('in'); else hideGate(); }
     }
 
@@ -449,7 +484,10 @@ const CloudUI = (() => {
       return `<div class="plan-bar"><span class="plan-chip ${esc(u.effective_plan)}">${esc(t('plan_' + u.effective_plan))}</span>
         ${trial ? `<span class="trial-note">${esc(t('trialOn'))} · ${daysLeft(u)} ${esc(t('trialDays'))}</span>` : ''}
         ${meter('uProjects', u.projects, u.max_projects)}${meter('uPeople', u.people, u.max_people)}
-        <div class="actions">${u.plan === 'free' && !u.trial_used && isOwner() ? `<button class="btn pri sm" type="button" data-trial>${esc(t('startTrial'))}</button>` : ''}<button class="btn sm" type="button" data-plans>${esc(t('seePlans'))}</button></div></div>`;
+        ${u.plan_renews_at && u.plan !== 'free' ? `<span class="trial-note">${esc(t('renews'))} ${esc(fmtDate(u.plan_renews_at))}</span>` : ''}
+        <div class="actions">${BILLING && isOwner() && u.has_billing && u.plan !== 'free' ? `<button class="btn sm" type="button" data-portal>${esc(t('manageSub'))}</button>`
+          : BILLING && isOwner() && u.effective_plan !== 'team' ? `<button class="btn pri sm" type="button" data-checkout="pro">${esc(t('upgradeTo'))} Pro</button>`
+          : u.plan === 'free' && !u.trial_used && isOwner() ? `<button class="btn pri sm" type="button" data-trial>${esc(t('startTrial'))}</button>` : ''}<button class="btn sm" type="button" data-plans>${esc(t('seePlans'))}</button></div></div>`;
     }
     const ckKey = () => 'ck-hidden-' + st.ws;
     function checklist() {
@@ -679,6 +717,8 @@ const CloudUI = (() => {
     /* ---------- boot ---------- */
     const params = new URLSearchParams(location.search);
     const share = params.get('share'), invite = params.get('invite');
+    let payBack = params.get('checkout') === 'success' ? 'success' : params.get('checkout') === 'cancel' ? 'cancel' : params.get('billing') === 'done' ? 'portal' : null;
+    if (params.has('checkout') || params.has('billing')) { params.delete('checkout'); params.delete('billing'); history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : '') + location.hash); }
     if (invite && /^[0-9a-f]{64}$/.test(invite)) { ssSet('pendingInvite', invite); params.delete('invite'); history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : '') + location.hash); }
     if (share) { openSharedView(share); return; }
     renderHeader(); gateLoading();

@@ -9,6 +9,8 @@ await db.exec(readFileSync(new URL('db/schema.sql', root), 'utf8'));
 await db.exec(readFileSync(new URL('db/schema.sql', root), 'utf8')); // running it twice must be safe
 await db.exec(readFileSync(new URL('db/saas.sql', root), 'utf8'));
 await db.exec(readFileSync(new URL('db/saas.sql', root), 'utf8'));
+await db.exec(readFileSync(new URL('db/billing.sql', root), 'utf8'));
+await db.exec(readFileSync(new URL('db/billing.sql', root), 'utf8'));
 let n = 0; const ok = async (name, fn) => { await fn(); n++; console.log('✓', name); };
 const U = { ana: '11111111-1111-4111-8111-111111111111', bob: '22222222-2222-4222-8222-222222222222', eve: '33333333-3333-4333-8333-333333333333', cid: '44444444-4444-4444-8444-444444444444' };
 const mail = { ana: 'ana@acme.fr', bob: 'bob@acme.fr', eve: 'eve@evil.io', cid: 'cid@client.com' };
@@ -42,7 +44,7 @@ await ok('creating a workspace makes you its owner', async () => {
 await ok('nobody sees another company’s workspace, members or projects', async () => {
   proj = (await as('ana', `insert into projects (workspace_id, name, data) values ($1, 'Boutique', $2) returning id, version, created_by`, [ws, project]))[0];
   assert.equal(proj.version, 1); assert.equal(proj.created_by, U.ana);
-  assert.equal((await as('eve', `select * from workspaces where id = $1`, [ws])).length, 0);
+  assert.equal((await as('eve', `select id, name from workspaces where id = $1`, [ws])).length, 0);
   assert.equal((await as('eve', `select * from projects where workspace_id = $1`, [ws])).length, 0);
   assert.equal((await as('eve', `select * from workspace_members where workspace_id = $1`, [ws])).length, 0);
   assert.equal((await as('eve', `select * from list_members($1)`, [ws])).length, 0);
@@ -211,5 +213,14 @@ await ok('when the trial ends, existing data stays but new projects are refused 
   assert.equal((await as('zoe', `select * from workspace_usage($1)`, [ws3]))[0].effective_plan, 'free');
   assert.equal((await as('zoe', `select count(*)::int as c from projects where workspace_id = $1 and not archived`, [ws3]))[0].c, 4);
   await fails(as('zoe', `insert into projects (workspace_id, name, data) values ($1, 'P6', $2)`, [ws3, project]), /plan_limit_projects/);
+});
+
+await ok('billing: Stripe ids stay server-side, usage reports the subscription', async () => {
+  await db.query(`update workspaces set stripe_customer_id = 'cus_123', plan = 'pro', subscription_status = 'active', plan_renews_at = now() + interval '30 days' where id = $1`, [ws3]);
+  const u = (await as('zoe', `select * from workspace_usage($1)`, [ws3]))[0];
+  assert.equal(u.effective_plan, 'pro'); assert.equal(u.subscription_status, 'active'); assert.equal(u.has_billing, true); assert.equal(u.max_projects, 25);
+  await fails(as('zoe', `select stripe_customer_id from workspaces where id = $1`, [ws3]), /permission denied/);
+  assert.equal((await as('zoe', `select name, plan from workspaces where id = $1`, [ws3]))[0].plan, 'pro');
+  await fails(as('zoe', `update workspaces set stripe_subscription_id = 'sub_x' where id = $1`, [ws3]), /permission denied/);
 });
 console.log(`\n${n} tests passed`);

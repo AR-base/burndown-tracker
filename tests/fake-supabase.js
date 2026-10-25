@@ -109,7 +109,7 @@ function createFakeSupabase(opts = {}) {
     revoke_share({ share_id }) { const s = db.project_shares.find(x => x.id === share_id); s.revoked_at = new Date().toISOString(); delete db.tokens[s._t]; return null; },
     get_shared_project({ share_token }) { const s = db.tokens[share_token]; if (!s || !s.share) return []; const p = db.projects.find(x => x.id === s.share); return p ? [{ name: p.name, data: p.data, updated_at: p.updated_at }] : []; },
     workspace_usage({ ws }) { if (!roleIn(ws)) throw new Error('forbidden'); const w = db.workspaces.find(x => x.id === ws);
-      return [{ plan: w.plan, effective_plan: plan(ws), trial_ends_at: w.trial_ends_at, trial_used: w.trial_used, projects: activeProjects(ws), people: people(ws), max_projects: lim(ws, 'projects'), max_people: lim(ws, 'members'), max_shares: lim(ws, 'shares') }]; },
+      return [{ plan: w.plan, effective_plan: plan(ws), trial_ends_at: w.trial_ends_at, trial_used: w.trial_used, projects: activeProjects(ws), people: people(ws), max_projects: lim(ws, 'projects'), max_people: lim(ws, 'members'), max_shares: lim(ws, 'shares'), subscription_status: w.subscription_status || null, plan_renews_at: w.plan_renews_at || null, has_billing: !!w.stripe_customer_id }]; },
     start_trial({ ws }) { if (roleIn(ws) !== 'owner') throw new Error('forbidden'); const w = db.workspaces.find(x => x.id === ws); if (w.plan !== 'free' || w.trial_used) throw new Error('trial_unavailable');
       w.trial_used = true; w.trial_ends_at = new Date(Date.now() + 14 * 864e5).toISOString(); log(ws, null, 'plan.trial_started', {}); return w.trial_ends_at; },
     export_my_data() { return { account: { email: me().email }, memberships: db.workspace_members.filter(m => m.user_id === me().id) }; },
@@ -158,6 +158,13 @@ function createFakeSupabase(opts = {}) {
         async getAuthenticatorAssuranceLevel() { return { data: { currentLevel: 'aal1', nextLevel: opts.needMfa ? 'aal2' : 'aal1' }, error: null }; }
       }
     },
+    _invoked: [],
+    functions: { async invoke(name, { body } = {}) {
+      if (!me()) return err('permission denied'); client._invoked.push({ name, body });
+      if (name === 'create-checkout') return { data: { url: 'https://checkout.stripe.com/c/pay/cs_test_123' }, error: null };
+      if (name === 'billing-portal') return { data: { url: 'https://billing.stripe.com/p/session/test_123' }, error: null };
+      return err('Edge Function returned a non-2xx status code');
+    } },
     channel() { const c = { on(_t, f, cb) { c.filter = f.filter; c.cb = cb; return c; }, subscribe() { channels.push(c); return c; } }; return c; },
     removeChannel(c) { const i = channels.indexOf(c); if (i >= 0) channels.splice(i, 1); }
   };

@@ -5,7 +5,7 @@
   "description": "Bilingual FR/EN project tracker: burndown, Gantt, budget, team workspaces and documents for any project.",
   "scripts": {
     "build": "python3 src/build.py",
-    "test": "python3 src/build.py --test-cloud && node tests/core.test.js && node tests/io.test.js && node tests/docgen.test.js && node tests/generator.test.js && node tests/budget.test.js && node tests/pm.test.js && node tests/cloud.test.js && node tests/db.test.mjs && node tests/smoke.test.js && node tests/cloud-ui.test.js"
+    "test": "python3 src/build.py --test-cloud && node tests/core.test.js && node tests/io.test.js && node tests/docgen.test.js && node tests/generator.test.js && node tests/budget.test.js && node tests/pm.test.js && node tests/cloud.test.js && node tests/db.test.mjs && node --experimental-strip-types --no-warnings tests/billing.test.mjs && node tests/smoke.test.js && node tests/cloud-ui.test.js"
   },
   "devDependencies": {
     "jsdom": "24.1.3",
