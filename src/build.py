@@ -41,8 +41,11 @@ headers = [
     {"key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()"},
     {"key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains"},
 ]
+OLD_HOST, NEW_HOST = 'burndown-tracker.vercel.app', 'the-manager-app.vercel.app'
 (root / 'vercel.json').write_text(json.dumps({"$schema": "https://openapi.vercel.sh/vercel.json", "framework": None, "buildCommand": "python3 src/build.py",
-    "outputDirectory": "public", "cleanUrls": True, "headers": [{"source": "/(.*)", "headers": headers}]}, indent=2) + '\n')
+    "outputDirectory": "public", "cleanUrls": True, "headers": [{"source": "/(.*)", "headers": headers}],
+    # the app was renamed: the old address forwards to the new one, keeping the path and query (?checkout=… etc.)
+    "redirects": [{"source": "/:path*", "has": [{"type": "host", "value": OLD_HOST}], "destination": f"https://{NEW_HOST}/:path*", "permanent": True}]}, indent=2) + '\n')
 (root / '_headers').write_text('/*\n' + ''.join(f'  {h["key"]}: {h["value"]}\n' for h in headers))
 print(f'index.html {len(page)} bytes · cloud {"ON (" + config["url"] + ")" if config else "off (local demo)"} · CSP updated')
 

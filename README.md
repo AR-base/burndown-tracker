@@ -55,7 +55,7 @@ Without configuration the tool stays a local demo. With Supabase it becomes mult
 
 1. **supabase.com → New project**, région **Central EU (Frankfurt)**.
 2. **SQL Editor → New query** : collez `db/schema.sql` → **Run**. (Relançable sans risque / safe to re-run.)
-3. **Authentication → URL Configuration** : *Site URL* = `https://burndown-tracker.vercel.app`, *Redirect URLs* = la même adresse (+ `http://localhost:8080` pour tester en local).
+3. **Authentication → URL Configuration** : *Site URL* = `https://the-manager-app.vercel.app`, *Redirect URLs* = la même adresse (+ l’ancienne `https://burndown-tracker.vercel.app`) (+ `http://localhost:8080` pour tester en local).
 4. **Authentication → Sign In / Providers** : laissez *Confirm email* activé ; activez *Leaked password protection*. Optionnel : Google et Azure (Microsoft) avec leurs identifiants OAuth.
 5. **Project Settings → API** : copiez *Project URL* et la clé **anon public**, puis créez `cloud.config.json` à la racine (voir `cloud.config.example.json`) et poussez. Vercel redéploie ; le build ajoute l'adresse Supabase à la CSP (`connect-src`).
 
@@ -94,7 +94,7 @@ Le paiement passe **uniquement** par trois fonctions serveur (Supabase Edge Func
 1. **Stripe** (dashboard.stripe.com, mode *Test*) → *Product catalog* → créer **The Manager Pro** (19 €/mois, récurrent) et **The Manager Team** (49 €/mois). Copier les deux **Price ID** (`price_…`). Activer le **Customer portal** (*Settings → Billing → Customer portal*).
 2. **Supabase SQL Editor** → exécuter `db/billing.sql`.
 3. **Supabase → Edge Functions** → déployer les trois fonctions (CLI : `supabase functions deploy create-checkout`, `… billing-portal`, `supabase functions deploy stripe-webhook --no-verify-jwt`). Le webhook doit avoir **JWT verification désactivée**.
-4. **Supabase → Edge Functions → Secrets** : `STRIPE_SECRET_KEY` (`sk_test_…`), `STRIPE_PRICE_PRO`, `STRIPE_PRICE_TEAM`, `SITE_URL` (`https://burndown-tracker.vercel.app`, plusieurs adresses séparées par des virgules), puis `STRIPE_WEBHOOK_SECRET` (étape 5).
+4. **Supabase → Edge Functions → Secrets** : `STRIPE_SECRET_KEY` (`sk_test_…`), `STRIPE_PRICE_PRO`, `STRIPE_PRICE_TEAM`, `SITE_URL` (`https://the-manager-app.vercel.app,https://burndown-tracker.vercel.app`, plusieurs adresses séparées par des virgules), puis `STRIPE_WEBHOOK_SECRET` (étape 5).
 5. **Stripe → Developers → Webhooks → Add endpoint** : `https://<ref>.supabase.co/functions/v1/stripe-webhook`, événements `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`. Copier le *Signing secret* (`whsec_…`) dans `STRIPE_WEBHOOK_SECRET`.
 6. `cloud.config.json` : `"billing": true`, puis pousser. Les boutons « Passer à Pro / Team » et « Gérer l’abonnement » apparaissent pour le propriétaire.
 7. Tester avec la carte `4242 4242 4242 4242`, date future, CVC quelconque. Passer en mode *Live* = refaire 1, 4 et 5 avec les clés live.

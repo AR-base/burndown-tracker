@@ -30,5 +30,18 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "burndown-tracker.vercel.app"
+        }
+      ],
+      "destination": "https://the-manager-app.vercel.app/:path*",
+      "permanent": true
+    }
   ]
 }
