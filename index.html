@@ -353,7 +353,7 @@ body.gated>header,body.gated>main{display:none}
 .gate-cv{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
 .gate-hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,rgba(194,204,196,.97) 0%,rgba(194,204,196,.85) 32%,rgba(194,204,196,.25) 58%,rgba(194,204,196,.05) 100%)}
 .gate-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:120px;z-index:-1;background:linear-gradient(rgba(194,204,196,0),var(--bg))}
-.gate-in{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,440px);gap:40px;align-items:center;width:100%;padding-block:96px 56px}
+.gate-in{display:grid;grid-template-columns:minmax(0,600px);align-items:center;width:100%;padding-block:110px 64px}
 .gate-top{position:absolute;top:max(16px,env(safe-area-inset-top,0px));left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:16px;z-index:2}
 .gate-brand{display:flex;align-items:center;gap:10px;font:600 15px var(--f-display);letter-spacing:.01em;flex:none}
 .gate-brand b{color:var(--gold-2)}
@@ -366,8 +366,15 @@ body.gated>header,body.gated>main{display:none}
 .gate-feats{list-style:none;margin:26px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .gate-feats li{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(233,238,232,0.55);font-size:12.5px;color:var(--ink);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .gate-feats li::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:8px;vertical-align:middle;box-shadow:0 0 8px var(--gold)}
-.gate-card{background:rgba(233,238,232,0.78);-webkit-backdrop-filter:saturate(1.4) blur(22px);backdrop-filter:saturate(1.4) blur(22px);border:1px solid var(--line-strong);border-radius:24px;padding:28px;box-shadow:0 40px 90px -30px rgba(20,30,22,0.34),0 0 0 1px rgba(11,11,11,0.044);min-width:0}
-.gate-card .modal-h{font-size:24px}
+.gate-drawer{position:fixed;top:0;right:0;bottom:0;z-index:70;width:min(440px,100%);overflow-y:auto;padding:30px 28px calc(28px + env(safe-area-inset-bottom,0px));background:var(--glass-strong);-webkit-backdrop-filter:saturate(1.3) blur(22px);backdrop-filter:saturate(1.3) blur(22px);border-left:1px solid var(--line-strong);box-shadow:-30px 0 70px -30px rgba(20,30,22,.45);transform:translateX(105%);visibility:hidden;transition:transform .42s var(--ease),visibility 0s linear .42s}
+.gate.auth-open .gate-drawer{transform:none;visibility:visible;transition:transform .42s var(--ease),visibility 0s}
+.gate-scrim{position:fixed;inset:0;z-index:65;background:rgba(20,30,22,.22);opacity:0;pointer-events:none;transition:opacity .3s}
+.gate.auth-open .gate-scrim{opacity:1;pointer-events:auto}
+.gate-drawer .modal-x{top:16px;right:16px}
+.gate-drawer .modal-h{font-size:26px;margin-top:18px}
+.forgot{align-self:flex-end;font-size:12.5px;padding:2px 0 0}
+.gate-acts{display:flex;align-items:center;gap:10px}.gate-acts-b{display:flex;gap:8px}
+.gate-ctas{margin-top:26px}.gate-ctas .btn{padding:12px 22px}
 .gate-load{display:flex;align-items:center;gap:10px;color:var(--muted)}
 .gate-load::before{content:"";width:16px;height:16px;border-radius:50%;border:2px solid var(--line-strong);border-top-color:var(--accent);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -402,7 +409,7 @@ body.gated>header,body.gated>main{display:none}
 .plan-note{color:var(--faint);font-size:12px;text-align:center;margin:14px 0 0}
 .lp-foot a{color:var(--muted)}
 .lp-foot{margin-top:72px;padding-block:28px calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;color:var(--faint);font-size:12.5px}
-@media (max-width:900px){.gate-hero{align-items:flex-start}.gate-in{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:290px 32px}.gate-h{max-width:none;margin-top:8px}.gate-hero::before{background:linear-gradient(180deg,transparent 0,transparent 230px,rgba(194,204,196,.94) 290px)}.gate-nav{display:none}.lp-sec{padding-block:48px 0}}
+@media (max-width:900px){.gate-hero{align-items:flex-start}.gate-in{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:290px 32px}.gate-h{max-width:none;margin-top:8px}.gate-hero::before{background:linear-gradient(180deg,transparent 0,transparent 230px,rgba(194,204,196,.94) 290px)}.gate-nav{display:none}.gate-acts .seg{display:none}.lp-sec{padding-block:48px 0}}
 
 /* ---------- plan, usage and onboarding (signed in) ---------- */
 .plan-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;margin-top:16px;padding:14px 18px;border-radius:var(--r);border:1px solid var(--line);background:var(--glass)}
@@ -574,12 +581,14 @@ td{overflow-wrap:break-word}
     <canvas class="gate-cv" id="gateCv" aria-hidden="true"></canvas>
     <div class="wrap gate-top"><span class="gate-brand"><span class="logo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="24" height="24" aria-hidden="true"><g fill="none" stroke="#0B0B0B" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"><polygon points="32,1 39,5 46,12 51,21 55,27 54,33 53,42 47,53 38,59 26,59 17,53 11,42 10,33 9,27 13,21 18,12 25,5"/><polyline points="13,21 51,21 49,27 37,28.5 32,27 27,28.5 15,27 13,21"/><polyline points="29,30 35,30 41,40 38,44.5 26,44.5 23,40 29,30"/><polyline points="25,41.5 28,39.5 30.5,42.5"/><polyline points="39,41.5 36,39.5 33.5,42.5"/><polyline points="16,38 17,49 25,55.5 39,55.5 47,49 48,38"/><polyline points="23,50 32,51.8 41,50"/><line x1="32" y1="1" x2="32" y2="21"/><line x1="18" y1="12" x2="27" y2="21"/><line x1="46" y1="12" x2="37" y2="21"/></g><g fill="#0B0B0B"><circle cx="25.5" cy="31.5" r="2.2"/><circle cx="38.5" cy="31.5" r="2.2"/></g></svg></span>The <b>Manager</b></span>
       <nav class="gate-nav" id="gateNav" aria-label="Menu"></nav>
-      <div class="seg" role="group" aria-label="Language"><button type="button" data-glang="fr">FR</button><button type="button" data-glang="en">EN</button></div></div>
+      <div class="gate-acts"><div class="seg" role="group" aria-label="Language"><button type="button" data-glang="fr">FR</button><button type="button" data-glang="en">EN</button></div><span class="gate-acts-b" id="gateActs"></span></div></div>
     <div class="wrap gate-in">
-      <div class="gate-copy"><p class="eyebrow" id="gateEyebrow"></p><h1 class="gate-h" id="gateH"></h1><p class="gate-lead" id="gateLead"></p><ul class="gate-feats" id="gateFeats"></ul></div>
-      <div class="gate-card" id="gateCard"><p class="gate-load" id="gateLoad"></p></div>
+      <div class="gate-copy"><p class="eyebrow" id="gateEyebrow"></p><h1 class="gate-h" id="gateH"></h1><p class="gate-lead" id="gateLead"></p>
+        <div class="actions gate-ctas" id="gateCtas"></div><ul class="gate-feats" id="gateFeats"></ul></div>
     </div>
   </section>
+  <div class="gate-scrim" data-gclose></div>
+  <aside class="gate-drawer" id="gateCard" role="dialog" aria-modal="true" aria-labelledby="cuMTitle" aria-hidden="true"></aside>
   <div id="lpMore"></div>
 </div>
 
@@ -1158,7 +1167,7 @@ const GanttIO = (() => {
     if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
     return rows.filter(r => r.some(c => c.trim() !== ''));
   }
-  const norm = h => h.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9%]/g, '');
+  const norm = h => h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9%]/g, '');
   const ALIASES = {
     id: ['id', 'code', 'wbs', 'ref', 'num', 'no', 'n'],
     type: ['type', 'kind'],
@@ -2300,7 +2309,7 @@ if (typeof module !== 'undefined') module.exports = KB;
 const Generator = (() => {
   const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
   const K = (typeof KB !== 'undefined') ? KB : require('./kb.js');
-  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/[^a-z0-9+\- ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’']/g, ' ').replace(/[^a-z0-9+\- ]/g, ' ').replace(/\s+/g, ' ').trim();
   const PHASES = [['P1', 'Cadrage', 'Initiation', '#1F2A24'], ['P2', 'Conception', 'Design', '#3F5E4B'], ['P3', 'Réalisation', 'Build', '#6E8B74'],
     ['P4', 'Tests et recette', 'Testing and acceptance', '#8C6A3F'], ['P5', 'Mise en service', 'Go-live', '#4D6A86'], ['P6', 'Clôture', 'Closure', '#7A4E5A']];
   const SIZES = { small: { f: 0.7, prios: ['M'], lanes: 2 }, medium: { f: 1, prios: ['M', 'S'], lanes: 2 }, large: { f: 1.35, prios: ['M', 'S', 'C'], lanes: 2 } };
@@ -3336,7 +3345,7 @@ const CloudUI = (() => {
       e_plan_limit_projects: 'Limite de projets actifs atteinte pour votre plan.', e_plan_limit_members: 'Limite de personnes atteinte pour votre plan.', e_plan_limit_shares: 'Limite de liens client atteinte pour ce projet sur votre plan.', e_trial_unavailable: 'L’essai Pro a déjà été utilisé pour cet espace.',
       tabProjects: 'Projets', tabTeam: 'Équipe', signIn: 'Se connecter', signUp: 'Créer un compte', signOut: 'Se déconnecter', account: 'Mon compte',
       localMode: 'Démo locale', email: 'E-mail', password: 'Mot de passe', fullName: 'Nom complet', orWith: 'ou continuer avec', google: 'Google', microsoft: 'Microsoft',
-      gateEyebrow: 'Espace chef de projet', gateH: 'Le cerveau, de tous vos projets.', gateLead: 'Décrivez un projet en une phrase : planning, burndown, budget, équipe, risques, RACI, documents et rapports sont prêts. Votre équipe et vos clients suivent tout en direct.', gateFeats: ['Gantt et burndown', 'Budget et équipe', 'Risques et RACI', 'Documents Word', 'Équipes et rôles', 'Liens client'], demo: 'Explorer la démo sans compte', loading: 'Connexion…', welcome: 'Bienvenue',
+      gateEyebrow: 'Espace chef de projet', gateH: 'Le cerveau, de tous vos projets.', gateLead: 'Décrivez un projet en une phrase : planning, burndown, budget, équipe, risques, RACI, documents et rapports sont prêts. Votre équipe et vos clients suivent tout en direct.', gateFeats: ['Gantt et burndown', 'Budget et équipe', 'Risques et RACI', 'Documents Word', 'Équipes et rôles', 'Liens client'], demo: 'Démo', loading: 'Connexion…', welcome: 'Bienvenue',
       forgot: 'Mot de passe oublié ?', resetSent: 'Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé.', skip: 'Continuer sans compte',
       authLead: 'Retrouvez vos projets sur tous vos appareils et travaillez en équipe.', checkMail: 'Compte créé. Ouvrez l’e-mail de confirmation pour l’activer, puis connectez-vous.',
       pwHint: '10 caractères minimum.', newPw: 'Nouveau mot de passe', setPw: 'Enregistrer le mot de passe', pwChanged: 'Mot de passe modifié.', recoverTitle: 'Choisissez un nouveau mot de passe',
@@ -3393,7 +3402,7 @@ const CloudUI = (() => {
       e_plan_limit_projects: 'Your plan’s active-project limit is reached.', e_plan_limit_members: 'Your plan’s people limit is reached.', e_plan_limit_shares: 'Your plan’s client-link limit for this project is reached.', e_trial_unavailable: 'The Pro trial was already used for this workspace.',
       tabProjects: 'Projects', tabTeam: 'Team', signIn: 'Sign in', signUp: 'Create account', signOut: 'Sign out', account: 'My account',
       localMode: 'Local demo', email: 'E-mail', password: 'Password', fullName: 'Full name', orWith: 'or continue with', google: 'Google', microsoft: 'Microsoft',
-      gateEyebrow: 'Project manager workspace', gateH: 'The brain, behind all your projects.', gateLead: 'Describe a project in one sentence: schedule, burndown, budget, team, risks, RACI, documents and reports are ready. Your team and clients follow it all live.', gateFeats: ['Gantt and burndown', 'Budget and team', 'Risks and RACI', 'Word documents', 'Teams and roles', 'Client links'], demo: 'Explore the demo without an account', loading: 'Signing in…', welcome: 'Welcome',
+      gateEyebrow: 'Project manager workspace', gateH: 'The brain, behind all your projects.', gateLead: 'Describe a project in one sentence: schedule, burndown, budget, team, risks, RACI, documents and reports are ready. Your team and clients follow it all live.', gateFeats: ['Gantt and burndown', 'Budget and team', 'Risks and RACI', 'Word documents', 'Teams and roles', 'Client links'], demo: 'Demo', loading: 'Signing in…', welcome: 'Welcome',
       forgot: 'Forgot password?', resetSent: 'If an account exists for this address, a reset e-mail has just been sent.', skip: 'Continue without an account',
       authLead: 'Find your projects on every device and work as a team.', checkMail: 'Account created. Open the confirmation e-mail to activate it, then sign in.',
       pwHint: '10 characters minimum.', newPw: 'New password', setPw: 'Save password', pwChanged: 'Password changed.', recoverTitle: 'Choose a new password',
@@ -3545,6 +3554,8 @@ const CloudUI = (() => {
       $('gateLead').textContent = t('gateLead');
       $('gateFeats').innerHTML = STR[App.ui.lang].gateFeats.map(f => `<li>${esc(f)}</li>`).join('');
       $('gateNav').innerHTML = [['lp-features', 'navFeat'], ['lp-how', 'navHow'], ['lp-pricing', 'navPricing']].map(([id, k]) => `<button type="button" data-jump="${id}">${esc(t(k))}</button>`).join('');
+      $('gateActs').innerHTML = `<button type="button" class="btn sm" data-demo>${esc(t('demo'))}</button><button type="button" class="btn pri sm" data-cta="login">${esc(t('navLogin'))}</button>`;
+      $('gateCtas').innerHTML = `<button type="button" class="btn pri wiz-go" data-cta="free">${esc(t('getStarted'))}</button><button type="button" class="btn wiz-go" data-demo>${esc(t('demo'))}</button>`;
       const L = STR[App.ui.lang], head = (ey, h, l) => { const [a, b] = t(h).split(/,\s*/); return `<div class="lp-head"><p class="eyebrow">${esc(t(ey))}</p><h2 class="lp-h">${b ? `${esc(a)}, <em>${esc(b)}</em>` : esc(a)}</h2>${l ? `<p class="lp-lead">${esc(t(l))}</p>` : ''}</div>`; };
       $('lpMore').innerHTML = `<section class="wrap lp-sec" id="lp-features">${head('lpFeatEy', 'lpFeatH', 'lpFeatL')}
           <div class="lp-grid">${L.lpFeats.map(([ic, h, d]) => `<article class="lp-feat"><span class="lp-ic" aria-hidden="true">${esc(ic)}</span><h3>${esc(h)}</h3><p>${esc(d)}</p></article>`).join('')}</div></section>
@@ -3553,23 +3564,43 @@ const CloudUI = (() => {
         <footer class="wrap lp-foot"><span>© ${new Date().getFullYear()} The Manager</span><span>${esc(t('footNote'))} · <a href="/privacy">Confidentialité / Privacy</a> · <a href="/terms">Conditions / Terms</a></span></footer>`;
       gate.querySelectorAll('[data-glang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.glang === App.ui.lang));
     }
-    function showGate(card) {
+    let drawerReturn = null;
+    function openDrawer() {
+      if (!gate.classList.contains('auth-open')) drawerReturn = document.activeElement;
+      gate.classList.add('auth-open'); gateCard.setAttribute('aria-hidden', 'false');
+      const f = gateCard.querySelector('input:not([type=hidden])'); f && setTimeout(() => f.focus({ preventScroll: true }), 60);
+    }
+    function closeDrawer() {
+      if (!gate.classList.contains('auth-open')) return;
+      gate.classList.remove('auth-open'); gateCard.setAttribute('aria-hidden', 'true');
+      drawerReturn && drawerReturn.focus && drawerReturn.focus();
+    }
+    // card: { html, bind } rendered in the side panel; open: slide the panel in
+    function showGate(card, open = true) {
       document.body.classList.add('gated'); gate.hidden = false; renderGateCopy();
-      if (card) { gateCard.innerHTML = card.html; card.bind && card.bind(); const f = gateCard.querySelector('input:not([type=hidden])'); f && f.focus({ preventScroll: true }); }
-      if (typeof Brain !== 'undefined' && !gateBrain) { gateBrain = Brain.create($('gateCv'), { count: 2400, place: (W, H) => W > 900 ? { offsetX: 0.57, offsetY: 0.5, scale: 0.34 } : { offsetX: 0.5, cy: 185, scale: 120 / Math.min(W, H) } }); }
+      if (card) {
+        gateCard.innerHTML = `<button type="button" class="modal-x" data-gclose aria-label="${esc(t('close'))}">×</button>${card.html}`;
+        card.bind && card.bind();
+        if (open) openDrawer();
+      }
+      if (typeof Brain !== 'undefined' && !gateBrain) { gateBrain = Brain.create($('gateCv'), { count: 2400, place: (W, H) => W > 900 ? { offsetX: 0.69, offsetY: 0.5, scale: 0.36 } : { offsetX: 0.5, cy: 185, scale: 120 / Math.min(W, H) } }); }
       gateBrain && (gateBrain.redraw(), gateBrain.start());
     }
-    function hideGate() { document.body.classList.remove('gated'); gate.hidden = true; gateBrain && gateBrain.stop(); }
-    function gateLoading() { showGate({ html: `<p class="gate-load">${esc(t('loading'))}</p>` }); }
+    function hideGate() { closeDrawer(); document.body.classList.remove('gated'); gate.hidden = true; gateBrain && gateBrain.stop(); }
+    function gateLoading() { showGate({ html: `<p class="gate-load">${esc(t('loading'))}</p>` }, false); }
+    const startDemo = () => { S.demo = true; hideGate(); App.setProject(App.sample(), { tab: 'brain' }); renderHeader(); };
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !gate.hidden && gate.classList.contains('auth-open')) closeDrawer(); });
     gate.addEventListener('click', ev => {
       const j = ev.target.closest('[data-jump]'); if (j) { $(j.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
       const c = ev.target.closest('[data-cta]');
-      if (c) { if (S.user) return; openAuth(c.dataset.cta === 'login' ? 'in' : 'up'); gateCard.scrollIntoView?.({ behavior: 'smooth', block: 'center' }); return; }
+      if (c) { if (S.user) return; openAuth(c.dataset.cta === 'login' ? 'in' : 'up'); return; }
+      if (ev.target.closest('[data-demo]')) { startDemo(); return; }
+      if (ev.target.closest('[data-gclose]')) { closeDrawer(); return; }
       const l = ev.target.closest('[data-glang]'); if (!l) return;
       App.ui.lang = l.dataset.glang; App.persist(); App.renderAll(); renderGateCopy();
-      const m = gateCard.querySelector('[data-mode][aria-pressed="true"]'); if (m) openAuth(m.dataset.mode);
+      const m = gateCard.querySelector('[data-mode][aria-pressed="true"]'); if (m) openAuth(m.dataset.mode, null, gate.classList.contains('auth-open'));
     });
-    function openAuth(mode = 'in', note) {
+    function openAuth(mode = 'in', note, open = true) {
       const up = mode === 'up';
       showGate({ html: `<p class="eyebrow">${esc(t(up ? 'signUp' : 'welcome'))}</p><h2 id="cuMTitle" class="modal-h">${esc(up ? t('signUp') : t('signIn'))}</h2>
         <p class="hint">${esc(note || t('authLead'))}</p>
@@ -3577,17 +3608,16 @@ const CloudUI = (() => {
         <form id="cuAuthForm" class="stack-sm" novalidate>
           ${up ? `<div class="f"><label for="cuName">${esc(t('fullName'))}</label><input id="cuName" autocomplete="name" maxlength="80"></div>` : ''}
           <div class="f"><label for="cuEmail">${esc(t('email'))}</label><input id="cuEmail" type="email" autocomplete="email" required maxlength="254"></div>
-          <div class="f"><label for="cuPw">${esc(t('password'))}</label><input id="cuPw" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="${up ? 10 : 1}" maxlength="200">${up ? `<span class="hint">${esc(t('pwHint'))}</span>` : ''}</div>
+          <div class="f"><label for="cuPw">${esc(t('password'))}</label><input id="cuPw" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="${up ? 10 : 1}" maxlength="200">${up ? `<span class="hint">${esc(t('pwHint'))}</span>` : `<button type="button" class="linkish forgot" id="cuForgot">${esc(t('forgot'))}</button>`}</div>
           <button class="btn pri wide-btn" type="submit" id="cuAuthGo">${esc(up ? t('signUp') : t('signIn'))}</button>
           <p class="form-msg" id="cuAuthMsg" role="alert"></p>
         </form>
         ${OAUTH.length ? `<p class="or">${esc(t('orWith'))}</p><div class="oauth">${OAUTH.map(p => `<button class="btn" type="button" data-oauth="${p}">${p === 'google' ? G_ICON : MS_ICON}<span>${esc(t(p === 'google' ? 'google' : 'microsoft'))}</span></button>`).join('')}</div>` : ''}
-        <div class="modal-foot">${up ? '<span></span>' : `<button type="button" class="linkish" id="cuForgot">${esc(t('forgot'))}</button>`}<button type="button" class="linkish" id="cuDemo">${esc(t('demo'))}</button></div>`,
+`,
       bind() {
         gateCard.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => openAuth(b.dataset.mode, note));
         gateCard.querySelectorAll('[data-oauth]').forEach(b => b.onclick = async () => { busy(b, true); try { await cloud.signInOAuth(b.dataset.oauth); } catch (e) { msgEl('cuAuthMsg', E(e)); busy(b, false); } });
         if ($('cuForgot')) $('cuForgot').onclick = async () => { try { await cloud.resetPassword($('cuEmail').value.trim()); msgEl('cuAuthMsg', t('resetSent'), true); } catch (e) { msgEl('cuAuthMsg', E(e)); } };
-        $('cuDemo').onclick = () => { S.demo = true; hideGate(); App.setProject(App.sample(), { tab: 'brain' }); renderHeader(); };
         $('cuAuthForm').onsubmit = async ev => {
           ev.preventDefault(); const go = $('cuAuthGo'); busy(go, true); msgEl('cuAuthMsg', '');
           try {
@@ -3596,7 +3626,7 @@ const CloudUI = (() => {
             await afterSignIn();
           } catch (e) { msgEl('cuAuthMsg', E(e)); busy(go, false); }
         };
-      } });
+      } }, open);
     }
     function openMfaChallenge() {
       showGate({ html: `<p class="eyebrow">${esc(t('security'))}</p><h2 id="cuMTitle" class="modal-h">${esc(t('mfaTitle'))}</h2><p class="hint">${esc(t('mfaLead'))}</p>
@@ -3622,7 +3652,7 @@ const CloudUI = (() => {
     function afterSignIn() { if (!signInRun) signInRun = doAfterSignIn().finally(() => { signInRun = null; }); return signInRun; }
     async function doAfterSignIn() {
       try {
-        await cloud.session(); S.user = cloud.user(); if (!S.user) { openAuth('in'); return; }
+        await cloud.session(); S.user = cloud.user(); if (!S.user) { openAuth('in', null, false); return; }
         if (await cloud.mfaNeeded()) { openMfaChallenge(); return; }
         if (S.demo) { S.demo = false; App.clearLocal(); }
         S.profile = await cloud.profile();
@@ -3947,7 +3977,7 @@ const CloudUI = (() => {
       st.pid = null; st.version = null; st.dirty = false; keep();
       App.setExtraTabs([], []); App.setReadOnly(false); App.clearLocal(); App.setEmpty(true); renderHeader();
       if (panelP) panelP.innerHTML = ''; if (panelT) panelT.innerHTML = '';
-      openAuth('in');
+      openAuth('in', null, false);
     }
 
     /* ---------- client share view (no account) ---------- */
@@ -3981,7 +4011,8 @@ const CloudUI = (() => {
       else if (ev === 'SIGNED_IN' && !S.user) afterSignIn();
       else if (ev === 'SIGNED_OUT' && S.user) signedOut();
     });
-    cloud.session().then(s => { if (s) afterSignIn(); else openAuth('in'); }).catch(() => openAuth('in'));
+    const pendingInv = !!ssGet('pendingInvite');
+    cloud.session().then(s => { if (s) afterSignIn(); else openAuth('in', null, pendingInv); }).catch(() => openAuth('in', null, pendingInv));
   }
   return { init };
 })();

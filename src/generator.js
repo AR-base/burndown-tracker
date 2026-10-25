@@ -3,7 +3,7 @@
 const Generator = (() => {
   const C = (typeof Core !== 'undefined') ? Core : require('./core.js');
   const K = (typeof KB !== 'undefined') ? KB : require('./kb.js');
-  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/[^a-z0-9+\- ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’']/g, ' ').replace(/[^a-z0-9+\- ]/g, ' ').replace(/\s+/g, ' ').trim();
   const PHASES = [['P1', 'Cadrage', 'Initiation', '#1F2A24'], ['P2', 'Conception', 'Design', '#3F5E4B'], ['P3', 'Réalisation', 'Build', '#6E8B74'],
     ['P4', 'Tests et recette', 'Testing and acceptance', '#8C6A3F'], ['P5', 'Mise en service', 'Go-live', '#4D6A86'], ['P6', 'Clôture', 'Closure', '#7A4E5A']];
   const SIZES = { small: { f: 0.7, prios: ['M'], lanes: 2 }, medium: { f: 1, prios: ['M', 'S'], lanes: 2 }, large: { f: 1.35, prios: ['M', 'S', 'C'], lanes: 2 } };

@@ -41,7 +41,7 @@ const GanttIO = (() => {
     if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
     return rows.filter(r => r.some(c => c.trim() !== ''));
   }
-  const norm = h => h.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9%]/g, '');
+  const norm = h => h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9%]/g, '');
   const ALIASES = {
     id: ['id', 'code', 'wbs', 'ref', 'num', 'no', 'n'],
     type: ['type', 'kind'],

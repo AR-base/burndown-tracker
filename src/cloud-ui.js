@@ -21,7 +21,7 @@ const CloudUI = (() => {
       e_plan_limit_projects: 'Limite de projets actifs atteinte pour votre plan.', e_plan_limit_members: 'Limite de personnes atteinte pour votre plan.', e_plan_limit_shares: 'Limite de liens client atteinte pour ce projet sur votre plan.', e_trial_unavailable: 'L’essai Pro a déjà été utilisé pour cet espace.',
       tabProjects: 'Projets', tabTeam: 'Équipe', signIn: 'Se connecter', signUp: 'Créer un compte', signOut: 'Se déconnecter', account: 'Mon compte',
       localMode: 'Démo locale', email: 'E-mail', password: 'Mot de passe', fullName: 'Nom complet', orWith: 'ou continuer avec', google: 'Google', microsoft: 'Microsoft',
-      gateEyebrow: 'Espace chef de projet', gateH: 'Le cerveau, de tous vos projets.', gateLead: 'Décrivez un projet en une phrase : planning, burndown, budget, équipe, risques, RACI, documents et rapports sont prêts. Votre équipe et vos clients suivent tout en direct.', gateFeats: ['Gantt et burndown', 'Budget et équipe', 'Risques et RACI', 'Documents Word', 'Équipes et rôles', 'Liens client'], demo: 'Explorer la démo sans compte', loading: 'Connexion…', welcome: 'Bienvenue',
+      gateEyebrow: 'Espace chef de projet', gateH: 'Le cerveau, de tous vos projets.', gateLead: 'Décrivez un projet en une phrase : planning, burndown, budget, équipe, risques, RACI, documents et rapports sont prêts. Votre équipe et vos clients suivent tout en direct.', gateFeats: ['Gantt et burndown', 'Budget et équipe', 'Risques et RACI', 'Documents Word', 'Équipes et rôles', 'Liens client'], demo: 'Démo', loading: 'Connexion…', welcome: 'Bienvenue',
       forgot: 'Mot de passe oublié ?', resetSent: 'Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé.', skip: 'Continuer sans compte',
       authLead: 'Retrouvez vos projets sur tous vos appareils et travaillez en équipe.', checkMail: 'Compte créé. Ouvrez l’e-mail de confirmation pour l’activer, puis connectez-vous.',
       pwHint: '10 caractères minimum.', newPw: 'Nouveau mot de passe', setPw: 'Enregistrer le mot de passe', pwChanged: 'Mot de passe modifié.', recoverTitle: 'Choisissez un nouveau mot de passe',
@@ -78,7 +78,7 @@ const CloudUI = (() => {
       e_plan_limit_projects: 'Your plan’s active-project limit is reached.', e_plan_limit_members: 'Your plan’s people limit is reached.', e_plan_limit_shares: 'Your plan’s client-link limit for this project is reached.', e_trial_unavailable: 'The Pro trial was already used for this workspace.',
       tabProjects: 'Projects', tabTeam: 'Team', signIn: 'Sign in', signUp: 'Create account', signOut: 'Sign out', account: 'My account',
       localMode: 'Local demo', email: 'E-mail', password: 'Password', fullName: 'Full name', orWith: 'or continue with', google: 'Google', microsoft: 'Microsoft',
-      gateEyebrow: 'Project manager workspace', gateH: 'The brain, behind all your projects.', gateLead: 'Describe a project in one sentence: schedule, burndown, budget, team, risks, RACI, documents and reports are ready. Your team and clients follow it all live.', gateFeats: ['Gantt and burndown', 'Budget and team', 'Risks and RACI', 'Word documents', 'Teams and roles', 'Client links'], demo: 'Explore the demo without an account', loading: 'Signing in…', welcome: 'Welcome',
+      gateEyebrow: 'Project manager workspace', gateH: 'The brain, behind all your projects.', gateLead: 'Describe a project in one sentence: schedule, burndown, budget, team, risks, RACI, documents and reports are ready. Your team and clients follow it all live.', gateFeats: ['Gantt and burndown', 'Budget and team', 'Risks and RACI', 'Word documents', 'Teams and roles', 'Client links'], demo: 'Demo', loading: 'Signing in…', welcome: 'Welcome',
       forgot: 'Forgot password?', resetSent: 'If an account exists for this address, a reset e-mail has just been sent.', skip: 'Continue without an account',
       authLead: 'Find your projects on every device and work as a team.', checkMail: 'Account created. Open the confirmation e-mail to activate it, then sign in.',
       pwHint: '10 characters minimum.', newPw: 'New password', setPw: 'Save password', pwChanged: 'Password changed.', recoverTitle: 'Choose a new password',
@@ -230,6 +230,8 @@ const CloudUI = (() => {
       $('gateLead').textContent = t('gateLead');
       $('gateFeats').innerHTML = STR[App.ui.lang].gateFeats.map(f => `<li>${esc(f)}</li>`).join('');
       $('gateNav').innerHTML = [['lp-features', 'navFeat'], ['lp-how', 'navHow'], ['lp-pricing', 'navPricing']].map(([id, k]) => `<button type="button" data-jump="${id}">${esc(t(k))}</button>`).join('');
+      $('gateActs').innerHTML = `<button type="button" class="btn sm" data-demo>${esc(t('demo'))}</button><button type="button" class="btn pri sm" data-cta="login">${esc(t('navLogin'))}</button>`;
+      $('gateCtas').innerHTML = `<button type="button" class="btn pri wiz-go" data-cta="free">${esc(t('getStarted'))}</button><button type="button" class="btn wiz-go" data-demo>${esc(t('demo'))}</button>`;
       const L = STR[App.ui.lang], head = (ey, h, l) => { const [a, b] = t(h).split(/,\s*/); return `<div class="lp-head"><p class="eyebrow">${esc(t(ey))}</p><h2 class="lp-h">${b ? `${esc(a)}, <em>${esc(b)}</em>` : esc(a)}</h2>${l ? `<p class="lp-lead">${esc(t(l))}</p>` : ''}</div>`; };
       $('lpMore').innerHTML = `<section class="wrap lp-sec" id="lp-features">${head('lpFeatEy', 'lpFeatH', 'lpFeatL')}
           <div class="lp-grid">${L.lpFeats.map(([ic, h, d]) => `<article class="lp-feat"><span class="lp-ic" aria-hidden="true">${esc(ic)}</span><h3>${esc(h)}</h3><p>${esc(d)}</p></article>`).join('')}</div></section>
@@ -238,23 +240,43 @@ const CloudUI = (() => {
         <footer class="wrap lp-foot"><span>© ${new Date().getFullYear()} The Manager</span><span>${esc(t('footNote'))} · <a href="/privacy">Confidentialité / Privacy</a> · <a href="/terms">Conditions / Terms</a></span></footer>`;
       gate.querySelectorAll('[data-glang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.glang === App.ui.lang));
     }
-    function showGate(card) {
+    let drawerReturn = null;
+    function openDrawer() {
+      if (!gate.classList.contains('auth-open')) drawerReturn = document.activeElement;
+      gate.classList.add('auth-open'); gateCard.setAttribute('aria-hidden', 'false');
+      const f = gateCard.querySelector('input:not([type=hidden])'); f && setTimeout(() => f.focus({ preventScroll: true }), 60);
+    }
+    function closeDrawer() {
+      if (!gate.classList.contains('auth-open')) return;
+      gate.classList.remove('auth-open'); gateCard.setAttribute('aria-hidden', 'true');
+      drawerReturn && drawerReturn.focus && drawerReturn.focus();
+    }
+    // card: { html, bind } rendered in the side panel; open: slide the panel in
+    function showGate(card, open = true) {
       document.body.classList.add('gated'); gate.hidden = false; renderGateCopy();
-      if (card) { gateCard.innerHTML = card.html; card.bind && card.bind(); const f = gateCard.querySelector('input:not([type=hidden])'); f && f.focus({ preventScroll: true }); }
-      if (typeof Brain !== 'undefined' && !gateBrain) { gateBrain = Brain.create($('gateCv'), { count: 2400, place: (W, H) => W > 900 ? { offsetX: 0.57, offsetY: 0.5, scale: 0.34 } : { offsetX: 0.5, cy: 185, scale: 120 / Math.min(W, H) } }); }
+      if (card) {
+        gateCard.innerHTML = `<button type="button" class="modal-x" data-gclose aria-label="${esc(t('close'))}">×</button>${card.html}`;
+        card.bind && card.bind();
+        if (open) openDrawer();
+      }
+      if (typeof Brain !== 'undefined' && !gateBrain) { gateBrain = Brain.create($('gateCv'), { count: 2400, place: (W, H) => W > 900 ? { offsetX: 0.69, offsetY: 0.5, scale: 0.36 } : { offsetX: 0.5, cy: 185, scale: 120 / Math.min(W, H) } }); }
       gateBrain && (gateBrain.redraw(), gateBrain.start());
     }
-    function hideGate() { document.body.classList.remove('gated'); gate.hidden = true; gateBrain && gateBrain.stop(); }
-    function gateLoading() { showGate({ html: `<p class="gate-load">${esc(t('loading'))}</p>` }); }
+    function hideGate() { closeDrawer(); document.body.classList.remove('gated'); gate.hidden = true; gateBrain && gateBrain.stop(); }
+    function gateLoading() { showGate({ html: `<p class="gate-load">${esc(t('loading'))}</p>` }, false); }
+    const startDemo = () => { S.demo = true; hideGate(); App.setProject(App.sample(), { tab: 'brain' }); renderHeader(); };
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !gate.hidden && gate.classList.contains('auth-open')) closeDrawer(); });
     gate.addEventListener('click', ev => {
       const j = ev.target.closest('[data-jump]'); if (j) { $(j.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
       const c = ev.target.closest('[data-cta]');
-      if (c) { if (S.user) return; openAuth(c.dataset.cta === 'login' ? 'in' : 'up'); gateCard.scrollIntoView?.({ behavior: 'smooth', block: 'center' }); return; }
+      if (c) { if (S.user) return; openAuth(c.dataset.cta === 'login' ? 'in' : 'up'); return; }
+      if (ev.target.closest('[data-demo]')) { startDemo(); return; }
+      if (ev.target.closest('[data-gclose]')) { closeDrawer(); return; }
       const l = ev.target.closest('[data-glang]'); if (!l) return;
       App.ui.lang = l.dataset.glang; App.persist(); App.renderAll(); renderGateCopy();
-      const m = gateCard.querySelector('[data-mode][aria-pressed="true"]'); if (m) openAuth(m.dataset.mode);
+      const m = gateCard.querySelector('[data-mode][aria-pressed="true"]'); if (m) openAuth(m.dataset.mode, null, gate.classList.contains('auth-open'));
     });
-    function openAuth(mode = 'in', note) {
+    function openAuth(mode = 'in', note, open = true) {
       const up = mode === 'up';
       showGate({ html: `<p class="eyebrow">${esc(t(up ? 'signUp' : 'welcome'))}</p><h2 id="cuMTitle" class="modal-h">${esc(up ? t('signUp') : t('signIn'))}</h2>
         <p class="hint">${esc(note || t('authLead'))}</p>
@@ -262,17 +284,16 @@ const CloudUI = (() => {
         <form id="cuAuthForm" class="stack-sm" novalidate>
           ${up ? `<div class="f"><label for="cuName">${esc(t('fullName'))}</label><input id="cuName" autocomplete="name" maxlength="80"></div>` : ''}
           <div class="f"><label for="cuEmail">${esc(t('email'))}</label><input id="cuEmail" type="email" autocomplete="email" required maxlength="254"></div>
-          <div class="f"><label for="cuPw">${esc(t('password'))}</label><input id="cuPw" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="${up ? 10 : 1}" maxlength="200">${up ? `<span class="hint">${esc(t('pwHint'))}</span>` : ''}</div>
+          <div class="f"><label for="cuPw">${esc(t('password'))}</label><input id="cuPw" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="${up ? 10 : 1}" maxlength="200">${up ? `<span class="hint">${esc(t('pwHint'))}</span>` : `<button type="button" class="linkish forgot" id="cuForgot">${esc(t('forgot'))}</button>`}</div>
           <button class="btn pri wide-btn" type="submit" id="cuAuthGo">${esc(up ? t('signUp') : t('signIn'))}</button>
           <p class="form-msg" id="cuAuthMsg" role="alert"></p>
         </form>
         ${OAUTH.length ? `<p class="or">${esc(t('orWith'))}</p><div class="oauth">${OAUTH.map(p => `<button class="btn" type="button" data-oauth="${p}">${p === 'google' ? G_ICON : MS_ICON}<span>${esc(t(p === 'google' ? 'google' : 'microsoft'))}</span></button>`).join('')}</div>` : ''}
-        <div class="modal-foot">${up ? '<span></span>' : `<button type="button" class="linkish" id="cuForgot">${esc(t('forgot'))}</button>`}<button type="button" class="linkish" id="cuDemo">${esc(t('demo'))}</button></div>`,
+`,
       bind() {
         gateCard.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => openAuth(b.dataset.mode, note));
         gateCard.querySelectorAll('[data-oauth]').forEach(b => b.onclick = async () => { busy(b, true); try { await cloud.signInOAuth(b.dataset.oauth); } catch (e) { msgEl('cuAuthMsg', E(e)); busy(b, false); } });
         if ($('cuForgot')) $('cuForgot').onclick = async () => { try { await cloud.resetPassword($('cuEmail').value.trim()); msgEl('cuAuthMsg', t('resetSent'), true); } catch (e) { msgEl('cuAuthMsg', E(e)); } };
-        $('cuDemo').onclick = () => { S.demo = true; hideGate(); App.setProject(App.sample(), { tab: 'brain' }); renderHeader(); };
         $('cuAuthForm').onsubmit = async ev => {
           ev.preventDefault(); const go = $('cuAuthGo'); busy(go, true); msgEl('cuAuthMsg', '');
           try {
@@ -281,7 +302,7 @@ const CloudUI = (() => {
             await afterSignIn();
           } catch (e) { msgEl('cuAuthMsg', E(e)); busy(go, false); }
         };
-      } });
+      } }, open);
     }
     function openMfaChallenge() {
       showGate({ html: `<p class="eyebrow">${esc(t('security'))}</p><h2 id="cuMTitle" class="modal-h">${esc(t('mfaTitle'))}</h2><p class="hint">${esc(t('mfaLead'))}</p>
@@ -307,7 +328,7 @@ const CloudUI = (() => {
     function afterSignIn() { if (!signInRun) signInRun = doAfterSignIn().finally(() => { signInRun = null; }); return signInRun; }
     async function doAfterSignIn() {
       try {
-        await cloud.session(); S.user = cloud.user(); if (!S.user) { openAuth('in'); return; }
+        await cloud.session(); S.user = cloud.user(); if (!S.user) { openAuth('in', null, false); return; }
         if (await cloud.mfaNeeded()) { openMfaChallenge(); return; }
         if (S.demo) { S.demo = false; App.clearLocal(); }
         S.profile = await cloud.profile();
@@ -632,7 +653,7 @@ const CloudUI = (() => {
       st.pid = null; st.version = null; st.dirty = false; keep();
       App.setExtraTabs([], []); App.setReadOnly(false); App.clearLocal(); App.setEmpty(true); renderHeader();
       if (panelP) panelP.innerHTML = ''; if (panelT) panelT.innerHTML = '';
-      openAuth('in');
+      openAuth('in', null, false);
     }
 
     /* ---------- client share view (no account) ---------- */
@@ -666,7 +687,8 @@ const CloudUI = (() => {
       else if (ev === 'SIGNED_IN' && !S.user) afterSignIn();
       else if (ev === 'SIGNED_OUT' && S.user) signedOut();
     });
-    cloud.session().then(s => { if (s) afterSignIn(); else openAuth('in'); }).catch(() => openAuth('in'));
+    const pendingInv = !!ssGet('pendingInvite');
+    cloud.session().then(s => { if (s) afterSignIn(); else openAuth('in', null, pendingInv); }).catch(() => openAuth('in', null, pendingInv));
   }
   return { init };
 })();

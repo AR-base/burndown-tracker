@@ -27,12 +27,18 @@ function page(url = 'https://app.test/') {
   let A = page();
   await sleep(30);
   check('signed out: the sign-in screen comes first, the tracker is hidden', A.d.body.classList.contains('gated') && !A.$('gate').hidden && !!A.$('cuAuthForm'));
+  check('landing first: the sign-in panel stays closed so the animation is visible', !A.$('gate').classList.contains('auth-open') && A.$('gateCard').getAttribute('aria-hidden') === 'true');
+  A.click(A.d.querySelector('#gateActs [data-cta="login"]'));
+  check('“Se connecter” slides the sign-in panel in from the right', A.$('gate').classList.contains('auth-open') && !!A.$('cuAuthForm'));
+  check('“forgot password” sits right under the password field', A.$('cuPw').parentElement.contains(A.$('cuForgot')));
+  A.click(A.d.querySelector('#gateCard [data-gclose]'));
+  check('the panel closes again', !A.$('gate').classList.contains('auth-open'));
   check('sign-in screen offers Google (from config)', A.$('gate').querySelectorAll('[data-oauth]').length === 1 && !!A.$('gate').querySelector('[data-oauth="google"]'));
   check('public landing: features, how it works and three plans', A.d.querySelectorAll('#lp-features .lp-feat').length === 8 && A.d.querySelectorAll('#lp-how li').length === 3 && A.d.querySelectorAll('#lp-pricing .plan').length === 3);
   A.click(A.d.querySelector('#lp-pricing [data-cta="pro"]'));
   check('a pricing button opens account creation', !!A.$('cuName'));
   A.click(A.d.querySelector('#gate [data-mode="in"]'));
-  A.click(A.$('cuDemo')); await sleep(20);
+  A.click(A.d.querySelector('#gateActs [data-demo]')); await sleep(20);
   check('demo link opens the local demo without an account', !A.d.body.classList.contains('gated') && A.tabs().join() === 'brain,assistant,burndown,gantt,tasks,pm,budget,project' && !!A.$('cuSignIn'));
   A.click(A.$('cuSignIn'));
   check('header sign-in returns to the sign-in screen', A.d.body.classList.contains('gated'));
@@ -122,7 +128,7 @@ function page(url = 'https://app.test/') {
   /* ---- Bob accepts the invitation ---- */
   const B = page(inviteUrl); await sleep(40);
   check('invite token is removed from the address bar', !B.w.location.search.includes('invite='));
-  check('sign-in screen shows for a pending invitation', B.d.body.classList.contains('gated') && !!B.$('cuAuthForm'));
+  check('sign-in panel opens by itself for a pending invitation', B.d.body.classList.contains('gated') && B.$('gate').classList.contains('auth-open') && !!B.$('cuAuthForm'));
   B.click(B.d.querySelector('#gate [data-mode="up"]'));
   B.$('cuName').value = 'Bob'; B.$('cuEmail').value = 'bob@acme.fr'; B.$('cuPw').value = 'correct-horse-battery'; B.submit(B.$('cuAuthForm')); await sleep(150);
   check('Bob joins ACME as a member', B.$('cuWs') && /ACME/.test(B.$('cuWs').textContent) && fake._db.workspace_members.some(m => m.role === 'member'));
