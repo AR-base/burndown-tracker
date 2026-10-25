@@ -22,6 +22,8 @@ page = ('<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
 (root / 'index.html').write_text(page, encoding='utf-8')
 (root / 'public').mkdir(exist_ok=True)
 (root / 'public' / 'index.html').write_text(page, encoding='utf-8')
+for legal in ('privacy', 'terms'):   # static pages linked from the Google sign-in consent screen
+    (root / 'public' / (legal + '.html')).write_text((root / 'src' / 'legal' / (legal + '.html')).read_text(encoding='utf-8'), encoding='utf-8')
 
 connect = "'none'" if not config else '%s %s' % (config['url'], config['url'].replace('https://', 'wss://'))
 csp = ("default-src 'none'; script-src " + ' '.join(script_hashes(page)) + "; style-src 'unsafe-inline' https://fonts.googleapis.com; "
